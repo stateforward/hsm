@@ -1,6 +1,9 @@
 [submodule "hsm.cpp"]
 	path = hsm.cpp
 	url = git@github.com:stateforward/hsm.cpp.git
+[submodule "hsm.cs"]
+	path = hsm.cs
+	url = git@github.com:stateforward/hsm.cs.git
 [submodule "hsm.dart"]
 	path = hsm.dart
 	url = git@github.com:stateforward/hsm.dart.git

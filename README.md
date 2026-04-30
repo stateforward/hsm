@@ -9,6 +9,7 @@ Every implementation shares the same compile-time DSL, the same semantics, and t
 | Language | Module | Status |
 |----------|--------|--------|
 | C++ | [hsm.cpp](hsm.cpp/) | Active |
+| C# | [hsm.cs](hsm.cs/) | Active |
 | Dart | [hsm.dart](hsm.dart/) | Active |
 | Go | [hsm.go](hsm.go/) | Active |
 | JavaScript/TypeScript | [hsm.js](hsm.js/) | Active |
@@ -69,6 +70,7 @@ hsm/
 ├── README.md        # this file
 ├── dsl.md           # language-agnostic DSL specification
 ├── hsm.cpp/         # C++ implementation
+├── hsm.cs/          # C# implementation
 ├── hsm.dart/        # Dart implementation
 ├── hsm.go/          # Go implementation
 ├── hsm.js/          # JavaScript/TypeScript implementation

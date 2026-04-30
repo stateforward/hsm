@@ -12,9 +12,10 @@ Every implementation shares the same compile-time DSL, the same semantics, and t
 | C# | [hsm.cs](hsm.cs/) | Active |
 | Dart | [hsm.dart](hsm.dart/) | Active |
 | Go | [hsm.go](hsm.go/) | Active |
-| JavaScript/TypeScript | [hsm.js](hsm.js/) | Active |
+| JavaScript | [hsm.js](hsm.js/) | Active |
 | Python | [hsm.py](hsm.py/) | Active |
 | Rust | [hsm.rs](hsm.rs/) | Active |
+| TypeScript | [hsm.ts](hsm.ts/) | Active |
 | Zig | [hsm.zig](hsm.zig/) | Active |
 
 ## DSL
@@ -73,9 +74,10 @@ hsm/
 ├── hsm.cs/          # C# implementation
 ├── hsm.dart/        # Dart implementation
 ├── hsm.go/          # Go implementation
-├── hsm.js/          # JavaScript/TypeScript implementation
+├── hsm.js/          # JavaScript implementation
 ├── hsm.py/          # Python implementation
 ├── hsm.rs/          # Rust implementation
+├── hsm.ts/          # TypeScript implementation
 └── hsm.zig/         # Zig implementation
 ```
 

@@ -22,3 +22,6 @@
 [submodule "hsm.zig"]
 	path = hsm.zig
 	url = git@github.com:stateforward/hsm.zig.git
+[submodule "hsm.ts"]
+	path = hsm.ts
+	url = git@github.com:stateforward/hsm.ts.git

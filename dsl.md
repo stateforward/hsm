@@ -621,14 +621,12 @@ Creates an identified group of machines for tracking and coordinated operation.
 
 ## Type Utilities
 
-### `hsm.MakeKind(id)` / `hsm.MakeKind(name)`
+### `hsm.MakeKind(base_kinds...)`
 
-Constructs event kind identifiers with optional inheritance.
+Constructs kind identifiers with optional inheritance.
 
 **Parameters:**
 
-* `id` Numeric event ID, or
-* `name` Event name (string), and
 * `base_kinds...` Optional parent kinds for polymorphic inheritance.
 
 **Constraints:**
@@ -636,7 +634,7 @@ Constructs event kind identifiers with optional inheritance.
 * Compile-time function.
 
 **Description:**
-Creates kind values that define the event type and optional inheritance hierarchy.
+Creates kind values with automatically assigned IDs and optional inheritance hierarchy. Implementations should expose the canonical PascalCase API and any language-native spelling, such as Python's `make_kind`.
 
 ### `hsm.IsKind(kind, base_kind...)`
 

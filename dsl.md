@@ -25,7 +25,9 @@ All DSL functions are **namespace/module-level functions** (not methods on objec
 11. [Group Operations](#group-operations)
 12. [Type Utilities](#type-utilities)
 13. [Runtime Attribute Access](#runtime-attribute-access)
-14. [Runtime Constants](#runtime-constants)
+14. [Runtime Configuration](#runtime-configuration)
+15. [Snapshotting](#snapshotting)
+16. [Runtime Constants](#runtime-constants)
 
 ---
 
@@ -702,6 +704,58 @@ Looks up an attribute by name at runtime, validates the dynamic value matches th
 
 ---
 
+## Runtime Configuration
+
+### `hsm.Config(...)`
+
+Configures a runtime state machine instance without changing the model.
+
+**Fields:**
+
+* `ID` Optional stable instance identifier used by `hsm.ID(...)`, `hsm.DispatchTo(...)`, and snapshots.
+* `Name` Optional runtime qualified machine name used by `hsm.Name(...)`, `hsm.QualifiedName(...)`, and snapshots. The model's qualified name remains unchanged.
+* `Data` Optional payload supplied to the initial event when the machine starts.
+* `Clock` Optional runtime clock used by timer-based transitions such as `hsm.After(...)`, `hsm.Every(...)`, and `hsm.At(...)` where implemented.
+
+**Constraints:**
+
+* Runtime configuration is applied when constructing or starting an instance.
+* Runtime configuration must not mutate the model.
+* Multiple instances of the same model may use different runtime configuration.
+
+**Description:**
+Provides instance-specific identity, initial data, and scheduling behavior. Configuration values affect runtime observability and execution only; they do not alter the DSL model structure.
+
+### `hsm.Clock(...)`
+
+Defines runtime scheduling hooks for timer-based behavior.
+
+**Fields:**
+
+* `Sleep(duration)` / `After(duration)` Host-language-specific wait function for relative durations.
+* `NewTimer(duration)` Optional host-language-specific timer factory where supported.
+
+**Constraints:**
+
+* Runtime facility.
+* Implementations must provide `hsm.DefaultClock`.
+* A partial clock inherits unspecified behavior from `hsm.DefaultClock`.
+* Timer waits must be cancelable by state exit or machine stop where the host language supports cancellation.
+
+**Description:**
+Allows production runtimes and tests to control time deterministically. Timer DSL declarations (`hsm.After`, `hsm.Every`, and `hsm.At`) describe *when* a transition should fire; `Clock` controls *how* the runtime waits for that time.
+
+### `hsm.DefaultClock`
+
+The process- or module-level fallback clock used when no `Config.Clock` is supplied.
+
+**Constraints:**
+
+* Runtime facility.
+* Must be safe for ordinary production use by default.
+
+---
+
 ## Snapshotting
 
 ### `hsm.TakeSnapshot(ctx, machine)`
@@ -733,9 +787,10 @@ The following structures describe the **logical snapshot schema**. Field names a
 
 Describes an event that was recently processed or is pending in the queue.
 
-* `Event` String identifier of the event.
+* `Name` String identifier of the event.
+* `Kind` Event kind identifier.
 * `Target` Absolute target state path, if resolved.
-* `Guard` Boolean indicating whether the guard condition evaluated to true.
+* `Guard` Boolean indicating whether the transition has a guard.
 * `Schema` Optional event payload or schema information (dynamic value).
 
 #### `Snapshot`
@@ -745,7 +800,7 @@ Represents the complete observable state of a machine at a point in time.
 * `ID` Unique snapshot identifier.
 * `QualifiedName` Fully-qualified machine name.
 * `State` Current active state path.
-* `Attributes` Map of attribute names to their current values (dynamic values).
+* `Attributes` Map of fully-qualified attribute names to their current values (dynamic values).
 * `QueueLen` Number of events currently queued.
 * `Events` Ordered list of `EventDetail` entries describing recent or queued events.
 

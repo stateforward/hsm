@@ -6,7 +6,7 @@ All DSL functions are **namespace/module-level functions** (not methods on objec
 
 > **Notation:** `hsm.FunctionName(...)` represents a function in the `hsm` namespace/module. These are free functions, not instance methods.
 
-> **Naming convention:** All exported DSL and runtime API functions use **PascalCase**. This choice is intentional, even though it conflicts with some language-specific style guides. PascalCase is the *only* casing convention that is consistently supported across **all major languages** for **both namespace-level functions and object methods**, without ambiguity or special rules. This ensures the DSL can be mapped 1:1 into C, C++, Rust, Go, C#, Java, Python, JavaScript, and scripting bindings while preserving identical API names and documentation.
+> **Naming convention:** All canonical exported DSL and runtime API functions use **PascalCase**. This choice is intentional, even though it conflicts with some language-specific style guides. PascalCase is the *only* casing convention that is consistently supported across **all major languages** for **both namespace-level functions and object methods**, without ambiguity or special rules. This ensures the DSL can be mapped 1:1 into C, C++, Rust, Go, C#, Java, Python, JavaScript, and scripting bindings while preserving identical API names and documentation. Implementations may also expose language-native aliases, such as TypeScript's camelCase aliases or Python's snake_case aliases, but those aliases must map directly to the canonical PascalCase API and must not introduce separate behavior.
 
 ---
 
@@ -616,6 +616,8 @@ Factory function to create a group with an identifier.
 
 **Description:**
 Creates an identified group of machines for tracking and coordinated operation.
+
+**Python alias:** `hsm.make_group(...)` maps directly to `hsm.MakeGroup(...)`. Python also keeps `hsm.NewGroup(...)` / `hsm.new_group(...)` as compatibility aliases for existing callers.
 
 ---
 

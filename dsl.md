@@ -310,19 +310,19 @@ Defines an absolute deadline trigger. Unlike `hsm.After()` (which is relative), 
 
 ### `hsm.Target(path)`
 
-Declares the target state of a transition using an absolute path.
+Declares the target state of a transition using a hierarchical path.
 
 **Parameters:**
 
-* `path` Absolute state path (string literal). Must start with `/`. Format: `/RootName/ParentName/ChildName`.
+* `path` State path (string literal). Absolute paths start with `/`, for example `/RootName/ParentName/ChildName`. Relative paths are resolved from the containing state, for example `child`, `../sibling`, or `.` for the current source state.
 
 **Constraints:**
 
-* Path must be absolute (start with `/`).
+* Path must resolve to a state or supported pseudostate in the model.
 * Compile-time function.
 
 **Description:**
-Specifies the destination state for a transition using a hierarchical path notation. Paths are absolute from the root of the state machine.
+Specifies the destination state for a transition using hierarchical path notation. Implementations must support absolute model paths and relative paths from the state that contains the transition.
 
 ### `hsm.Source(path)`
 
@@ -330,10 +330,11 @@ Specifies the source state of a transition for parent-level routing.
 
 **Parameters:**
 
-* `path` Source state path (string literal).
+* `path` Source state path (string literal). Absolute paths start with `/`. Relative paths are resolved from the containing state.
 
 **Constraints:**
 
+* Path must resolve to a state in the model.
 * Compile-time function.
 
 **Description:**

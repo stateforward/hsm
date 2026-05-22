@@ -217,6 +217,12 @@ Declares a string-based event trigger using a string literal name.
 **Description:**
 Enables simple event triggering by string name, useful for events without structured data payloads.
 
+### Event Ownership
+
+Dispatch implementations should treat event metadata as per-recipient runtime state. Mutating metadata fields such as `Name`, `QualifiedName`, `Source`, `Target`, `ID`, `Kind`, or `Schema` inside a behavior must not mutate the caller's event object and must not leak to sibling recipients during broadcast or group dispatch.
+
+Event payload data is application-owned. Implementations may pass payload data by reference unless a language binding explicitly documents stronger copy semantics. Callers that need isolated mutable payloads should provide immutable data or copy it at the application boundary.
+
 ### `hsm.OnCall(operation_name)`
 
 Declares a transition trigger linked to a named operation. Fires when that operation is invoked via a language-specific call mechanism.

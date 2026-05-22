@@ -723,6 +723,7 @@ Configures a runtime state machine instance without changing the model.
 * `Name` Optional runtime qualified machine name used by `hsm.Name(...)`, `hsm.QualifiedName(...)`, and snapshots. The model's qualified name remains unchanged.
 * `Data` Optional payload supplied to the initial event when the machine starts.
 * `Clock` Optional runtime clock used by timer-based transitions such as `hsm.After(...)`, `hsm.Every(...)`, and `hsm.At(...)` where implemented.
+* `Queue` Optional runtime event queue used to receive, buffer, and select events for processing.
 
 **Constraints:**
 
@@ -732,6 +733,27 @@ Configures a runtime state machine instance without changing the model.
 
 **Description:**
 Provides instance-specific identity, initial data, and scheduling behavior. Configuration values affect runtime observability and execution only; they do not alter the DSL model structure.
+
+### `hsm.Queue(...)`
+
+Defines runtime event queue hooks for event ingress and selection.
+
+**Fields:**
+
+* `Push(context, event)` Receives one event into the runtime buffer.
+* `Pop(context)` Returns the next event to process and whether an event was available.
+* `Len(context)` Returns the number of currently buffered events.
+
+**Constraints:**
+
+* Runtime facility.
+* Queue configuration is instance-specific and must not mutate the model.
+* Implementations must provide a default queue when no `Config.Queue` is supplied.
+* A supplied queue must provide all three operations: `Push`, `Pop`, and `Len`.
+* Queue implementations must preserve run-to-completion compatibility: `Push` must not process transitions directly, and `Pop` must return events to the runtime for normal transition selection.
+
+**Description:**
+Allows production runtimes and tests to control event buffering, priority, backpressure, persistence, or integration with host event loops. Dispatch APIs describe *which* event enters a machine; `Queue` controls *how* received events are buffered and selected for processing.
 
 ### `hsm.Clock(...)`
 

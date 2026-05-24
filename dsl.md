@@ -6,7 +6,7 @@ All DSL functions are **namespace/module-level functions** (not methods on objec
 
 > **Notation:** `hsm.FunctionName(...)` represents a function in the `hsm` namespace/module. These are free functions, not instance methods.
 
-> **Naming convention:** All canonical exported DSL and runtime API functions use **PascalCase**. This choice is intentional, even though it conflicts with some language-specific style guides. PascalCase is the *only* casing convention that is consistently supported across **all major languages** for **both namespace-level functions and object methods**, without ambiguity or special rules. This ensures the DSL can be mapped 1:1 into C, C++, Rust, Go, C#, Java, Python, JavaScript, and scripting bindings while preserving identical API names and documentation. Implementations may also expose language-native aliases, such as TypeScript's camelCase aliases or Python's snake_case aliases (`Define` -> `define`, `OnSet` -> `on_set`, `TakeSnapshot` -> `take_snapshot`, `MakeGroup` -> `make_group`, `DefaultClock` -> `default_clock`, `StateKind` -> `state_kind`, `CompletionEvent` -> `completion_event`, `EventSnapshot` -> `event_snapshot`, `Config(ID=..., Clock=...)` -> `Config(id=..., clock=...)`), but those aliases must map directly to the canonical PascalCase API and must not introduce separate behavior.
+> **Naming convention:** All canonical exported DSL and runtime API functions use **PascalCase**. This choice is intentional, even though it conflicts with some language-specific style guides. PascalCase is the *only* casing convention that is consistently supported across **all major languages** for **both namespace-level functions and object methods**, without ambiguity or special rules. This ensures the DSL can be mapped 1:1 into C, C++, Rust, Go, C#, Java, Python, JavaScript, and scripting bindings while preserving identical API names and documentation. Implementations may also expose language-native aliases, such as TypeScript's camelCase aliases or Python's snake_case aliases (`Define` -> `define`, `OnSet` -> `on_set`, `TakeSnapshot` -> `take_snapshot`, `MakeGroup` -> `make_group`, `DefaultClock` -> `default_clock`, `StateKind` -> `state_kind`, `CompletionEvent` -> `completion_event`, `EventSnapshot` -> `event_snapshot`, `Config(ID=..., Clock=..., Queue=...)` -> `Config(id=..., clock=..., queue=...)`), but those aliases must map directly to the canonical PascalCase API and must not introduce separate behavior.
 
 ---
 
@@ -662,6 +662,53 @@ Checks if a kind matches or inherits from one or more base kinds.
 
 ---
 
+## Runtime Dispatch
+
+### `instance.Dispatch(event)`
+
+Submits an event to a running state machine instance.
+
+**Parameters:**
+
+* `event` Event value or event name accepted by the implementation's event-construction rules.
+
+**Returns:** completion handle.
+
+The completion handle is a host-language-native waitable that carries no value:
+
+* Go: a receive-only completion channel such as `<-chan struct{}`.
+* Python: an awaitable / future that resolves to `None`.
+* JavaScript / TypeScript: a `Promise<void>`.
+* C# / Rust / Dart / Zig / C++: the nearest native no-value completion primitive, or `void` for strictly synchronous implementations.
+
+**Description:**
+Dispatch submits the event and optionally lets callers wait until the resulting run-to-completion work reaches the implementation's synchronization point. The normal dispatch API does not report whether a submitted event was immediately consumed, deferred for later replay, or ignored by transition selection. Deferred-event handling is runtime-internal behavior unless exposed through explicit observation APIs.
+
+**Constraints:**
+
+* Waiting on the returned completion handle is the supported production synchronization path after dispatch.
+* Completion handles must not carry `Processed`, `Deferred`, `QueueFull`, or equivalent dispatch-result values.
+* Queue failures are runtime errors, not normal dispatch results. If processing can continue, implementations should surface queue failures through the runtime error-event mechanism.
+* Dispatch implementations should treat event metadata as per-recipient runtime state. Mutating metadata fields such as `Name`, `QualifiedName`, `Source`, `Target`, `ID`, `Kind`, or `Schema` inside a behavior must not mutate the caller's event object and must not leak to sibling recipients during broadcast or group dispatch.
+
+### `hsm.DispatchAll(ctx, event)`
+
+Submits an event to every started machine in a runtime context.
+
+**Returns:** completion handle.
+
+The handle completes after all selected machines have reached their dispatch synchronization point. It carries no value.
+
+### `hsm.DispatchTo(ctx, event, ids...)`
+
+Submits an event to started machines matching one or more runtime instance identifiers.
+
+**Returns:** completion handle.
+
+The handle completes after all selected machines have reached their dispatch synchronization point. It carries no value.
+
+---
+
 ## Runtime Attribute Access
 
 Runtime string-based attribute accessors that complement compile-time, name-specialized access (for languages that support it). These APIs use **type erasure** via a **dynamic value container** (for example: `Any`, `Variant`, or equivalent in the host language) to support scripting bindings, serialization, and tooling.
@@ -696,18 +743,17 @@ Runtime attribute write.
 * `name` Attribute name (string or string-like value).
 * `value` Dynamic value containing the new attribute value.
 
-**Returns:** `result_t`
+**Returns:** completion handle.
 
-* `Processed` Attribute updated (or value unchanged).
-* `QueueFull` Update failed (unknown attribute name or type mismatch).
+The completion handle is the same host-language-native no-value waitable used by `instance.Dispatch(event)`.
 
 **Description:**
-Looks up an attribute by name at runtime, validates the dynamic value matches the attribute type, applies change detection, updates storage, and emits any associated `hsm.When(...)` / `hsm.OnSet(...)` change events.
+Looks up an attribute by name at runtime, validates the dynamic value matches the attribute type, applies change detection, updates storage, and emits any associated `hsm.When(...)` / `hsm.OnSet(...)` change events. Waiting on the returned completion handle is the supported synchronization path for both the attribute update and the resulting runtime reaction.
 
 **Limitations:**
 
 * Requires exact type match (no implicit conversions).
-* Unknown-name and type-mismatch failures share the same result.
+* Unknown-name and type-mismatch failures are runtime errors, not normal result values. Host-language bindings may surface them through exceptions, failed completion handles, or the runtime error-event mechanism according to that language's conventions.
 
 ---
 
@@ -840,19 +886,6 @@ Represents the complete observable state of a machine at a point in time.
 * Attribute and schema values are represented using a dynamic value container (`Any` / `Variant` / equivalent).
 * Snapshot contents are immutable once produced.
 * Implementations may cap the number of events recorded for bounded memory usage.
-
----
-
-## Runtime Constants
-
-### Event Dispatch Results
-
-* `QueueFull` Event could not be enqueued due to queue capacity.
-* `Processed` Event was successfully enqueued and will be processed.
-* `Deferred` Event was deferred for later processing per `hsm.Defer(...)`.
-
-**Description:**
-Return values from `instance.Dispatch(event)` indicating the outcome of an attempt to queue an event.
 
 ---
 

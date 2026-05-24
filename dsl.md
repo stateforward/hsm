@@ -740,9 +740,9 @@ Defines runtime event queue hooks for regular event ingress and selection.
 
 **Fields:**
 
-* `Push(context, event)` Receives one regular event into the runtime buffer.
-* `Pop(context)` Returns the next regular event to process and whether an event was available.
-* `Len(context)` Returns the number of currently buffered regular events.
+* `Push(context, event)` Receives one regular event into the runtime buffer and returns an error if the event could not be buffered.
+* `Pop(context)` Returns the next regular event to process, whether an event was available, and an error if selection failed.
+* `Len(context)` Returns the number of currently buffered regular events and an error if the length could not be determined.
 
 **Constraints:**
 
@@ -751,6 +751,7 @@ Defines runtime event queue hooks for regular event ingress and selection.
 * Implementations must provide a default queue when no `Config.Queue` is supplied.
 * A supplied queue must provide all three operations: `Push`, `Pop`, and `Len`.
 * A supplied queue receives regular events only. Runtime completion events remain in the runtime-owned priority queue, are selected before regular events, and must not be routed through custom queue hooks.
+* Queue operation errors must be propagated through the runtime as `ErrorEvent` when processing can continue. Since `ErrorEvent` derives from `CompletionEvent`, those propagated errors must enter the runtime-owned priority queue and must not be routed back through the supplied queue.
 * Queue implementations must preserve run-to-completion compatibility: `Push` must not process transitions directly, and `Pop` must return events to the runtime for normal transition selection.
 
 **Description:**

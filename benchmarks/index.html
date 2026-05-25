@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HSM Cross-Language Benchmarks</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="results.js"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .chart-container {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            padding: 20px;
+            position: relative;
+            height: 400px;
+        }
+        .error {
+            color: red;
+            font-weight: bold;
+            text-align: center;
+            padding: 20px;
+            background-color: #fee;
+            border-radius: 4px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>HSM Cross-Language Benchmarks (Traffic Light)</h1>
+    
+    <div id="error-message" class="error"></div>
+
+    <div class="chart-container">
+        <canvas id="throughputChart"></canvas>
+    </div>
+    
+    <div class="chart-container">
+        <canvas id="iterationsChart"></canvas>
+    </div>
+    
+    <div class="chart-container">
+        <canvas id="memoryChart"></canvas>
+    </div>
+
+    <script>
+        // Colors for charts
+        const bgColors = [
+            'rgba(54, 162, 235, 0.6)',  // Blue
+            'rgba(255, 99, 132, 0.6)',  // Red
+            'rgba(75, 192, 192, 0.6)',  // Green
+            'rgba(255, 206, 86, 0.6)',  // Yellow
+            'rgba(153, 102, 255, 0.6)', // Purple
+            'rgba(255, 159, 64, 0.6)',  // Orange
+            'rgba(199, 199, 199, 0.6)', // Grey
+            'rgba(83, 102, 255, 0.6)'   // Dark Blue
+        ];
+        
+        const borderColors = bgColors.map(c => c.replace('0.6', '1'));
+
+        function loadData() {
+            try {
+                if (typeof benchmarkResults === 'undefined') {
+                    throw new Error("results.js could not be loaded. Please ensure you have run 'python3 benchmarks/run_all.py' first.");
+                }
+                renderCharts(benchmarkResults);
+            } catch (error) {
+                document.getElementById('error-message').innerText = error.message;
+                document.getElementById('error-message').style.display = 'block';
+                console.error("Error loading data:", error);
+            }
+        }
+
+        function renderCharts(data) {
+            // Sort data by throughput descending
+            data.sort((a, b) => b.throughput_ops_per_sec - a.throughput_ops_per_sec);
+
+            const labels = data.map(d => d.language);
+            
+            // 1. Throughput Chart
+            new Chart(document.getElementById('throughputChart'), {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Throughput (Operations / Second)',
+                        data: data.map(d => d.throughput_ops_per_sec),
+                        backgroundColor: bgColors,
+                        borderColor: borderColors,
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: { display: true, text: 'Transition Throughput (Higher is Better)', font: { size: 16 } }
+                    },
+                    scales: {
+                        y: { beginAtZero: true }
+                    }
+                }
+            });
+
+            const measurementWindowMs = Math.round(
+                data.reduce((sum, d) => sum + d.duration_ms, 0) / Math.max(data.length, 1)
+            );
+
+            // 2. Completed Operations Chart
+            new Chart(document.getElementById('iterationsChart'), {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: `Completed Operations in ~${measurementWindowMs.toLocaleString()} ms`,
+                        data: data.map(d => d.iterations),
+                        backgroundColor: bgColors,
+                        borderColor: borderColors,
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: { display: true, text: 'Completed Operations in Fixed Measurement Window (Higher is Better)', font: { size: 16 } }
+                    },
+                    scales: {
+                        y: { beginAtZero: true }
+                    }
+                }
+            });
+
+            // 3. Memory Chart
+            new Chart(document.getElementById('memoryChart'), {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Memory Footprint (MB)',
+                        data: data.map(d => d.memory_mb),
+                        backgroundColor: bgColors,
+                        borderColor: borderColors,
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: { display: true, text: 'Memory Footprint (Lower is Better)', font: { size: 16 } }
+                    },
+                    scales: {
+                        y: { beginAtZero: true }
+                    }
+                }
+            });
+        }
+
+        // Initialize
+        loadData();
+    </script>
+</body>
+</html>

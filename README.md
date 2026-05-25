@@ -12,11 +12,18 @@ Every implementation shares the same compile-time DSL, the same semantics, and t
 | C# | [hsm.cs](hsm.cs/) | Active |
 | Dart | [hsm.dart](hsm.dart/) | Active |
 | Go | [hsm.go](hsm.go/) | Active |
+| Java | [hsm.java](hsm.java/) | Active |
 | JavaScript | [hsm.js](hsm.js/) | Active |
 | Python | [hsm.py](hsm.py/) | Active |
 | Rust | [hsm.rs](hsm.rs/) | Active |
 | TypeScript | [hsm.ts](hsm.ts/) | Active |
 | Zig | [hsm.zig](hsm.zig/) | Active |
+
+## Tooling
+
+| Tool | Module | Status |
+|------|--------|--------|
+| HSM compiler | [hsmc](hsmc/) | Experimental |
 
 ## DSL
 
@@ -31,6 +38,7 @@ All implementations conform to the [HSM DSL Reference](dsl.md) — a language-ag
 - **Guards & deferral** — `hsm.Guard`, `hsm.Defer`
 - **Metadata** — `hsm.Attribute`, `hsm.Operation`
 - **Composition** — `hsm.MakeGroup`
+- **Runtime configuration** — `hsm.Config`, `hsm.Clock`, `hsm.Queue`
 - **Snapshotting** — `hsm.TakeSnapshot`
 
 All DSL functions use **PascalCase** across every language for a 1:1 API mapping.
@@ -74,9 +82,11 @@ hsm/
 ├── hsm.cs/          # C# implementation
 ├── hsm.dart/        # Dart implementation
 ├── hsm.go/          # Go implementation
+├── hsm.java/        # Java implementation
 ├── hsm.js/          # JavaScript implementation
 ├── hsm.py/          # Python implementation
 ├── hsm.rs/          # Rust implementation
+├── hsmc/            # Go-based cross-language HSM compiler
 ├── hsm.ts/          # TypeScript implementation
 └── hsm.zig/         # Zig implementation
 ```

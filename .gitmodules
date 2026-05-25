@@ -13,6 +13,9 @@
 [submodule "hsm.js"]
 	path = hsm.js
 	url = git@github.com:stateforward/hsm.js.git
+[submodule "hsmc"]
+	path = hsmc
+	url = git@github.com:stateforward/hsmc.git
 [submodule "hsm.py"]
 	path = hsm.py
 	url = git@github.com:stateforward/hsm.py.git

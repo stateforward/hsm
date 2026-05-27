@@ -81,6 +81,13 @@ BENCHMARKS = [
         "dir": "hsm.dart",
         "build_cmd": [],
         "run_cmd": ["dart", "run", "benchmark/traffic_light_bench.dart"]
+    },
+    {
+        "name": "Elixir",
+        "dir": "hsm.ex",
+        "build_cmd": ["mix", "compile"],
+        "run_cmd": ["mix", "run", "benchmark/traffic_light_bench.exs"],
+        "env": {"MIX_ENV": "prod"}
     }
 ]
 

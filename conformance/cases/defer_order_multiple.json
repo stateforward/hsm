@@ -1,0 +1,134 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "defer_order_multiple",
+  "features": [
+    "defer",
+    "queue_order"
+  ],
+  "model": {
+    "name": "DeferOrder",
+    "initial": "blocked",
+    "states": [
+      {
+        "name": "blocked",
+        "defer": [
+          "a",
+          "b"
+        ],
+        "transitions": [
+          {
+            "on": "release",
+            "target": "ready"
+          }
+        ]
+      },
+      {
+        "name": "ready",
+        "transitions": [
+          {
+            "on": "a",
+            "target": "got_a",
+            "effects": [
+              {
+                "behavior": "effect_a"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "got_a",
+        "transitions": [
+          {
+            "on": "b",
+            "target": "done",
+            "effects": [
+              {
+                "behavior": "effect_b"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "done"
+      }
+    ]
+  },
+  "behaviors": {
+    "effect_a": [
+      {
+        "op": "trace",
+        "value": "effect:a"
+      }
+    ],
+    "effect_b": [
+      {
+        "op": "trace",
+        "value": "effect:b"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "a"
+    },
+    {
+      "op": "dispatch",
+      "event": "b"
+    },
+    {
+      "op": "dispatch",
+      "event": "release"
+    }
+  ],
+  "expect": {
+    "state": "/DeferOrder/done",
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "a"
+      },
+      {
+        "type": "defer",
+        "event": "a"
+      },
+      {
+        "type": "dispatch",
+        "event": "b"
+      },
+      {
+        "type": "defer",
+        "event": "b"
+      },
+      {
+        "type": "dispatch",
+        "event": "release"
+      },
+      {
+        "type": "undefer",
+        "event": "a"
+      },
+      {
+        "type": "trace",
+        "value": "effect:a"
+      },
+      {
+        "type": "undefer",
+        "event": "b"
+      },
+      {
+        "type": "trace",
+        "value": "effect:b"
+      },
+      {
+        "type": "stable",
+        "state": "/DeferOrder/done"
+      }
+    ]
+  }
+}

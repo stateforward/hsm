@@ -1,0 +1,53 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "choice_no_fallback_validation",
+  "mode": "validation",
+  "features": [
+    "validation"
+  ],
+  "model": {
+    "name": "ChoiceNoFallback",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "on": "go",
+            "target": "choice"
+          }
+        ]
+      },
+      {
+        "name": "choice",
+        "kind": "choice",
+        "transitions": [
+          {
+            "guard": {
+              "behavior": "guard_true"
+            },
+            "target": "done"
+          }
+        ]
+      },
+      {
+        "name": "done"
+      }
+    ]
+  },
+  "behaviors": {
+    "guard_true": [
+      {
+        "op": "return_value",
+        "value": true
+      }
+    ]
+  },
+  "expect": {
+    "validation": [
+      {
+        "code": "choice_missing_fallback"
+      }
+    ]
+  }
+}

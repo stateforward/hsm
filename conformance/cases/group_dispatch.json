@@ -1,0 +1,95 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "group_dispatch",
+  "features": [
+    "group"
+  ],
+  "model": {
+    "name": "GroupDispatch",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "on": "go",
+            "target": "done",
+            "effects": [
+              {
+                "behavior": "effect_go"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "done"
+      }
+    ]
+  },
+  "instances": [
+    {
+      "id": "one"
+    },
+    {
+      "id": "two"
+    }
+  ],
+  "groups": [
+    {
+      "id": "both",
+      "members": [
+        "one",
+        "two"
+      ]
+    }
+  ],
+  "behaviors": {
+    "effect_go": [
+      {
+        "op": "trace",
+        "value": "effect:go"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start",
+      "instance": "one"
+    },
+    {
+      "op": "start",
+      "instance": "two"
+    },
+    {
+      "op": "group_dispatch",
+      "group": "both",
+      "event": "go"
+    }
+  ],
+  "expect": {
+    "states": {
+      "one": "/GroupDispatch/done",
+      "two": "/GroupDispatch/done"
+    },
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "go",
+        "target": "both"
+      },
+      {
+        "type": "trace",
+        "value": "effect:go"
+      },
+      {
+        "type": "trace",
+        "value": "effect:go"
+      },
+      {
+        "type": "stable",
+        "state": "group:both"
+      }
+    ]
+  }
+}

@@ -1,0 +1,91 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "when",
+  "features": [
+    "when",
+    "attribute"
+  ],
+  "model": {
+    "name": "WhenCase",
+    "initial": "idle",
+    "attributes": {
+      "ready_flag": {
+        "type": "boolean",
+        "default": false
+      }
+    },
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "trigger": {
+              "kind": "when",
+                "behavior": "ready_when"
+            },
+            "target": "ready"
+          }
+        ]
+      },
+      {
+        "name": "ready",
+        "entry": [
+          {
+            "behavior": "entry_ready"
+          }
+        ]
+      }
+    ]
+  },
+  "behaviors": {
+    "ready_when": [
+      {
+        "op": "trace",
+        "value": "when:ready"
+      },
+      {
+        "op": "return_equals",
+        "name": "ready_flag",
+        "value": true
+      }
+    ],
+    "entry_ready": [
+      {
+        "op": "trace",
+        "value": "enter:ready"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "set",
+      "attribute": "ready_flag",
+      "value": true
+    }
+  ],
+  "expect": {
+    "state": "/WhenCase/ready",
+    "trace": [
+      {
+        "type": "set",
+        "attribute": "ready_flag",
+        "value": true
+      },
+      {
+        "type": "trace",
+        "value": "when:ready"
+      },
+      {
+        "type": "trace",
+        "value": "enter:ready"
+      },
+      {
+        "type": "stable",
+        "state": "/WhenCase/ready"
+      }
+    ]
+  }
+}

@@ -1,0 +1,115 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "queue_reentrancy",
+  "features": [
+    "queue",
+    "reentrancy"
+  ],
+  "model": {
+    "name": "QueueReentrancy",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "on": "first",
+            "target": "middle",
+            "effects": [
+              {
+                "behavior": "dispatch_second"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "middle",
+        "transitions": [
+          {
+            "on": "second",
+            "target": "done",
+            "effects": [
+              {
+                "behavior": "effect_second"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "done",
+        "entry": [
+          {
+            "behavior": "entry_done"
+          }
+        ]
+      }
+    ]
+  },
+  "behaviors": {
+    "dispatch_second": [
+      {
+        "op": "trace",
+        "value": "effect:first"
+      },
+      {
+        "op": "dispatch",
+        "event": "second"
+      }
+    ],
+    "effect_second": [
+      {
+        "op": "trace",
+        "value": "effect:second"
+      }
+    ],
+    "entry_done": [
+      {
+        "op": "trace",
+        "value": "enter:done"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "first"
+    }
+  ],
+  "expect": {
+    "state": "/QueueReentrancy/done",
+    "queue": {
+      "nested_dispatch": "fifo_after_current"
+    },
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "first"
+      },
+      {
+        "type": "trace",
+        "value": "effect:first"
+      },
+      {
+        "type": "dispatch",
+        "event": "second"
+      },
+      {
+        "type": "trace",
+        "value": "effect:second"
+      },
+      {
+        "type": "trace",
+        "value": "enter:done"
+      },
+      {
+        "type": "stable",
+        "state": "/QueueReentrancy/done"
+      }
+    ]
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_targets",
+  "mode": "validation",
+  "features": [
+    "validation"
+  ],
+  "model": {
+    "name": "InvalidTargets",
+    "initial": "missing",
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "on": "go",
+            "target": "missing"
+          }
+        ]
+      }
+    ]
+  },
+  "behaviors": {
+    "guard_true": [
+      {
+        "op": "return_value",
+        "value": true
+      }
+    ]
+  },
+  "expect": {
+    "validation": [
+      {
+        "code": "missing_target"
+      }
+    ]
+  }
+}

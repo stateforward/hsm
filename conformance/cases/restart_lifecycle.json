@@ -1,0 +1,129 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "restart_lifecycle",
+  "features": [
+    "lifecycle",
+    "restart",
+    "stop"
+  ],
+  "model": {
+    "name": "RestartLifecycle",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle",
+        "entry": [
+          {
+            "behavior": "entry_idle"
+          }
+        ],
+        "exit": [
+          {
+            "behavior": "exit_idle"
+          }
+        ],
+        "transitions": [
+          {
+            "on": "go",
+            "target": "done"
+          }
+        ]
+      },
+      {
+        "name": "done",
+        "entry": [
+          {
+            "behavior": "entry_done"
+          }
+        ]
+      }
+    ]
+  },
+  "behaviors": {
+    "entry_idle": [
+      {
+        "op": "trace",
+        "value": "enter:idle"
+      }
+    ],
+    "exit_idle": [
+      {
+        "op": "trace",
+        "value": "exit:idle"
+      }
+    ],
+    "entry_done": [
+      {
+        "op": "trace",
+        "value": "enter:done"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "go"
+    },
+    {
+      "op": "restart"
+    },
+    {
+      "op": "stop"
+    },
+    {
+      "op": "start"
+    }
+  ],
+  "expect": {
+    "state": "/RestartLifecycle/idle",
+    "trace": [
+      {
+        "type": "start"
+      },
+      {
+        "type": "trace",
+        "value": "enter:idle"
+      },
+      {
+        "type": "dispatch",
+        "event": "go"
+      },
+      {
+        "type": "trace",
+        "value": "exit:idle"
+      },
+      {
+        "type": "trace",
+        "value": "enter:done"
+      },
+      {
+        "type": "restart"
+      },
+      {
+        "type": "trace",
+        "value": "enter:idle"
+      },
+      {
+        "type": "stop"
+      },
+      {
+        "type": "trace",
+        "value": "exit:idle"
+      },
+      {
+        "type": "start"
+      },
+      {
+        "type": "trace",
+        "value": "enter:idle"
+      },
+      {
+        "type": "stable",
+        "state": "/RestartLifecycle/idle"
+      }
+    ]
+  }
+}

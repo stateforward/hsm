@@ -1,0 +1,88 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "timer_every",
+  "features": [
+    "timer",
+    "every"
+  ],
+  "model": {
+    "name": "TimerEvery",
+    "initial": "waiting",
+    "states": [
+      {
+        "name": "waiting",
+        "transitions": [
+          {
+            "trigger": {
+              "kind": "every",
+              "duration_ms": 10
+            },
+            "target": "fired",
+            "effects": [
+              {
+                "behavior": "effect_timer"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "fired",
+        "entry": [
+          {
+            "behavior": "entry_fired"
+          }
+        ]
+      }
+    ]
+  },
+  "behaviors": {
+    "effect_timer": [
+      {
+        "op": "trace",
+        "value": "effect:timer"
+      }
+    ],
+    "entry_fired": [
+      {
+        "op": "trace",
+        "value": "enter:fired"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "tick",
+      "millis": 100
+    }
+  ],
+  "expect": {
+    "state": "/TimerEvery/fired",
+    "trace": [
+      {
+        "type": "timer_scheduled"
+      },
+      {
+        "type": "timer_scheduled"
+      },
+      {
+        "type": "timer_fired"
+      },
+      {
+        "type": "trace",
+        "value": "effect:timer"
+      },
+      {
+        "type": "trace",
+        "value": "enter:fired"
+      },
+      {
+        "type": "stable",
+        "state": "/TimerEvery/fired"
+      }
+    ]
+  }
+}

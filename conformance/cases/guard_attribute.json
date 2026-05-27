@@ -1,0 +1,151 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "guard_attribute",
+  "features": ["core", "attribute", "guard", "entry", "exit", "effect"],
+  "model": {
+    "name": "Gate",
+    "initial": "locked",
+    "attributes": {
+      "allowed": {
+        "type": "boolean",
+        "default": false
+      }
+    },
+    "states": [
+      {
+        "name": "locked",
+        "entry": [
+          {
+            "behavior": "entry_locked"
+          }
+        ],
+        "exit": [
+          {
+            "behavior": "exit_locked"
+          }
+        ],
+        "transitions": [
+          {
+            "on": "open",
+            "guard": {
+              "behavior": "is_allowed"
+            },
+            "target": "open",
+            "effects": [
+              {
+                "behavior": "effect_unlock"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "open",
+        "entry": [
+          {
+            "behavior": "entry_open"
+          }
+        ]
+      }
+    ]
+  },
+  "behaviors": {
+    "entry_locked": [
+      {
+        "op": "trace",
+        "value": "enter:/Gate/locked"
+      }
+    ],
+    "exit_locked": [
+      {
+        "op": "trace",
+        "value": "exit:/Gate/locked"
+      }
+    ],
+    "is_allowed": [
+      {
+        "op": "trace",
+        "value": "guard:allowed"
+      },
+      {
+        "op": "return_equals",
+        "name": "allowed",
+        "value": true
+      }
+    ],
+    "effect_unlock": [
+      {
+        "op": "trace",
+        "value": "effect:unlock"
+      }
+    ],
+    "entry_open": [
+      {
+        "op": "trace",
+        "value": "enter:/Gate/open"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "open"
+    },
+    {
+      "op": "set",
+      "attribute": "allowed",
+      "value": true
+    },
+    {
+      "op": "dispatch",
+      "event": "open"
+    }
+  ],
+  "expect": {
+    "state": "/Gate/open",
+    "attributes": {
+      "allowed": true
+    },
+    "trace": [
+      {
+        "type": "trace",
+        "value": "enter:/Gate/locked"
+      },
+      {
+        "type": "dispatch",
+        "event": "open"
+      },
+      {
+        "type": "trace",
+        "value": "guard:allowed"
+      },
+      {
+        "type": "dispatch",
+        "event": "open"
+      },
+      {
+        "type": "trace",
+        "value": "guard:allowed"
+      },
+      {
+        "type": "trace",
+        "value": "exit:/Gate/locked"
+      },
+      {
+        "type": "trace",
+        "value": "effect:unlock"
+      },
+      {
+        "type": "trace",
+        "value": "enter:/Gate/open"
+      },
+      {
+        "type": "stable",
+        "state": "/Gate/open"
+      }
+    ]
+  }
+}

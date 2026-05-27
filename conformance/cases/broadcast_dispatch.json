@@ -1,0 +1,85 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "broadcast_dispatch",
+  "features": [
+    "broadcast"
+  ],
+  "model": {
+    "name": "BroadcastDispatch",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "on": "go",
+            "target": "done",
+            "effects": [
+              {
+                "behavior": "effect_go"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "done"
+      }
+    ]
+  },
+  "instances": [
+    {
+      "id": "one"
+    },
+    {
+      "id": "two"
+    }
+  ],
+  "behaviors": {
+    "effect_go": [
+      {
+        "op": "trace",
+        "value": "effect:broadcast"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start",
+      "instance": "one"
+    },
+    {
+      "op": "start",
+      "instance": "two"
+    },
+    {
+      "op": "dispatch_all",
+      "event": "go"
+    }
+  ],
+  "expect": {
+    "states": {
+      "one": "/BroadcastDispatch/done",
+      "two": "/BroadcastDispatch/done"
+    },
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "go",
+        "target": "all"
+      },
+      {
+        "type": "trace",
+        "value": "effect:broadcast"
+      },
+      {
+        "type": "trace",
+        "value": "effect:broadcast"
+      },
+      {
+        "type": "stable",
+        "state": "all"
+      }
+    ]
+  }
+}

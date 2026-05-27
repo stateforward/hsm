@@ -1,0 +1,93 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "final_completion",
+  "features": [
+    "final",
+    "completion"
+  ],
+  "model": {
+    "name": "FinalCompletion",
+    "initial": "work",
+    "states": [
+      {
+        "name": "work",
+        "transitions": [
+          {
+            "on": "finish",
+            "target": "done"
+          }
+        ]
+      },
+    {
+      "name": "done",
+      "kind": "final"
+      },
+      {
+        "name": "complete",
+        "entry": [
+          {
+            "behavior": "entry_complete"
+          }
+        ]
+      }
+    ],
+    "transitions": [
+      {
+        "trigger": {
+          "kind": "completion"
+        },
+        "target": "complete",
+        "effects": [
+          {
+            "behavior": "effect_completion"
+          }
+        ]
+      }
+    ]
+  },
+  "behaviors": {
+    "effect_completion": [
+      {
+        "op": "trace",
+        "value": "effect:completion"
+      }
+    ],
+    "entry_complete": [
+      {
+        "op": "trace",
+        "value": "enter:complete"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "finish"
+    }
+  ],
+  "expect": {
+    "state": "/FinalCompletion/complete",
+    "done": true,
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "finish"
+      },
+      {
+        "type": "trace",
+        "value": "effect:completion"
+      },
+      {
+        "type": "trace",
+        "value": "enter:complete"
+      },
+      {
+        "type": "stable",
+        "state": "/FinalCompletion/complete"
+      }
+    ]
+  }
+}

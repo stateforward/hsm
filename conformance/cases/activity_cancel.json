@@ -1,0 +1,93 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "activity_cancel",
+  "features": [
+    "activity",
+    "async",
+    "cancellation"
+  ],
+  "model": {
+    "name": "ActivityCancel",
+    "initial": "active",
+    "states": [
+      {
+        "name": "active",
+        "activity": [
+          {
+            "behavior": "activity_running"
+          }
+        ],
+        "transitions": [
+          {
+            "on": "stop",
+            "target": "done"
+          }
+        ]
+      },
+      {
+        "name": "done",
+        "entry": [
+          {
+            "behavior": "entry_done"
+          }
+        ]
+      }
+    ]
+  },
+  "behaviors": {
+    "activity_running": [
+      {
+        "op": "trace",
+        "value": "activity:start"
+      },
+      {
+        "op": "sleep",
+        "millis": 1000
+      },
+      {
+        "op": "trace",
+        "value": "activity:done"
+      }
+    ],
+    "entry_done": [
+      {
+        "op": "trace",
+        "value": "enter:done"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "stop"
+    }
+  ],
+  "expect": {
+    "state": "/ActivityCancel/done",
+    "trace": [
+      {
+        "type": "trace",
+        "value": "activity:start"
+      },
+      {
+        "type": "dispatch",
+        "event": "stop"
+      },
+      {
+        "type": "activity_cancel",
+        "behavior": "activity_running"
+      },
+      {
+        "type": "trace",
+        "value": "enter:done"
+      },
+      {
+        "type": "stable",
+        "state": "/ActivityCancel/done"
+      }
+    ]
+  }
+}

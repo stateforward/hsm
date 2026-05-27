@@ -1,0 +1,133 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "transition_selection_order",
+  "features": [
+    "core",
+    "guard",
+    "selection_order"
+  ],
+  "model": {
+    "name": "Selection",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "on": "go",
+            "guard": {
+              "behavior": "first_false"
+            },
+            "target": "wrong",
+            "effects": [
+              {
+                "behavior": "effect_wrong"
+              }
+            ]
+          },
+          {
+            "on": "go",
+            "guard": {
+              "behavior": "second_true"
+            },
+            "target": "right",
+            "effects": [
+              {
+                "behavior": "effect_right"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "wrong"
+      },
+      {
+        "name": "right",
+        "entry": [
+          {
+            "behavior": "entry_right"
+          }
+        ]
+      }
+    ]
+  },
+  "behaviors": {
+    "first_false": [
+      {
+        "op": "trace",
+        "value": "guard:first"
+      },
+      {
+        "op": "return_value",
+        "value": false
+      }
+    ],
+    "second_true": [
+      {
+        "op": "trace",
+        "value": "guard:second"
+      },
+      {
+        "op": "return_value",
+        "value": true
+      }
+    ],
+    "effect_wrong": [
+      {
+        "op": "trace",
+        "value": "effect:wrong"
+      }
+    ],
+    "effect_right": [
+      {
+        "op": "trace",
+        "value": "effect:right"
+      }
+    ],
+    "entry_right": [
+      {
+        "op": "trace",
+        "value": "enter:right"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "go"
+    }
+  ],
+  "expect": {
+    "state": "/Selection/right",
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "go"
+      },
+      {
+        "type": "trace",
+        "value": "guard:first"
+      },
+      {
+        "type": "trace",
+        "value": "guard:second"
+      },
+      {
+        "type": "trace",
+        "value": "effect:right"
+      },
+      {
+        "type": "trace",
+        "value": "enter:right"
+      },
+      {
+        "type": "stable",
+        "state": "/Selection/right"
+      }
+    ]
+  }
+}

@@ -1,0 +1,72 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "group_snapshot",
+  "features": [
+    "group",
+    "snapshot"
+  ],
+  "model": {
+    "name": "GroupSnapshot",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle"
+      }
+    ]
+  },
+  "instances": [
+    {
+      "id": "one"
+    },
+    {
+      "id": "two"
+    }
+  ],
+  "groups": [
+    {
+      "id": "both",
+      "members": [
+        "one",
+        "two"
+      ]
+    }
+  ],
+  "script": [
+    {
+      "op": "start",
+      "instance": "one"
+    },
+    {
+      "op": "start",
+      "instance": "two"
+    },
+    {
+      "op": "snapshot",
+      "group": "both"
+    }
+  ],
+  "expect": {
+    "states": {
+      "one": "/GroupSnapshot/idle",
+      "two": "/GroupSnapshot/idle"
+    },
+    "snapshots": {
+      "both": {
+        "members": {
+          "one": "/GroupSnapshot/idle",
+          "two": "/GroupSnapshot/idle"
+        }
+      }
+    },
+    "trace": [
+      {
+        "type": "snapshot",
+        "group": "both"
+      },
+      {
+        "type": "stable",
+        "state": "group:both"
+      }
+    ]
+  }
+}

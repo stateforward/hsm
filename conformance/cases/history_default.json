@@ -1,0 +1,79 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "history_default",
+  "features": [
+    "history",
+    "history_default"
+  ],
+  "model": {
+    "name": "HistoryDefault",
+    "initial": "outside",
+    "states": [
+      {
+        "name": "outside",
+        "transitions": [
+          {
+            "on": "enter",
+            "target": "comp/h"
+          }
+        ]
+      },
+      {
+        "name": "comp",
+        "states": [
+          {
+            "name": "a",
+            "entry": [
+              {
+                "behavior": "entry_a"
+              }
+            ]
+          },
+          {
+            "name": "h",
+            "kind": "shallow_history",
+            "transitions": [
+              {
+                "target": "a"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "behaviors": {
+    "entry_a": [
+      {
+        "op": "trace",
+        "value": "enter:a"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "enter"
+    }
+  ],
+  "expect": {
+    "state": "/HistoryDefault/comp/a",
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "enter"
+      },
+      {
+        "type": "trace",
+        "value": "enter:a"
+      },
+      {
+        "type": "stable",
+        "state": "/HistoryDefault/comp/a"
+      }
+    ]
+  }
+}

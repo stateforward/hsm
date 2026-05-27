@@ -1,0 +1,107 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "basic_transition",
+  "features": ["core", "entry", "exit", "effect"],
+  "model": {
+    "name": "Door",
+    "initial": "closed",
+    "states": [
+      {
+        "name": "closed",
+        "entry": [
+          {
+            "behavior": "entry_closed"
+          }
+        ],
+        "exit": [
+          {
+            "behavior": "exit_closed"
+          }
+        ],
+        "transitions": [
+          {
+            "on": "open",
+            "target": "open",
+            "effects": [
+              {
+                "behavior": "effect_open"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "open",
+        "entry": [
+          {
+            "behavior": "entry_open"
+          }
+        ]
+      }
+    ]
+  },
+  "behaviors": {
+    "entry_closed": [
+      {
+        "op": "trace",
+        "value": "enter:/Door/closed"
+      }
+    ],
+    "exit_closed": [
+      {
+        "op": "trace",
+        "value": "exit:/Door/closed"
+      }
+    ],
+    "effect_open": [
+      {
+        "op": "trace",
+        "value": "effect:open"
+      }
+    ],
+    "entry_open": [
+      {
+        "op": "trace",
+        "value": "enter:/Door/open"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "open"
+    }
+  ],
+  "expect": {
+    "state": "/Door/open",
+    "trace": [
+      {
+        "type": "trace",
+        "value": "enter:/Door/closed"
+      },
+      {
+        "type": "dispatch",
+        "event": "open"
+      },
+      {
+        "type": "trace",
+        "value": "exit:/Door/closed"
+      },
+      {
+        "type": "trace",
+        "value": "effect:open"
+      },
+      {
+        "type": "trace",
+        "value": "enter:/Door/open"
+      },
+      {
+        "type": "stable",
+        "state": "/Door/open"
+      }
+    ]
+  }
+}

@@ -1,0 +1,570 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://stateforward.dev/hsm/conformance/case.schema.json",
+  "title": "StateForward HSM Conformance Case",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "name", "model", "expect"],
+  "allOf": [
+    {
+      "if": {
+        "required": ["mode"],
+        "properties": {
+          "mode": {
+            "const": "validation"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "expect": {
+            "required": ["validation"]
+          }
+        }
+      },
+      "else": {
+        "required": ["script"]
+      }
+    }
+  ],
+  "properties": {
+    "version": {
+      "const": "hsm-conformance-v1"
+    },
+    "name": {
+      "$ref": "#/$defs/nonEmptyString"
+    },
+    "description": {
+      "type": "string"
+    },
+    "features": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/nonEmptyString"
+      },
+      "uniqueItems": true
+    },
+    "mode": {
+      "enum": ["runtime", "validation"],
+      "default": "runtime"
+    },
+    "model": {
+      "$ref": "#/$defs/model"
+    },
+    "behaviors": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/$defs/behaviorProgram"
+      }
+    },
+    "instances": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/instance"
+      }
+    },
+    "groups": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/group"
+      }
+    },
+    "script": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/scriptStep"
+      }
+    },
+    "expect": {
+      "$ref": "#/$defs/expect"
+    }
+  },
+  "$defs": {
+    "nonEmptyString": {
+      "type": "string",
+      "minLength": 1
+    },
+    "name": {
+      "$ref": "#/$defs/nonEmptyString"
+    },
+    "path": {
+      "$ref": "#/$defs/nonEmptyString"
+    },
+    "model": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "states"],
+      "properties": {
+        "name": {
+          "$ref": "#/$defs/name"
+        },
+        "initial": {
+          "$ref": "#/$defs/initial"
+        },
+        "attributes": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/attribute"
+          }
+        },
+        "operations": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/behaviorRef"
+          }
+        },
+        "states": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/state"
+          }
+        },
+        "transitions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/transition"
+          }
+        }
+      }
+    },
+    "state": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name"],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "name": {
+          "$ref": "#/$defs/name"
+        },
+        "kind": {
+          "enum": ["state", "final", "choice", "shallow_history", "deep_history"],
+          "default": "state"
+        },
+        "initial": {
+          "$ref": "#/$defs/initial"
+        },
+        "entry": {
+          "$ref": "#/$defs/behaviorRefs"
+        },
+        "exit": {
+          "$ref": "#/$defs/behaviorRefs"
+        },
+        "activity": {
+          "$ref": "#/$defs/behaviorRefs"
+        },
+        "defer": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/eventRef"
+          }
+        },
+        "states": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/state"
+          }
+        },
+        "transitions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/transition"
+          }
+        }
+      }
+    },
+    "initial": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/path"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["target"],
+          "properties": {
+            "id": {
+              "$ref": "#/$defs/nonEmptyString"
+            },
+            "target": {
+              "$ref": "#/$defs/path"
+            },
+            "effects": {
+              "$ref": "#/$defs/behaviorRefs"
+            }
+          }
+        }
+      ]
+    },
+    "transition": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "kind": {
+          "enum": ["external", "internal", "local", "self"],
+          "default": "external"
+        },
+        "source": {
+          "$ref": "#/$defs/path"
+        },
+        "target": {
+          "$ref": "#/$defs/path"
+        },
+        "on": {
+          "$ref": "#/$defs/eventRef"
+        },
+        "trigger": {
+          "$ref": "#/$defs/trigger"
+        },
+        "guard": {
+          "$ref": "#/$defs/behaviorRef"
+        },
+        "effects": {
+          "$ref": "#/$defs/behaviorRefs"
+        }
+      }
+    },
+    "trigger": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind"],
+      "properties": {
+        "kind": {
+          "enum": ["on", "on_set", "on_call", "after", "every", "at", "when", "completion"]
+        },
+        "event": {
+          "$ref": "#/$defs/eventRef"
+        },
+        "events": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/eventRef"
+          }
+        },
+        "attribute": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "operation": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "behavior": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "duration_ms": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "time_ms": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "value": true
+      }
+    },
+    "attribute": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "enum": ["any", "boolean", "number", "string", "object", "array", "duration_ms", "time_ms"]
+        },
+        "default": true
+      }
+    },
+    "eventRef": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        {
+          "$ref": "#/$defs/event"
+        }
+      ]
+    },
+    "event": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name"],
+      "properties": {
+        "name": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "data": true,
+        "id": {
+          "type": "string"
+        },
+        "source": {
+          "type": "string"
+        },
+        "target": {
+          "type": "string"
+        },
+        "metadata": {
+          "type": "object"
+        }
+      }
+    },
+    "behaviorRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["behavior"],
+      "properties": {
+        "behavior": {
+          "$ref": "#/$defs/nonEmptyString"
+        }
+      }
+    },
+    "behaviorRefs": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/behaviorRef"
+      }
+    },
+    "behaviorProgram": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/behaviorOp"
+      }
+    },
+    "behaviorOp": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["op"],
+      "properties": {
+        "op": {
+          "enum": [
+            "trace",
+            "set_attr",
+            "get_attr",
+            "return_attr",
+            "return_value",
+            "return_equals",
+            "event_name_equals",
+            "event_data_equals",
+            "event_data_get",
+            "event_metadata_set",
+            "event_metadata_get",
+            "raise",
+            "dispatch",
+            "call",
+            "snapshot",
+            "sleep",
+            "yield"
+          ]
+        },
+        "name": {
+          "type": "string"
+        },
+        "attribute": {
+          "type": "string"
+        },
+        "event": {
+          "$ref": "#/$defs/eventRef"
+        },
+        "path": {
+          "type": "string"
+        },
+        "value": true,
+        "code": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "millis": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "instance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id"],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "model": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "data": true,
+        "config": {
+          "type": "object"
+        }
+      }
+    },
+    "group": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "members"],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "members": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/nonEmptyString"
+          }
+        }
+      }
+    },
+    "scriptStep": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["op"],
+      "properties": {
+        "op": {
+          "enum": [
+            "start",
+            "stop",
+            "restart",
+            "dispatch",
+            "dispatch_all",
+            "dispatch_to",
+            "group_dispatch",
+            "set",
+            "call",
+            "tick",
+            "sleep",
+            "snapshot",
+            "expect"
+          ]
+        },
+        "instance": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "group": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "event": {
+          "$ref": "#/$defs/eventRef"
+        },
+        "attribute": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "operation": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "value": true,
+        "data": true,
+        "millis": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "expect": {
+          "$ref": "#/$defs/expect"
+        }
+      }
+    },
+    "expect": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "state": {
+          "$ref": "#/$defs/path"
+        },
+        "states": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/path"
+          }
+        },
+        "trace": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/traceEvent"
+          }
+        },
+        "attributes": {
+          "type": "object"
+        },
+        "instance_attributes": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object"
+          }
+        },
+        "snapshots": {
+          "type": "object"
+        },
+        "queue": {
+          "type": "object"
+        },
+        "done": {
+          "type": "boolean"
+        },
+        "error": {
+          "$ref": "#/$defs/errorExpectation"
+        },
+        "validation": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/errorExpectation"
+          }
+        }
+      }
+    },
+    "errorExpectation": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "code": {
+              "$ref": "#/$defs/nonEmptyString"
+            },
+            "message_contains": {
+              "type": "string"
+            },
+            "path": {
+              "type": "string"
+            }
+          }
+        }
+      ]
+    },
+    "traceEvent": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["type"],
+      "properties": {
+        "type": {
+          "enum": [
+            "trace",
+            "start",
+            "stop",
+            "restart",
+            "dispatch",
+            "select",
+            "guard",
+            "exit",
+            "effect",
+            "enter",
+            "activity_start",
+            "activity_cancel",
+            "activity_done",
+            "defer",
+            "undefer",
+            "raise",
+            "call",
+            "set",
+            "timer_scheduled",
+            "timer_cancelled",
+            "timer_fired",
+            "snapshot",
+            "stable",
+            "done",
+            "error"
+          ]
+        }
+      }
+    }
+  }
+}

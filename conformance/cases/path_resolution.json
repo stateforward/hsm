@@ -1,0 +1,260 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "path_resolution",
+  "features": [
+    "core",
+    "paths",
+    "nested"
+  ],
+  "model": {
+    "name": "Paths",
+    "initial": "a",
+    "states": [
+      {
+        "name": "a",
+        "entry": [
+          {
+            "behavior": "entry_a"
+          }
+        ],
+        "transitions": [
+          {
+            "on": "abs",
+            "target": "/Paths/b",
+            "effects": [
+              {
+                "behavior": "effect_abs"
+              }
+            ]
+          },
+          {
+            "on": "nested",
+            "target": "parent/child",
+            "effects": [
+              {
+                "behavior": "effect_nested"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "b",
+        "entry": [
+          {
+            "behavior": "entry_b"
+          }
+        ],
+        "transitions": [
+          {
+            "on": "model",
+            "target": "a",
+            "effects": [
+              {
+                "behavior": "effect_model"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "parent",
+        "initial": "child",
+        "states": [
+          {
+            "name": "child",
+            "entry": [
+              {
+                "behavior": "entry_child"
+              }
+            ],
+            "transitions": [
+              {
+                "on": "sibling",
+                "target": "../sibling",
+                "effects": [
+                  {
+                    "behavior": "effect_sibling"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "name": "sibling",
+            "entry": [
+              {
+                "behavior": "entry_sibling"
+              }
+            ],
+            "transitions": [
+              {
+                "on": "parent",
+                "target": "../../b",
+                "effects": [
+                  {
+                    "behavior": "effect_parent"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "behaviors": {
+    "entry_a": [
+      {
+        "op": "trace",
+        "value": "enter:a"
+      }
+    ],
+    "entry_b": [
+      {
+        "op": "trace",
+        "value": "enter:b"
+      }
+    ],
+    "entry_child": [
+      {
+        "op": "trace",
+        "value": "enter:parent/child"
+      }
+    ],
+    "entry_sibling": [
+      {
+        "op": "trace",
+        "value": "enter:parent/sibling"
+      }
+    ],
+    "effect_abs": [
+      {
+        "op": "trace",
+        "value": "target:absolute"
+      }
+    ],
+    "effect_model": [
+      {
+        "op": "trace",
+        "value": "target:model-relative"
+      }
+    ],
+    "effect_nested": [
+      {
+        "op": "trace",
+        "value": "target:nested"
+      }
+    ],
+    "effect_sibling": [
+      {
+        "op": "trace",
+        "value": "target:relative-sibling"
+      }
+    ],
+    "effect_parent": [
+      {
+        "op": "trace",
+        "value": "target:relative-parent"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "abs"
+    },
+    {
+      "op": "dispatch",
+      "event": "model"
+    },
+    {
+      "op": "dispatch",
+      "event": "nested"
+    },
+    {
+      "op": "dispatch",
+      "event": "sibling"
+    },
+    {
+      "op": "dispatch",
+      "event": "parent"
+    }
+  ],
+  "expect": {
+    "state": "/Paths/b",
+    "trace": [
+      {
+        "type": "trace",
+        "value": "enter:a"
+      },
+      {
+        "type": "dispatch",
+        "event": "abs"
+      },
+      {
+        "type": "trace",
+        "value": "target:absolute"
+      },
+      {
+        "type": "trace",
+        "value": "enter:b"
+      },
+      {
+        "type": "dispatch",
+        "event": "model"
+      },
+      {
+        "type": "trace",
+        "value": "target:model-relative"
+      },
+      {
+        "type": "trace",
+        "value": "enter:a"
+      },
+      {
+        "type": "dispatch",
+        "event": "nested"
+      },
+      {
+        "type": "trace",
+        "value": "target:nested"
+      },
+      {
+        "type": "trace",
+        "value": "enter:parent/child"
+      },
+      {
+        "type": "dispatch",
+        "event": "sibling"
+      },
+      {
+        "type": "trace",
+        "value": "target:relative-sibling"
+      },
+      {
+        "type": "trace",
+        "value": "enter:parent/sibling"
+      },
+      {
+        "type": "dispatch",
+        "event": "parent"
+      },
+      {
+        "type": "trace",
+        "value": "target:relative-parent"
+      },
+      {
+        "type": "trace",
+        "value": "enter:b"
+      },
+      {
+        "type": "stable",
+        "state": "/Paths/b"
+      }
+    ]
+  }
+}

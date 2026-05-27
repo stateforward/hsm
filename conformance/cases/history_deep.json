@@ -1,0 +1,150 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "history_deep",
+  "features": [
+    "deep_history",
+    "history",
+    "nested"
+  ],
+  "model": {
+    "name": "HistoryDeep",
+    "initial": "outside",
+    "states": [
+      {
+        "name": "outside",
+        "transitions": [
+          {
+            "on": "enter",
+            "target": "comp/h",
+            "effects": [
+              {
+                "behavior": "effect_enter_history"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "comp",
+        "initial": "a",
+        "states": [
+          {
+            "name": "a",
+            "transitions": [
+              {
+                "on": "to_b",
+                "target": "../b/deep"
+              }
+            ]
+          },
+          {
+            "name": "b",
+            "initial": "deep",
+            "states": [
+              {
+                "name": "deep",
+                "entry": [
+                  {
+                    "behavior": "entry_deep"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "name": "h",
+            "kind": "deep_history",
+            "transitions": [
+              {
+                "target": "a"
+              }
+            ]
+          }
+        ],
+        "transitions": [
+          {
+            "source": "comp/b/deep",
+            "on": "leave",
+            "target": "outside"
+          }
+        ]
+      }
+    ]
+  },
+  "behaviors": {
+    "effect_enter_history": [
+      {
+        "op": "trace",
+        "value": "effect:history"
+      }
+    ],
+    "entry_deep": [
+      {
+        "op": "trace",
+        "value": "enter:deep"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "enter"
+    },
+    {
+      "op": "dispatch",
+      "event": "to_b"
+    },
+    {
+      "op": "dispatch",
+      "event": "leave"
+    },
+    {
+      "op": "dispatch",
+      "event": "enter"
+    }
+  ],
+  "expect": {
+    "state": "/HistoryDeep/comp/b/deep",
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "enter"
+      },
+      {
+        "type": "trace",
+        "value": "effect:history"
+      },
+      {
+        "type": "dispatch",
+        "event": "to_b"
+      },
+      {
+        "type": "trace",
+        "value": "enter:deep"
+      },
+      {
+        "type": "dispatch",
+        "event": "leave"
+      },
+      {
+        "type": "dispatch",
+        "event": "enter"
+      },
+      {
+        "type": "trace",
+        "value": "effect:history"
+      },
+      {
+        "type": "trace",
+        "value": "enter:deep"
+      },
+      {
+        "type": "stable",
+        "state": "/HistoryDeep/comp/b/deep"
+      }
+    ]
+  }
+}

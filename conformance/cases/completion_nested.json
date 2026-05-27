@@ -1,0 +1,99 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "completion_nested",
+  "features": [
+    "completion",
+    "final",
+    "nested"
+  ],
+  "model": {
+    "name": "CompletionNested",
+    "initial": "parent",
+    "states": [
+      {
+        "name": "parent",
+        "initial": "work",
+        "states": [
+          {
+            "name": "work",
+            "transitions": [
+              {
+                "on": "finish",
+                "target": "../done"
+              }
+            ]
+          },
+          {
+            "name": "done",
+            "kind": "final"
+          }
+        ],
+        "transitions": [
+          {
+            "trigger": {
+              "kind": "completion"
+            },
+            "target": "complete",
+            "effects": [
+              {
+                "behavior": "effect_parent_complete"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "complete",
+        "entry": [
+          {
+            "behavior": "entry_complete"
+          }
+        ]
+      }
+    ]
+  },
+  "behaviors": {
+    "effect_parent_complete": [
+      {
+        "op": "trace",
+        "value": "effect:parent-complete"
+      }
+    ],
+    "entry_complete": [
+      {
+        "op": "trace",
+        "value": "enter:complete"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "finish"
+    }
+  ],
+  "expect": {
+    "state": "/CompletionNested/complete",
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "finish"
+      },
+      {
+        "type": "trace",
+        "value": "effect:parent-complete"
+      },
+      {
+        "type": "trace",
+        "value": "enter:complete"
+      },
+      {
+        "type": "stable",
+        "state": "/CompletionNested/complete"
+      }
+    ]
+  }
+}

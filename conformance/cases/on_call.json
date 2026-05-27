@@ -1,0 +1,98 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "on_call",
+  "features": [
+    "operation",
+    "on_call"
+  ],
+  "model": {
+    "name": "OnCallCase",
+    "initial": "idle",
+    "operations": {
+      "approve": {
+        "behavior": "operation_approve"
+      }
+    },
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "trigger": {
+              "kind": "on_call",
+              "operation": "approve"
+            },
+            "target": "approved",
+            "effects": [
+              {
+                "behavior": "effect_approved"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "approved",
+        "entry": [
+          {
+            "behavior": "entry_approved"
+          }
+        ]
+      }
+    ]
+  },
+  "behaviors": {
+    "operation_approve": [
+      {
+        "op": "trace",
+        "value": "operation:approve"
+      }
+    ],
+    "effect_approved": [
+      {
+        "op": "trace",
+        "value": "effect:approved"
+      }
+    ],
+    "entry_approved": [
+      {
+        "op": "trace",
+        "value": "enter:approved"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "call",
+      "operation": "approve"
+    }
+  ],
+  "expect": {
+    "state": "/OnCallCase/approved",
+    "trace": [
+      {
+        "type": "call",
+        "operation": "approve"
+      },
+      {
+        "type": "trace",
+        "value": "effect:approved"
+      },
+      {
+        "type": "trace",
+        "value": "enter:approved"
+      },
+      {
+        "type": "trace",
+        "value": "operation:approve"
+      },
+      {
+        "type": "stable",
+        "state": "/OnCallCase/approved"
+      }
+    ]
+  }
+}

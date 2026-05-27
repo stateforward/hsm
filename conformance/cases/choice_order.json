@@ -1,0 +1,136 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "choice_order",
+  "features": [
+    "choice",
+    "guard",
+    "selection_order"
+  ],
+  "model": {
+    "name": "ChoiceOrder",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "on": "decide",
+            "target": "choice",
+            "effects": [
+              {
+                "behavior": "effect_to_choice"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "choice",
+        "kind": "choice",
+        "transitions": [
+          {
+            "guard": {
+              "behavior": "choice_a"
+            },
+            "target": "a"
+          },
+          {
+            "guard": {
+              "behavior": "choice_b"
+            },
+            "target": "b"
+          },
+          {
+            "target": "fallback"
+          }
+        ]
+      },
+      {
+        "name": "a"
+      },
+      {
+        "name": "b",
+        "entry": [
+          {
+            "behavior": "entry_b"
+          }
+        ]
+      },
+      {
+        "name": "fallback"
+      }
+    ]
+  },
+  "behaviors": {
+    "effect_to_choice": [
+      {
+        "op": "trace",
+        "value": "effect:to-choice"
+      }
+    ],
+    "choice_a": [
+      {
+        "op": "trace",
+        "value": "guard:a"
+      },
+      {
+        "op": "return_value",
+        "value": false
+      }
+    ],
+    "choice_b": [
+      {
+        "op": "trace",
+        "value": "guard:b"
+      },
+      {
+        "op": "return_value",
+        "value": true
+      }
+    ],
+    "entry_b": [
+      {
+        "op": "trace",
+        "value": "enter:b"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "decide"
+    }
+  ],
+  "expect": {
+    "state": "/ChoiceOrder/b",
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "decide"
+      },
+      {
+        "type": "trace",
+        "value": "effect:to-choice"
+      },
+      {
+        "type": "trace",
+        "value": "guard:a"
+      },
+      {
+        "type": "trace",
+        "value": "guard:b"
+      },
+      {
+        "type": "trace",
+        "value": "enter:b"
+      },
+      {
+        "type": "stable",
+        "state": "/ChoiceOrder/b"
+      }
+    ]
+  }
+}

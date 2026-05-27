@@ -1,0 +1,107 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "operation_reference",
+  "features": [
+    "operation"
+  ],
+  "model": {
+    "name": "OperationReference",
+    "initial": "idle",
+    "operations": {
+      "record": {
+        "behavior": "operation_record"
+      }
+    },
+    "states": [
+      {
+        "name": "idle",
+        "entry": [
+          {
+            "behavior": "entry_call_record"
+          }
+        ],
+        "transitions": [
+          {
+            "on": "go",
+            "guard": {
+              "behavior": "guard_call_record"
+            },
+            "target": "done",
+            "effects": [
+              {
+                "behavior": "effect_call_record"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "done"
+      }
+    ]
+  },
+  "behaviors": {
+    "operation_record": [
+      {
+        "op": "trace",
+        "value": "operation:record"
+      }
+    ],
+    "entry_call_record": [
+      {
+        "op": "call",
+        "name": "record"
+      }
+    ],
+    "guard_call_record": [
+      {
+        "op": "call",
+        "name": "record"
+      },
+      {
+        "op": "return_value",
+        "value": true
+      }
+    ],
+    "effect_call_record": [
+      {
+        "op": "call",
+        "name": "record"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "go"
+    }
+  ],
+  "expect": {
+    "state": "/OperationReference/done",
+    "trace": [
+      {
+        "type": "trace",
+        "value": "operation:record"
+      },
+      {
+        "type": "dispatch",
+        "event": "go"
+      },
+      {
+        "type": "trace",
+        "value": "operation:record"
+      },
+      {
+        "type": "trace",
+        "value": "operation:record"
+      },
+      {
+        "type": "stable",
+        "state": "/OperationReference/done"
+      }
+    ]
+  }
+}

@@ -1,0 +1,106 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "event_payload_guard",
+  "features": [
+    "event_data",
+    "guard"
+  ],
+  "model": {
+    "name": "PayloadGuard",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "trigger": {
+              "kind": "on",
+              "event": "submit"
+            },
+            "guard": {
+              "behavior": "payload_ok"
+            },
+            "target": "accepted",
+            "effects": [
+              {
+                "behavior": "effect_accept"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "accepted",
+        "entry": [
+          {
+            "behavior": "entry_accepted"
+          }
+        ]
+      }
+    ]
+  },
+  "behaviors": {
+    "payload_ok": [
+      {
+        "op": "trace",
+        "value": "guard:payload"
+      },
+      {
+        "op": "event_data_equals",
+        "path": "kind",
+        "value": "ok"
+      }
+    ],
+    "effect_accept": [
+      {
+        "op": "trace",
+        "value": "effect:accept"
+      }
+    ],
+    "entry_accepted": [
+      {
+        "op": "trace",
+        "value": "enter:accepted"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": {
+        "name": "submit",
+        "data": {
+          "kind": "ok"
+        }
+      }
+    }
+  ],
+  "expect": {
+    "state": "/PayloadGuard/accepted",
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "submit"
+      },
+      {
+        "type": "trace",
+        "value": "guard:payload"
+      },
+      {
+        "type": "trace",
+        "value": "effect:accept"
+      },
+      {
+        "type": "trace",
+        "value": "enter:accepted"
+      },
+      {
+        "type": "stable",
+        "state": "/PayloadGuard/accepted"
+      }
+    ]
+  }
+}

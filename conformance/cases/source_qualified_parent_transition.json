@@ -1,0 +1,103 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "source_qualified_parent_transition",
+  "features": [
+    "core",
+    "source",
+    "nested"
+  ],
+  "model": {
+    "name": "ParentSource",
+    "initial": "parent",
+    "states": [
+      {
+        "name": "parent",
+        "initial": "a",
+        "transitions": [
+          {
+            "source": "parent/a",
+            "on": "go",
+            "target": "parent/b",
+            "effects": [
+              {
+                "behavior": "effect_parent"
+              }
+            ]
+          }
+        ],
+        "states": [
+          {
+            "name": "a",
+            "entry": [
+              {
+                "behavior": "entry_a"
+              }
+            ]
+          },
+          {
+            "name": "b",
+            "entry": [
+              {
+                "behavior": "entry_b"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "behaviors": {
+    "entry_a": [
+      {
+        "op": "trace",
+        "value": "enter:a"
+      }
+    ],
+    "effect_parent": [
+      {
+        "op": "trace",
+        "value": "effect:parent-source"
+      }
+    ],
+    "entry_b": [
+      {
+        "op": "trace",
+        "value": "enter:b"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "go"
+    }
+  ],
+  "expect": {
+    "state": "/ParentSource/parent/b",
+    "trace": [
+      {
+        "type": "trace",
+        "value": "enter:a"
+      },
+      {
+        "type": "dispatch",
+        "event": "go"
+      },
+      {
+        "type": "trace",
+        "value": "effect:parent-source"
+      },
+      {
+        "type": "trace",
+        "value": "enter:b"
+      },
+      {
+        "type": "stable",
+        "state": "/ParentSource/parent/b"
+      }
+    ]
+  }
+}

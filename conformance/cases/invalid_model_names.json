@@ -1,0 +1,32 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_model_names",
+  "mode": "validation",
+  "features": [
+    "validation"
+  ],
+  "model": {
+    "name": "Bad/Model",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle"
+      }
+    ]
+  },
+  "behaviors": {
+    "guard_true": [
+      {
+        "op": "return_value",
+        "value": true
+      }
+    ]
+  },
+  "expect": {
+    "validation": [
+      {
+        "code": "invalid_name"
+      }
+    ]
+  }
+}

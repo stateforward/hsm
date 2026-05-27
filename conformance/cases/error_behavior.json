@@ -1,0 +1,86 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "error_behavior",
+  "features": [
+    "error"
+  ],
+  "model": {
+    "name": "ErrorBehavior",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "on": "fail",
+            "effects": [
+              {
+                "behavior": "throw_error"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "error",
+        "entry": [
+          {
+            "behavior": "entry_error"
+          }
+        ]
+      }
+    ]
+  },
+  "behaviors": {
+    "throw_error": [
+      {
+        "op": "trace",
+        "value": "throw:error"
+      },
+      {
+        "op": "raise",
+        "code": "behavior_error",
+        "value": "boom"
+      }
+    ],
+    "entry_error": [
+      {
+        "op": "trace",
+        "value": "enter:error"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "fail"
+    }
+  ],
+  "expect": {
+    "error": {
+      "code": "behavior_error",
+      "message_contains": "boom"
+    },
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "fail"
+      },
+      {
+        "type": "trace",
+        "value": "throw:error"
+      },
+      {
+        "type": "error",
+        "code": "behavior_error"
+      },
+      {
+        "type": "stable",
+        "state": "/ErrorBehavior/idle"
+      }
+    ]
+  }
+}

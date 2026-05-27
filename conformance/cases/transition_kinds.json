@@ -1,0 +1,249 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "transition_kinds",
+  "features": [
+    "transition_kind",
+    "external",
+    "internal",
+    "local",
+    "self"
+  ],
+  "model": {
+    "name": "Kinds",
+    "initial": "outer",
+    "states": [
+      {
+        "name": "outer",
+        "initial": "leaf",
+        "entry": [
+          {
+            "behavior": "entry_outer"
+          }
+        ],
+        "exit": [
+          {
+            "behavior": "exit_outer"
+          }
+        ],
+        "states": [
+          {
+            "name": "leaf",
+            "entry": [
+              {
+                "behavior": "entry_leaf"
+              }
+            ],
+            "exit": [
+              {
+                "behavior": "exit_leaf"
+              }
+            ],
+            "transitions": [
+              {
+                "on": "internal",
+                "kind": "internal",
+                "effects": [
+                  {
+                    "behavior": "effect_internal"
+                  }
+                ]
+              },
+              {
+                "on": "self",
+                "kind": "self",
+                "target": "outer/leaf",
+                "effects": [
+                  {
+                    "behavior": "effect_self"
+                  }
+                ]
+              },
+              {
+                "on": "local",
+                "kind": "local",
+                "target": "outer/leaf",
+                "effects": [
+                  {
+                    "behavior": "effect_local"
+                  }
+                ]
+              },
+              {
+                "on": "external",
+                "kind": "external",
+                "target": "done",
+                "effects": [
+                  {
+                    "behavior": "effect_external"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "done",
+        "entry": [
+          {
+            "behavior": "entry_done"
+          }
+        ]
+      }
+    ]
+  },
+  "behaviors": {
+    "entry_outer": [
+      {
+        "op": "trace",
+        "value": "enter:outer"
+      }
+    ],
+    "exit_outer": [
+      {
+        "op": "trace",
+        "value": "exit:outer"
+      }
+    ],
+    "entry_leaf": [
+      {
+        "op": "trace",
+        "value": "enter:leaf"
+      }
+    ],
+    "exit_leaf": [
+      {
+        "op": "trace",
+        "value": "exit:leaf"
+      }
+    ],
+    "effect_internal": [
+      {
+        "op": "trace",
+        "value": "effect:internal"
+      }
+    ],
+    "effect_self": [
+      {
+        "op": "trace",
+        "value": "effect:self"
+      }
+    ],
+    "effect_local": [
+      {
+        "op": "trace",
+        "value": "effect:local"
+      }
+    ],
+    "effect_external": [
+      {
+        "op": "trace",
+        "value": "effect:external"
+      }
+    ],
+    "entry_done": [
+      {
+        "op": "trace",
+        "value": "enter:done"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "internal"
+    },
+    {
+      "op": "dispatch",
+      "event": "self"
+    },
+    {
+      "op": "dispatch",
+      "event": "local"
+    },
+    {
+      "op": "dispatch",
+      "event": "external"
+    }
+  ],
+  "expect": {
+    "state": "/Kinds/done",
+    "trace": [
+      {
+        "type": "trace",
+        "value": "enter:outer"
+      },
+      {
+        "type": "trace",
+        "value": "enter:leaf"
+      },
+      {
+        "type": "dispatch",
+        "event": "internal"
+      },
+      {
+        "type": "trace",
+        "value": "effect:internal"
+      },
+      {
+        "type": "dispatch",
+        "event": "self"
+      },
+      {
+        "type": "trace",
+        "value": "exit:leaf"
+      },
+      {
+        "type": "trace",
+        "value": "effect:self"
+      },
+      {
+        "type": "trace",
+        "value": "enter:leaf"
+      },
+      {
+        "type": "dispatch",
+        "event": "local"
+      },
+      {
+        "type": "trace",
+        "value": "exit:leaf"
+      },
+      {
+        "type": "trace",
+        "value": "effect:local"
+      },
+      {
+        "type": "trace",
+        "value": "enter:leaf"
+      },
+      {
+        "type": "dispatch",
+        "event": "external"
+      },
+      {
+        "type": "trace",
+        "value": "exit:leaf"
+      },
+      {
+        "type": "trace",
+        "value": "exit:outer"
+      },
+      {
+        "type": "trace",
+        "value": "effect:external"
+      },
+      {
+        "type": "trace",
+        "value": "enter:done"
+      },
+      {
+        "type": "stable",
+        "state": "/Kinds/done"
+      }
+    ]
+  }
+}

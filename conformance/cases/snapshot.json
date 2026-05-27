@@ -1,0 +1,53 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "snapshot",
+  "features": [
+    "snapshot",
+    "attribute"
+  ],
+  "model": {
+    "name": "SnapshotCase",
+    "initial": "idle",
+    "attributes": {
+      "count": {
+        "type": "number",
+        "default": 1
+      }
+    },
+    "states": [
+      {
+        "name": "idle"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "snapshot"
+    }
+  ],
+  "expect": {
+    "state": "/SnapshotCase/idle",
+    "snapshots": {
+      "last": {
+        "state": "/SnapshotCase/idle",
+        "attributes": {
+          "count": 1
+        },
+        "queue_len": 0
+      }
+    },
+    "trace": [
+      {
+        "type": "snapshot",
+        "state": "/SnapshotCase/idle"
+      },
+      {
+        "type": "stable",
+        "state": "/SnapshotCase/idle"
+      }
+    ]
+  }
+}

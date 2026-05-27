@@ -1,0 +1,39 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_final",
+  "mode": "validation",
+  "features": [
+    "validation"
+  ],
+  "model": {
+    "name": "InvalidFinal",
+    "initial": "done",
+    "states": [
+      {
+        "name": "done",
+        "kind": "final",
+        "transitions": [
+          {
+            "on": "go",
+            "target": "done"
+          }
+        ]
+      }
+    ]
+  },
+  "behaviors": {
+    "guard_true": [
+      {
+        "op": "return_value",
+        "value": true
+      }
+    ]
+  },
+  "expect": {
+    "validation": [
+      {
+        "code": "invalid_final_transition"
+      }
+    ]
+  }
+}

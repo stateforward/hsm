@@ -1,0 +1,114 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "defer_replay",
+  "features": [
+    "defer",
+    "queue"
+  ],
+  "model": {
+    "name": "DeferReplay",
+    "initial": "blocked",
+    "states": [
+      {
+        "name": "blocked",
+        "defer": [
+          "work"
+        ],
+        "transitions": [
+          {
+            "on": "release",
+            "target": "ready"
+          }
+        ]
+      },
+      {
+        "name": "ready",
+        "transitions": [
+          {
+            "on": "work",
+            "target": "done",
+            "effects": [
+              {
+                "behavior": "effect_work"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "done",
+        "entry": [
+          {
+            "behavior": "entry_done"
+          }
+        ]
+      }
+    ]
+  },
+  "behaviors": {
+    "effect_work": [
+      {
+        "op": "trace",
+        "value": "effect:work"
+      }
+    ],
+    "entry_done": [
+      {
+        "op": "trace",
+        "value": "enter:done"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "work"
+    },
+    {
+      "op": "dispatch",
+      "event": "release"
+    }
+  ],
+  "expect": {
+    "state": "/DeferReplay/done",
+    "queue": {
+      "deferred": [
+        "work"
+      ],
+      "replay": "fifo"
+    },
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "work"
+      },
+      {
+        "type": "defer",
+        "event": "work"
+      },
+      {
+        "type": "dispatch",
+        "event": "release"
+      },
+      {
+        "type": "undefer",
+        "event": "work"
+      },
+      {
+        "type": "trace",
+        "value": "effect:work"
+      },
+      {
+        "type": "trace",
+        "value": "enter:done"
+      },
+      {
+        "type": "stable",
+        "state": "/DeferReplay/done"
+      }
+    ]
+  }
+}

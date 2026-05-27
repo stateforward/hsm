@@ -1,0 +1,107 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "event_ownership",
+  "features": [
+    "event_ownership",
+    "group",
+    "broadcast"
+  ],
+  "model": {
+    "name": "EventOwnership",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "on": "mutate",
+            "target": "done",
+            "effects": [
+              {
+                "behavior": "mutate_event"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "done"
+      }
+    ]
+  },
+  "instances": [
+    {
+      "id": "first"
+    },
+    {
+      "id": "second"
+    }
+  ],
+  "groups": [
+    {
+      "id": "both",
+      "members": [
+        "first",
+        "second"
+      ]
+    }
+  ],
+  "behaviors": {
+    "mutate_event": [
+      {
+        "op": "event_metadata_set",
+        "name": "owner",
+        "value": "changed"
+      },
+      {
+        "op": "trace",
+        "value": "event:mutated"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start",
+      "instance": "first"
+    },
+    {
+      "op": "start",
+      "instance": "second"
+    },
+    {
+      "op": "group_dispatch",
+      "group": "both",
+      "event": {
+        "name": "mutate",
+        "metadata": {
+          "owner": "caller"
+        }
+      }
+    }
+  ],
+  "expect": {
+    "states": {
+      "first": "/EventOwnership/done",
+      "second": "/EventOwnership/done"
+    },
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "mutate",
+        "target": "both"
+      },
+      {
+        "type": "trace",
+        "value": "event:mutated"
+      },
+      {
+        "type": "trace",
+        "value": "event:mutated"
+      },
+      {
+        "type": "stable",
+        "state": "group:both"
+      }
+    ]
+  }
+}

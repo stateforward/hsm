@@ -1,0 +1,94 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "on_set",
+  "features": [
+    "attribute",
+    "on_set"
+  ],
+  "model": {
+    "name": "OnSetCase",
+    "initial": "idle",
+    "attributes": {
+      "flag": {
+        "type": "boolean",
+        "default": false
+      }
+    },
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "trigger": {
+              "kind": "on_set",
+              "attribute": "flag"
+            },
+            "target": "changed",
+            "effects": [
+              {
+                "behavior": "effect_changed"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "changed",
+        "entry": [
+          {
+            "behavior": "entry_changed"
+          }
+        ]
+      }
+    ]
+  },
+  "behaviors": {
+    "effect_changed": [
+      {
+        "op": "trace",
+        "value": "effect:on-set"
+      }
+    ],
+    "entry_changed": [
+      {
+        "op": "trace",
+        "value": "enter:changed"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "set",
+      "attribute": "flag",
+      "value": true
+    }
+  ],
+  "expect": {
+    "state": "/OnSetCase/changed",
+    "attributes": {
+      "flag": true
+    },
+    "trace": [
+      {
+        "type": "set",
+        "attribute": "flag",
+        "value": true
+      },
+      {
+        "type": "trace",
+        "value": "effect:on-set"
+      },
+      {
+        "type": "trace",
+        "value": "enter:changed"
+      },
+      {
+        "type": "stable",
+        "state": "/OnSetCase/changed"
+      }
+    ]
+  }
+}

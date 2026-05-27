@@ -1,0 +1,85 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "timer_cancel_on_exit",
+  "features": [
+    "timer",
+    "cancellation"
+  ],
+  "model": {
+    "name": "TimerCancel",
+    "initial": "waiting",
+    "states": [
+      {
+        "name": "waiting",
+        "transitions": [
+          {
+            "trigger": {
+              "kind": "after",
+              "duration_ms": 100
+            },
+            "target": "timeout"
+          },
+          {
+            "on": "leave",
+            "target": "done"
+          }
+        ]
+      },
+      {
+        "name": "timeout"
+      },
+      {
+        "name": "done",
+        "entry": [
+          {
+            "behavior": "entry_done"
+          }
+        ]
+      }
+    ]
+  },
+  "behaviors": {
+    "entry_done": [
+      {
+        "op": "trace",
+        "value": "enter:done"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "leave"
+    },
+    {
+      "op": "tick",
+      "millis": 200
+    }
+  ],
+  "expect": {
+    "state": "/TimerCancel/done",
+    "trace": [
+      {
+        "type": "timer_scheduled"
+      },
+      {
+        "type": "dispatch",
+        "event": "leave"
+      },
+      {
+        "type": "timer_cancelled"
+      },
+      {
+        "type": "trace",
+        "value": "enter:done"
+      },
+      {
+        "type": "stable",
+        "state": "/TimerCancel/done"
+      }
+    ]
+  }
+}

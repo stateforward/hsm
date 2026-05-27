@@ -1,0 +1,88 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "nested_initial",
+  "features": [
+    "core",
+    "nested",
+    "initial",
+    "entry"
+  ],
+  "model": {
+    "name": "NestedInitial",
+    "initial": "parent",
+    "states": [
+      {
+        "name": "parent",
+        "initial": {
+          "target": "child",
+          "effects": [
+            {
+              "behavior": "initial_parent"
+            }
+          ]
+        },
+        "entry": [
+          {
+            "behavior": "entry_parent"
+          }
+        ],
+        "states": [
+          {
+            "name": "child",
+            "entry": [
+              {
+                "behavior": "entry_child"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "behaviors": {
+    "initial_parent": [
+      {
+        "op": "trace",
+        "value": "initial:/NestedInitial/parent"
+      }
+    ],
+    "entry_parent": [
+      {
+        "op": "trace",
+        "value": "enter:/NestedInitial/parent"
+      }
+    ],
+    "entry_child": [
+      {
+        "op": "trace",
+        "value": "enter:/NestedInitial/parent/child"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    }
+  ],
+  "expect": {
+    "state": "/NestedInitial/parent/child",
+    "trace": [
+      {
+        "type": "trace",
+        "value": "enter:/NestedInitial/parent"
+      },
+      {
+        "type": "trace",
+        "value": "initial:/NestedInitial/parent"
+      },
+      {
+        "type": "trace",
+        "value": "enter:/NestedInitial/parent/child"
+      },
+      {
+        "type": "stable",
+        "state": "/NestedInitial/parent/child"
+      }
+    ]
+  }
+}

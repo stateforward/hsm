@@ -31,3 +31,6 @@
 [submodule "hsm.ts"]
 	path = hsm.ts
 	url = git@github.com:stateforward/hsm.ts.git
+[submodule "hsm.ex"]
+	path = hsm.ex
+	url = git@github.com:stateforward/hsm.ex.git

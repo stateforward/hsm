@@ -11,6 +11,7 @@ Every implementation shares the same compile-time DSL, the same semantics, and t
 | C++ | [hsm.cpp](hsm.cpp/) | Active |
 | C# | [hsm.cs](hsm.cs/) | Active |
 | Dart | [hsm.dart](hsm.dart/) | Active |
+| Elixir | [hsm.ex](hsm.ex/) | Initial |
 | Go | [hsm.go](hsm.go/) | Active |
 | Java | [hsm.java](hsm.java/) | Active |
 | JavaScript | [hsm.js](hsm.js/) | Active |
@@ -81,6 +82,7 @@ hsm/
 ├── hsm.cpp/         # C++ implementation
 ├── hsm.cs/          # C# implementation
 ├── hsm.dart/        # Dart implementation
+├── hsm.ex/          # Elixir implementation
 ├── hsm.go/          # Go implementation
 ├── hsm.java/        # Java implementation
 ├── hsm.js/          # JavaScript implementation

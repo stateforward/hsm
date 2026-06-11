@@ -215,7 +215,7 @@
     "trace": [
       {
         "type": "snapshot",
-        "state": "/SubmodelTimerBehaviorSourceAllOpsReentrancy/drive/ChildSubmodelTimerBehaviorSourceAllOpsReentrancy/idle"
+        "state": "/SubmodelTimerBehaviorSourceAllOpsReentrancy"
       },
       {
         "type": "dispatch",

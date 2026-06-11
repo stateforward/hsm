@@ -157,7 +157,7 @@
     "trace": [
       {
         "type": "snapshot",
-        "state": "/SubmodelOperationBodyAllOpsReentrancy/drive/ChildOperationBodyAllOpsReentrancy/idle"
+        "state": "/SubmodelOperationBodyAllOpsReentrancy"
       },
       {
         "type": "dispatch",

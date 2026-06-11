@@ -1,0 +1,18 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_behavior_event_data_equals_missing_path",
+  "mode": "validation",
+  "description": "event_data_equals behavior ops must declare the payload path to compare.",
+  "features": ["validation"],
+  "model": {
+    "name": "InvalidBehaviorEventDataEqualsMissingPath",
+    "initial": "idle",
+    "states": [{"name": "idle"}]
+  },
+  "behaviors": {
+    "bad": [{"op": "event_data_equals", "value": true}]
+  },
+  "expect": {
+    "validation": [{"code": "invalid_behavior_op_operand"}]
+  }
+}

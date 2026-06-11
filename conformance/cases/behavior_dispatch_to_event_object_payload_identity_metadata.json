@@ -1,0 +1,96 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "behavior_dispatch_to_event_object_payload_identity_metadata",
+  "description": "A behavior dispatch op targeting one instance preserves event-object payload, metadata, and reserved identity fields without replacing declared source or target with route metadata.",
+  "features": ["dispatch_to", "event_data", "event_ownership", "queue", "reentrancy", "guard"],
+  "model": {
+    "name": "BehaviorDispatchToEventObjectProducer",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {"on": "go", "target": "sent", "effects": [{"behavior": "dispatch_peer"}]},
+          {"on": "audit", "target": "self_leaked", "effects": [{"behavior": "effect_self_leaked"}]}
+        ]
+      },
+      {"name": "sent", "entry": [{"behavior": "entry_sent"}]},
+      {"name": "self_leaked"}
+    ]
+  },
+  "models": [
+    {
+      "name": "BehaviorDispatchToEventObjectPeer",
+      "initial": "peer_idle",
+      "states": [
+        {
+          "name": "peer_idle",
+          "transitions": [
+            {
+              "on": "audit",
+              "guard": {"behavior": "event_object_ok"},
+              "target": "peer_done",
+              "effects": [{"behavior": "effect_peer"}]
+            },
+            {"on": "audit", "target": "peer_bad", "effects": [{"behavior": "effect_bad"}]}
+          ]
+        },
+        {"name": "peer_done", "entry": [{"behavior": "entry_peer_done"}]},
+        {"name": "peer_bad"}
+      ]
+    }
+  ],
+  "instances": [
+    {"id": "producer"},
+    {"id": "peer", "model": "BehaviorDispatchToEventObjectPeer"}
+  ],
+  "behaviors": {
+    "dispatch_peer": [
+      {
+        "op": "dispatch",
+        "target": "peer",
+        "event": {
+          "name": "audit",
+          "data": {"nested": {"ok": true}},
+          "id": "evt-1",
+          "source": "declared-source",
+          "target": "declared-target",
+          "metadata": {"owner": "behavior"}
+        }
+      },
+      {"op": "trace", "value": "effect:dispatch-peer"}
+    ],
+    "event_object_ok": [
+      {"op": "event_data_equals", "path": "nested.ok", "value": true},
+      {"op": "event_metadata_equals", "name": "owner", "value": "behavior"},
+      {"op": "event_metadata_equals", "name": "id", "value": "evt-1"},
+      {"op": "event_metadata_equals", "name": "source", "value": "declared-source"},
+      {"op": "event_metadata_equals", "name": "target", "value": "declared-target"}
+    ],
+    "entry_sent": [{"op": "trace", "value": "entry:sent"}],
+    "effect_peer": [{"op": "trace", "value": "effect:peer"}],
+    "entry_peer_done": [{"op": "trace", "value": "entry:peer-done"}],
+    "effect_bad": [{"op": "trace", "value": "effect:bad"}],
+    "effect_self_leaked": [{"op": "trace", "value": "effect:self-leaked"}]
+  },
+  "script": [
+    {"op": "start", "instance": "producer"},
+    {"op": "start", "instance": "peer"},
+    {"op": "dispatch_to", "target": "producer", "event": "go"}
+  ],
+  "expect": {
+    "states": {
+      "producer": "/BehaviorDispatchToEventObjectProducer/sent",
+      "peer": "/BehaviorDispatchToEventObjectPeer/peer_done"
+    },
+    "trace": [
+      {"type": "dispatch", "event": "go", "target": "producer"},
+      {"type": "dispatch", "event": "audit", "target": "peer"},
+      {"type": "trace", "value": "effect:peer"},
+      {"type": "trace", "value": "entry:peer-done"},
+      {"type": "trace", "value": "effect:dispatch-peer"},
+      {"type": "trace", "value": "entry:sent"},
+      {"type": "stable", "state": "producer"}
+    ]
+  }
+}

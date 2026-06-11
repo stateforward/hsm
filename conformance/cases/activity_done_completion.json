@@ -1,0 +1,65 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "activity_done_completion",
+  "description": "A naturally completing activity emits activity_done and leaves the state active unless another transition fires.",
+  "features": ["activity", "async"],
+  "model": {
+    "name": "ActivityDoneCompletion",
+    "initial": "active",
+    "states": [
+      {
+        "name": "active",
+        "activity": [
+          {
+            "behavior": "activity_done"
+          }
+        ]
+      }
+    ]
+  },
+  "behaviors": {
+    "activity_done": [
+      {
+        "op": "trace",
+        "value": "activity:start"
+      },
+      {
+        "op": "yield"
+      },
+      {
+        "op": "trace",
+        "value": "activity:done"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "sleep",
+      "millis": 0
+    }
+  ],
+  "expect": {
+    "state": "/ActivityDoneCompletion/active",
+    "trace": [
+      {
+        "type": "trace",
+        "value": "activity:start"
+      },
+      {
+        "type": "trace",
+        "value": "activity:done"
+      },
+      {
+        "type": "activity_done",
+        "behavior": "activity_done"
+      },
+      {
+        "type": "stable",
+        "state": "/ActivityDoneCompletion/active"
+      }
+    ]
+  }
+}

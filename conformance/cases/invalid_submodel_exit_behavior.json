@@ -1,0 +1,41 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_submodel_exit_behavior",
+  "mode": "validation",
+  "description": "Exit behavior references inside child models must be validated recursively.",
+  "features": ["submachine", "validation"],
+  "model": {
+    "name": "InvalidSubmodelExitBehavior",
+    "initial": "drive",
+    "states": [
+      {
+        "name": "drive",
+        "kind": "submachine",
+        "machine": "ChildWithMissingExitBehavior"
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "ChildWithMissingExitBehavior",
+      "initial": "idle",
+      "states": [
+        {
+          "name": "idle",
+          "exit": [
+            {
+              "behavior": "missing_child_exit"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "expect": {
+    "validation": [
+      {
+        "code": "missing_behavior"
+      }
+    ]
+  }
+}

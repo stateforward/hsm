@@ -1,0 +1,51 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "lifecycle_set_while_stopped_error",
+  "description": "Setting an attribute after stop produces a normalized lifecycle error and does not mutate stopped state.",
+  "features": ["lifecycle", "stop", "attribute", "error"],
+  "model": {
+    "name": "LifecycleSetWhileStoppedError",
+    "initial": "idle",
+    "attributes": {
+      "flag": {
+        "type": "boolean",
+        "default": false
+      }
+    },
+    "states": [
+      {
+        "name": "idle"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "stop"
+    },
+    {
+      "op": "set",
+      "attribute": "flag",
+      "value": true
+    }
+  ],
+  "expect": {
+    "state": "/LifecycleSetWhileStoppedError",
+    "error": {
+      "code": "lifecycle_error",
+      "message_contains": "started"
+    },
+    "trace": [
+      {
+        "type": "error",
+        "code": "lifecycle_error"
+      },
+      {
+        "type": "stable",
+        "state": "/LifecycleSetWhileStoppedError"
+      }
+    ]
+  }
+}

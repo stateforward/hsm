@@ -1,0 +1,122 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "timer_simultaneous_order",
+  "description": "Multiple timers that mature in the same tick are selected deterministically in transition declaration order.",
+  "features": [
+    "timer",
+    "after",
+    "selection_order"
+  ],
+  "model": {
+    "name": "TimerSimultaneousOrder",
+    "initial": "waiting",
+    "states": [
+      {
+        "name": "waiting",
+        "transitions": [
+          {
+            "trigger": {
+              "kind": "after",
+              "duration_ms": 10
+            },
+            "target": "first",
+            "effects": [
+              {
+                "behavior": "effect_first"
+              }
+            ]
+          },
+          {
+            "trigger": {
+              "kind": "after",
+              "duration_ms": 10
+            },
+            "target": "second",
+            "effects": [
+              {
+                "behavior": "effect_second"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "first",
+        "entry": [
+          {
+            "behavior": "entry_first"
+          }
+        ]
+      },
+      {
+        "name": "second",
+        "entry": [
+          {
+            "behavior": "entry_second"
+          }
+        ]
+      }
+    ]
+  },
+  "behaviors": {
+    "effect_first": [
+      {
+        "op": "trace",
+        "value": "effect:first"
+      }
+    ],
+    "effect_second": [
+      {
+        "op": "trace",
+        "value": "effect:second"
+      }
+    ],
+    "entry_first": [
+      {
+        "op": "trace",
+        "value": "enter:first"
+      }
+    ],
+    "entry_second": [
+      {
+        "op": "trace",
+        "value": "enter:second"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "tick",
+      "millis": 100
+    }
+  ],
+  "expect": {
+    "state": "/TimerSimultaneousOrder/first",
+    "trace": [
+      {
+        "type": "timer_scheduled"
+      },
+      {
+        "type": "timer_scheduled"
+      },
+      {
+        "type": "timer_fired"
+      },
+      {
+        "type": "trace",
+        "value": "effect:first"
+      },
+      {
+        "type": "trace",
+        "value": "enter:first"
+      },
+      {
+        "type": "stable",
+        "state": "/TimerSimultaneousOrder/first"
+      }
+    ]
+  }
+}

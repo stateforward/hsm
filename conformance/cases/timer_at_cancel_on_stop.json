@@ -1,0 +1,30 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "timer_at_cancel_on_stop",
+  "description": "Stopping an instance cancels an active at timer so it cannot fire after a later tick while stopped.",
+  "features": ["timer", "at", "cancellation", "stop"],
+  "model": {
+    "name": "TimerAtStopCancel",
+    "initial": "waiting",
+    "states": [
+      {
+        "name": "waiting",
+        "transitions": [
+          {"trigger": {"kind": "at", "time_ms": 100}, "target": "timeout", "effects": [{"behavior": "effect_timeout"}]}
+        ]
+      },
+      {"name": "timeout"}
+    ]
+  },
+  "behaviors": {"effect_timeout": [{"op": "trace", "value": "effect:timeout"}]},
+  "script": [{"op": "start"}, {"op": "stop"}, {"op": "tick", "millis": 200}],
+  "expect": {
+    "state": "/TimerAtStopCancel",
+    "trace": [
+      {"type": "timer_scheduled"},
+      {"type": "stop"},
+      {"type": "timer_cancelled"},
+      {"type": "stable", "state": "/TimerAtStopCancel"}
+    ]
+  }
+}

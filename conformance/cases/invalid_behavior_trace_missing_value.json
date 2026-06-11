@@ -1,0 +1,18 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_behavior_trace_missing_value",
+  "mode": "validation",
+  "description": "trace behavior ops must declare the value to append.",
+  "features": ["validation"],
+  "model": {
+    "name": "InvalidBehaviorTraceMissingValue",
+    "initial": "idle",
+    "states": [{"name": "idle"}]
+  },
+  "behaviors": {
+    "bad": [{"op": "trace"}]
+  },
+  "expect": {
+    "validation": [{"code": "invalid_behavior_op_operand"}]
+  }
+}

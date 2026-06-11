@@ -1,0 +1,52 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_exit_point_missing_operand",
+  "mode": "validation",
+  "description": "An exit_point trigger must declare the child exit point outcome it handles.",
+  "features": ["submachine", "exit_point", "validation"],
+  "model": {
+    "name": "InvalidExitPointMissingOperand",
+    "initial": "drive",
+    "states": [
+      {
+        "name": "drive",
+        "kind": "submachine",
+        "machine": "ExitPointOperandChild",
+        "transitions": [
+          {
+            "trigger": {
+              "kind": "exit_point"
+            },
+            "target": "outside"
+          }
+        ]
+      },
+      {
+        "name": "outside"
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "ExitPointOperandChild",
+      "initial": "idle",
+      "exit_points": [
+        {
+          "name": "done"
+        }
+      ],
+      "states": [
+        {
+          "name": "idle"
+        }
+      ]
+    }
+  ],
+  "expect": {
+    "validation": [
+      {
+        "code": "missing_trigger_operand"
+      }
+    ]
+  }
+}

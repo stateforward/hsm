@@ -1,0 +1,38 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_submodel_missing_submachine_model",
+  "mode": "validation",
+  "description": "Submachine states inside child models must reference known child models.",
+  "features": ["submachine", "validation"],
+  "model": {
+    "name": "InvalidSubmodelMissingSubmachineModel",
+    "initial": "outer",
+    "states": [
+      {
+        "name": "outer",
+        "kind": "submachine",
+        "machine": "ChildWithMissingSubmachine"
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "ChildWithMissingSubmachine",
+      "initial": "inner",
+      "states": [
+        {
+          "name": "inner",
+          "kind": "submachine",
+          "machine": "DoesNotExist"
+        }
+      ]
+    }
+  ],
+  "expect": {
+    "validation": [
+      {
+        "code": "missing_submachine_model"
+      }
+    ]
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "source_qualified_relative_source_path",
+  "description": "Source-qualified transitions can use ./ relative source and target paths under their owner.",
+  "features": ["source", "path_resolution", "nested"],
+  "model": {
+    "name": "SourceQualifiedRelativeSourcePath",
+    "initial": "parent",
+    "states": [
+      {
+        "name": "parent",
+        "initial": "a",
+        "transitions": [
+          {
+            "source": "./a",
+            "on": "go",
+            "target": "./b",
+            "effects": [{"behavior": "effect_parent"}]
+          }
+        ],
+        "states": [
+          {"name": "a", "entry": [{"behavior": "entry_a"}]},
+          {"name": "b", "entry": [{"behavior": "entry_b"}]}
+        ]
+      }
+    ]
+  },
+  "behaviors": {
+    "entry_a": [{"op": "trace", "value": "entry:a"}],
+    "effect_parent": [{"op": "trace", "value": "effect:parent"}],
+    "entry_b": [{"op": "trace", "value": "entry:b"}]
+  },
+  "script": [{"op": "start"}, {"op": "dispatch", "event": "go"}],
+  "expect": {
+    "state": "/SourceQualifiedRelativeSourcePath/parent/b",
+    "trace": [
+      {"type": "trace", "value": "entry:a"},
+      {"type": "dispatch", "event": "go"},
+      {"type": "trace", "value": "effect:parent"},
+      {"type": "trace", "value": "entry:b"},
+      {"type": "stable", "state": "/SourceQualifiedRelativeSourcePath/parent/b"}
+    ]
+  }
+}

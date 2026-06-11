@@ -1,0 +1,39 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_deep_history_initial",
+  "mode": "validation",
+  "description": "Deep history pseudostates must not declare initial transitions.",
+  "features": ["history", "deep_history", "initial", "validation"],
+  "model": {
+    "name": "InvalidDeepHistoryInitial",
+    "initial": "parent",
+    "states": [
+      {
+        "name": "parent",
+        "initial": "h",
+        "states": [
+          {
+            "name": "h",
+            "kind": "deep_history",
+            "initial": "../idle",
+            "transitions": [
+              {
+                "target": "idle"
+              }
+            ]
+          },
+          {
+            "name": "idle"
+          }
+        ]
+      }
+    ]
+  },
+  "expect": {
+    "validation": [
+      {
+        "code": "already has an initial state"
+      }
+    ]
+  }
+}

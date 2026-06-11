@@ -1,0 +1,24 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_final_name_slash",
+  "mode": "validation",
+  "description": "Final state names must not contain path separators.",
+  "features": ["final", "validation"],
+  "model": {
+    "name": "InvalidFinalNameSlash",
+    "initial": "done/final",
+    "states": [
+      {
+        "name": "done/final",
+        "kind": "final"
+      }
+    ]
+  },
+  "expect": {
+    "validation": [
+      {
+        "code": "invalid_name"
+      }
+    ]
+  }
+}

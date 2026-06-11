@@ -1,0 +1,56 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_submachine_exit_point",
+  "mode": "validation",
+  "features": [
+    "validation",
+    "submachine",
+    "exit_point"
+  ],
+  "model": {
+    "name": "InvalidSubmachineExitPoint",
+    "initial": "drive",
+    "states": [
+      {
+        "name": "drive",
+        "kind": "submachine",
+        "machine": "Child",
+        "transitions": [
+          {
+            "trigger": {
+              "kind": "exit_point",
+              "exit_point": "missing"
+            },
+            "target": "done"
+          }
+        ]
+      },
+      {
+        "name": "done"
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "Child",
+      "initial": "ready",
+      "exit_points": [
+        {
+          "name": "known"
+        }
+      ],
+      "states": [
+        {
+          "name": "ready"
+        }
+      ]
+    }
+  ],
+  "expect": {
+    "validation": [
+      {
+        "code": "missing_exit_point"
+      }
+    ]
+  }
+}

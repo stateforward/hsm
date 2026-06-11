@@ -1,0 +1,225 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "defer_replay_after_final_completion_priority",
+  "description": "Completion produced by entering a final state is handled before replayed deferred regular events.",
+  "features": [
+    "defer",
+    "queue",
+    "nested",
+    "completion",
+    "final"
+  ],
+  "model": {
+    "name": "DeferReplayAfterFinalCompletionPriority",
+    "initial": "parent",
+    "states": [
+      {
+        "name": "parent",
+        "initial": "blocked",
+        "transitions": [
+          {
+            "trigger": {
+              "kind": "completion"
+            },
+            "target": "complete",
+            "effects": [
+              {
+                "behavior": "effect_completion"
+              }
+            ]
+          },
+          {
+            "on": "noise",
+            "target": "wrong",
+            "effects": [
+              {
+                "behavior": "effect_wrong"
+              }
+            ]
+          }
+        ],
+        "states": [
+          {
+            "name": "blocked",
+            "defer": [
+              "noise"
+            ],
+            "exit": [
+              {
+                "behavior": "exit_blocked"
+              }
+            ],
+            "transitions": [
+              {
+                "on": "release",
+                "target": "../done",
+                "effects": [
+                  {
+                    "behavior": "effect_release"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "name": "done",
+            "kind": "final"
+          }
+        ]
+      },
+      {
+        "name": "complete",
+        "entry": [
+          {
+            "behavior": "entry_complete"
+          }
+        ],
+        "transitions": [
+          {
+            "on": "noise",
+            "target": "after_noise",
+            "effects": [
+              {
+                "behavior": "effect_noise"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "after_noise",
+        "entry": [
+          {
+            "behavior": "entry_after_noise"
+          }
+        ]
+      },
+      {
+        "name": "wrong",
+        "entry": [
+          {
+            "behavior": "entry_wrong"
+          }
+        ]
+      }
+    ]
+  },
+  "behaviors": {
+    "exit_blocked": [
+      {
+        "op": "trace",
+        "value": "exit:blocked"
+      }
+    ],
+    "effect_release": [
+      {
+        "op": "trace",
+        "value": "effect:release"
+      }
+    ],
+    "effect_completion": [
+      {
+        "op": "trace",
+        "value": "effect:completion"
+      }
+    ],
+    "entry_complete": [
+      {
+        "op": "trace",
+        "value": "entry:complete"
+      }
+    ],
+    "effect_noise": [
+      {
+        "op": "trace",
+        "value": "effect:noise"
+      }
+    ],
+    "entry_after_noise": [
+      {
+        "op": "trace",
+        "value": "entry:after-noise"
+      }
+    ],
+    "effect_wrong": [
+      {
+        "op": "trace",
+        "value": "effect:wrong"
+      }
+    ],
+    "entry_wrong": [
+      {
+        "op": "trace",
+        "value": "entry:wrong"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "noise"
+    },
+    {
+      "op": "dispatch",
+      "event": "release"
+    }
+  ],
+  "expect": {
+    "state": "/DeferReplayAfterFinalCompletionPriority/after_noise",
+    "queue": {
+      "deferred": [
+        "noise"
+      ],
+      "replay": "after_completion_priority"
+    },
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "noise"
+      },
+      {
+        "type": "defer",
+        "event": "noise"
+      },
+      {
+        "type": "dispatch",
+        "event": "release"
+      },
+      {
+        "type": "undefer",
+        "event": "noise"
+      },
+      {
+        "type": "trace",
+        "value": "exit:blocked"
+      },
+      {
+        "type": "trace",
+        "value": "effect:release"
+      },
+      {
+        "type": "trace",
+        "value": "effect:completion"
+      },
+      {
+        "type": "trace",
+        "value": "entry:complete"
+      },
+      {
+        "type": "trace",
+        "value": "effect:noise"
+      },
+      {
+        "type": "trace",
+        "value": "entry:after-noise"
+      },
+      {
+        "type": "stable",
+        "state": "/DeferReplayAfterFinalCompletionPriority/after_noise"
+      }
+    ]
+  }
+}

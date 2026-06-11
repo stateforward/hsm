@@ -1,0 +1,91 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "dispatch_to_stopped_member_noop",
+  "description": "dispatch_to ignores a stopped target while still delivering to started targets in the same target list.",
+  "features": ["dispatch_to", "multi_target", "lifecycle", "stop"],
+  "model": {
+    "name": "DispatchToStoppedMemberNoop",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "on": "go",
+            "target": "done",
+            "effects": [
+              {
+                "behavior": "effect_go"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "done"
+      }
+    ]
+  },
+  "instances": [
+    {
+      "id": "started"
+    },
+    {
+      "id": "stopped"
+    }
+  ],
+  "behaviors": {
+    "effect_go": [
+      {
+        "op": "trace",
+        "value": "effect:go"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start",
+      "instance": "started"
+    },
+    {
+      "op": "start",
+      "instance": "stopped"
+    },
+    {
+      "op": "stop",
+      "instance": "stopped"
+    },
+    {
+      "op": "dispatch_to",
+      "targets": [
+        "stopped",
+        "started"
+      ],
+      "event": "go"
+    }
+  ],
+  "expect": {
+    "states": {
+      "started": "/DispatchToStoppedMemberNoop/done",
+      "stopped": "/DispatchToStoppedMemberNoop"
+    },
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "go",
+        "target": [
+          "stopped",
+          "started"
+        ]
+      },
+      {
+        "type": "trace",
+        "value": "effect:go"
+      },
+      {
+        "type": "stable",
+        "state": "targets:stopped,started"
+      }
+    ]
+  }
+}

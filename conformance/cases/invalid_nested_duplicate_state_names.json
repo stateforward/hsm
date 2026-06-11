@@ -1,0 +1,35 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_nested_duplicate_state_names",
+  "mode": "validation",
+  "description": "Sibling state names must be unique inside ordinary nested composite states.",
+  "features": [
+    "validation",
+    "nested"
+  ],
+  "model": {
+    "name": "InvalidNestedDuplicateStateNames",
+    "initial": "outer",
+    "states": [
+      {
+        "name": "outer",
+        "initial": "idle",
+        "states": [
+          {
+            "name": "idle"
+          },
+          {
+            "name": "idle"
+          }
+        ]
+      }
+    ]
+  },
+  "expect": {
+    "validation": [
+      {
+        "code": "duplicate_state"
+      }
+    ]
+  }
+}

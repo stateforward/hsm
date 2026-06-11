@@ -1,0 +1,138 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "config_clock_per_instance_isolation",
+  "description": "Custom clock hooks are instance-specific and do not affect sibling instances without a custom clock.",
+  "features": ["timer", "after", "dispatch_to", "multi_target"],
+  "model": {
+    "name": "ClockedModel",
+    "initial": "waiting",
+    "states": [
+      {
+        "name": "waiting",
+        "transitions": [
+          {
+            "trigger": {
+              "kind": "after",
+              "duration_ms": 25
+            },
+            "target": "fired",
+            "effects": [
+              {
+                "behavior": "effect_clocked"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "fired"
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "PlainTimerModel",
+      "initial": "waiting",
+      "states": [
+        {
+          "name": "waiting",
+          "transitions": [
+            {
+              "on": "go",
+              "target": "done",
+              "effects": [
+                {
+                  "behavior": "effect_plain"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "done"
+        }
+      ]
+    }
+  ],
+  "instances": [
+    {
+      "id": "clocked",
+      "model": "ClockedModel",
+      "config": {
+        "clock": "trace_no_sleep"
+      }
+    },
+    {
+      "id": "plain",
+      "model": "PlainTimerModel"
+    }
+  ],
+  "behaviors": {
+    "effect_clocked": [
+      {
+        "op": "trace",
+        "value": "effect:clocked"
+      }
+    ],
+    "effect_plain": [
+      {
+        "op": "trace",
+        "value": "effect:plain"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start",
+      "instance": "clocked"
+    },
+    {
+      "op": "start",
+      "instance": "plain"
+    },
+    {
+      "op": "tick",
+      "millis": 0
+    },
+    {
+      "op": "dispatch_to",
+      "target": "plain",
+      "event": "go"
+    }
+  ],
+  "expect": {
+    "states": {
+      "clocked": "/ClockedModel/fired",
+      "plain": "/PlainTimerModel/done"
+    },
+    "trace": [
+      {
+        "type": "timer_scheduled"
+      },
+      {
+        "type": "trace",
+        "value": "clock:sleep:25"
+      },
+      {
+        "type": "timer_fired"
+      },
+      {
+        "type": "trace",
+        "value": "effect:clocked"
+      },
+      {
+        "type": "dispatch",
+        "event": "go",
+        "target": "plain"
+      },
+      {
+        "type": "trace",
+        "value": "effect:plain"
+      },
+      {
+        "type": "stable",
+        "state": "plain"
+      }
+    ]
+  }
+}

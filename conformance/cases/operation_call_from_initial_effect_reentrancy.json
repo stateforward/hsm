@@ -1,0 +1,141 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "operation_call_from_initial_effect_reentrancy",
+  "description": "An operation called from an initial effect queues its on_call event until the initial target entry completes.",
+  "features": [
+    "operation",
+    "on_call",
+    "initial",
+    "queue",
+    "reentrancy"
+  ],
+  "model": {
+    "name": "OperationCallFromInitialEffectReentrancy",
+    "initial": {
+      "target": "idle",
+      "effects": [
+        {
+          "behavior": "initial_calls_audit"
+        }
+      ]
+    },
+    "operations": {
+      "audit": {
+        "behavior": "operation_audit"
+      }
+    },
+    "states": [
+      {
+        "name": "idle",
+        "entry": [
+          {
+            "behavior": "entry_idle"
+          }
+        ],
+        "transitions": [
+          {
+            "trigger": {
+              "kind": "on_call",
+              "operation": "audit"
+            },
+            "target": "handled",
+            "effects": [
+              {
+                "behavior": "effect_audit"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "handled",
+        "entry": [
+          {
+            "behavior": "entry_handled"
+          }
+        ]
+      }
+    ]
+  },
+  "behaviors": {
+    "operation_audit": [
+      {
+        "op": "trace",
+        "value": "operation:audit"
+      }
+    ],
+    "initial_calls_audit": [
+      {
+        "op": "trace",
+        "value": "initial:before-call"
+      },
+      {
+        "op": "call",
+        "name": "audit"
+      },
+      {
+        "op": "trace",
+        "value": "initial:after-call"
+      }
+    ],
+    "entry_idle": [
+      {
+        "op": "trace",
+        "value": "entry:idle"
+      }
+    ],
+    "effect_audit": [
+      {
+        "op": "trace",
+        "value": "effect:audit"
+      }
+    ],
+    "entry_handled": [
+      {
+        "op": "trace",
+        "value": "entry:handled"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    }
+  ],
+  "expect": {
+    "state": "/OperationCallFromInitialEffectReentrancy/handled",
+    "queue": {
+      "operation_call_from_initial_effect": "queued_until_initial_target_entry_completes"
+    },
+    "trace": [
+      {
+        "type": "trace",
+        "value": "initial:before-call"
+      },
+      {
+        "type": "trace",
+        "value": "operation:audit"
+      },
+      {
+        "type": "trace",
+        "value": "initial:after-call"
+      },
+      {
+        "type": "trace",
+        "value": "entry:idle"
+      },
+      {
+        "type": "trace",
+        "value": "effect:audit"
+      },
+      {
+        "type": "trace",
+        "value": "entry:handled"
+      },
+      {
+        "type": "stable",
+        "state": "/OperationCallFromInitialEffectReentrancy/handled"
+      }
+    ]
+  }
+}

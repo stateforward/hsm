@@ -1,0 +1,37 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_choice_child_state",
+  "mode": "validation",
+  "description": "Choice pseudostates must not declare nested child states.",
+  "features": ["choice", "validation"],
+  "model": {
+    "name": "InvalidChoiceChildState",
+    "initial": "choice",
+    "states": [
+      {
+        "name": "choice",
+        "kind": "choice",
+        "states": [
+          {
+            "name": "child"
+          }
+        ],
+        "transitions": [
+          {
+            "target": "done"
+          }
+        ]
+      },
+      {
+        "name": "done"
+      }
+    ]
+  },
+  "expect": {
+    "validation": [
+      {
+        "code": "invalid_pseudostate_contents"
+      }
+    ]
+  }
+}

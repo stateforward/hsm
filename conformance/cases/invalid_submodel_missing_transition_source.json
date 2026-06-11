@@ -1,0 +1,46 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_submodel_missing_transition_source",
+  "mode": "validation",
+  "description": "Child model source-qualified transitions must resolve source paths inside the child model.",
+  "features": ["submachine", "source", "validation"],
+  "model": {
+    "name": "InvalidSubmodelMissingTransitionSource",
+    "initial": "drive",
+    "states": [
+      {
+        "name": "drive",
+        "kind": "submachine",
+        "machine": "ChildMissingTransitionSource"
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "ChildMissingTransitionSource",
+      "initial": "idle",
+      "states": [
+        {
+          "name": "idle"
+        },
+        {
+          "name": "done"
+        }
+      ],
+      "transitions": [
+        {
+          "source": "missing",
+          "on": "go",
+          "target": "done"
+        }
+      ]
+    }
+  ],
+  "expect": {
+    "validation": [
+      {
+        "code": "missing_source"
+      }
+    ]
+  }
+}

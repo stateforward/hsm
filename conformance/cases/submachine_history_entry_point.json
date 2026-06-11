@@ -1,0 +1,172 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "submachine_history_entry_point",
+  "description": "A parent can re-enter a submachine through an entry point that targets child history, restoring the child's remembered active state.",
+  "features": [
+    "submachine",
+    "entry_point",
+    "history",
+    "shallow_history",
+    "nested"
+  ],
+  "model": {
+    "name": "SubmachineHistory",
+    "initial": "outside",
+    "states": [
+      {
+        "name": "outside",
+        "transitions": [
+          {
+            "on": "enter",
+            "target": "drive"
+          },
+          {
+            "on": "resume",
+            "target": "drive",
+            "entry_point": "history"
+          }
+        ]
+      },
+      {
+        "name": "drive",
+        "kind": "submachine",
+        "machine": "HistoryChild",
+        "transitions": [
+          {
+            "on": "leave",
+            "target": "outside"
+          }
+        ]
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "HistoryChild",
+      "initial": "comp",
+      "entry_points": [
+        {
+          "name": "history",
+          "target": "comp/h",
+          "effects": [
+            {
+              "behavior": "effect_history"
+            }
+          ]
+        }
+      ],
+      "states": [
+        {
+          "name": "comp",
+          "initial": "a",
+          "states": [
+            {
+              "name": "a",
+              "transitions": [
+                {
+                  "on": "to_b",
+                  "target": "../b/deep"
+                }
+              ]
+            },
+            {
+              "name": "b",
+              "initial": "deep",
+              "states": [
+                {
+                  "name": "deep",
+                  "entry": [
+                    {
+                      "behavior": "entry_deep"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "h",
+              "kind": "shallow_history",
+              "transitions": [
+                {
+                  "target": "a"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "behaviors": {
+    "effect_history": [
+      {
+        "op": "trace",
+        "value": "effect:history"
+      }
+    ],
+    "entry_deep": [
+      {
+        "op": "trace",
+        "value": "enter:deep"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "enter"
+    },
+    {
+      "op": "dispatch",
+      "event": "to_b"
+    },
+    {
+      "op": "dispatch",
+      "event": "leave"
+    },
+    {
+      "op": "dispatch",
+      "event": "resume"
+    }
+  ],
+  "expect": {
+    "state": "/SubmachineHistory/drive/HistoryChild/comp/b/deep",
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "enter"
+      },
+      {
+        "type": "dispatch",
+        "event": "to_b"
+      },
+      {
+        "type": "trace",
+        "value": "enter:deep"
+      },
+      {
+        "type": "dispatch",
+        "event": "leave"
+      },
+      {
+        "type": "dispatch",
+        "event": "resume"
+      },
+      {
+        "type": "trace",
+        "value": "effect:history"
+      },
+      {
+        "type": "trace",
+        "value": "enter:deep"
+      },
+      {
+        "type": "stable",
+        "state": "/SubmachineHistory/drive/HistoryChild/comp/b/deep"
+      }
+    ]
+  }
+}

@@ -1,0 +1,46 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "root_transition_effect_raise_reentrancy",
+  "description": "A normal internal event raised from a root-owned transition effect is processed after the global transition reaches its target.",
+  "features": ["root_transition", "queue", "reentrancy"],
+  "model": {
+    "name": "RootTransitionEffectRaiseReentrancy",
+    "initial": "idle",
+    "states": [
+      {"name": "idle", "exit": [{"behavior": "exit_idle"}]},
+      {
+        "name": "waiting",
+        "entry": [{"behavior": "entry_waiting"}],
+        "transitions": [
+          {"on": "audit", "target": "done", "effects": [{"behavior": "effect_audit"}]}
+        ]
+      },
+      {"name": "done"}
+    ],
+    "transitions": [
+      {"on": "go", "target": "waiting", "effects": [{"behavior": "effect_raise"}]}
+    ]
+  },
+  "behaviors": {
+    "exit_idle": [{"op": "trace", "value": "exit:idle"}],
+    "effect_raise": [
+      {"op": "raise", "event": "audit"},
+      {"op": "trace", "value": "effect:go"}
+    ],
+    "entry_waiting": [{"op": "trace", "value": "entry:waiting"}],
+    "effect_audit": [{"op": "trace", "value": "effect:audit"}]
+  },
+  "script": [{"op": "start"}, {"op": "dispatch", "event": "go"}],
+  "expect": {
+    "state": "/RootTransitionEffectRaiseReentrancy/done",
+    "trace": [
+      {"type": "dispatch", "event": "go"},
+      {"type": "trace", "value": "exit:idle"},
+      {"type": "raise", "event": "audit"},
+      {"type": "trace", "value": "effect:go"},
+      {"type": "trace", "value": "entry:waiting"},
+      {"type": "trace", "value": "effect:audit"},
+      {"type": "stable", "state": "/RootTransitionEffectRaiseReentrancy/done"}
+    ]
+  }
+}

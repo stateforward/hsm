@@ -1,0 +1,102 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "snapshot_event_details_submachine_child_and_boundary_transitions",
+  "description": "Snapshots taken inside an active submachine include transition snapshots from the active child and the containing submachine boundary.",
+  "features": [
+    "snapshot",
+    "submachine",
+    "selection_order"
+  ],
+  "model": {
+    "name": "SnapshotEventDetailsSubmachineBoundary",
+    "initial": "drive",
+    "states": [
+      {
+        "name": "drive",
+        "kind": "submachine",
+        "machine": "ChildWithSnapshotEvents",
+        "transitions": [
+          {
+            "on": "parent_go",
+            "target": "parent_done"
+          }
+        ]
+      },
+      {
+        "name": "parent_done"
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "ChildWithSnapshotEvents",
+      "initial": "idle",
+      "states": [
+        {
+          "name": "idle",
+          "transitions": [
+            {
+              "on": "child_go",
+              "target": "child_done"
+            }
+          ]
+        },
+        {
+          "name": "child_done"
+        }
+      ]
+    }
+  ],
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "snapshot"
+    }
+  ],
+  "expect": {
+    "state": "/SnapshotEventDetailsSubmachineBoundary/drive/ChildWithSnapshotEvents/idle",
+    "snapshots": {
+      "last": {
+        "id": "default",
+        "qualified_name": "/SnapshotEventDetailsSubmachineBoundary",
+        "state": "/SnapshotEventDetailsSubmachineBoundary/drive/ChildWithSnapshotEvents/idle",
+        "attributes": {},
+        "queue_len": 0,
+        "transitions": [
+          {
+            "name": "/SnapshotEventDetailsSubmachineBoundary/drive/ChildWithSnapshotEvents/idle/transition_10",
+            "kind": 67343,
+            "source": "/SnapshotEventDetailsSubmachineBoundary/drive/ChildWithSnapshotEvents/idle",
+            "target": "/SnapshotEventDetailsSubmachineBoundary/drive/ChildWithSnapshotEvents/child_done",
+            "events": [
+              "child_go"
+            ],
+            "guard": false
+          },
+          {
+            "name": "/SnapshotEventDetailsSubmachineBoundary/drive/transition_12",
+            "kind": 67343,
+            "source": "/SnapshotEventDetailsSubmachineBoundary/drive",
+            "target": "/SnapshotEventDetailsSubmachineBoundary/parent_done",
+            "events": [
+              "parent_go"
+            ],
+            "guard": false
+          }
+        ]
+      }
+    },
+    "trace": [
+      {
+        "type": "snapshot",
+        "state": "/SnapshotEventDetailsSubmachineBoundary/drive/ChildWithSnapshotEvents/idle"
+      },
+      {
+        "type": "stable",
+        "state": "/SnapshotEventDetailsSubmachineBoundary/drive/ChildWithSnapshotEvents/idle"
+      }
+    ]
+  }
+}

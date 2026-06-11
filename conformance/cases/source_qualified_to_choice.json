@@ -1,0 +1,145 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "source_qualified_to_choice",
+  "description": "A parent-owned source-qualified transition can target a choice pseudostate and then follow normal guard ordering.",
+  "features": [
+    "source",
+    "choice",
+    "guard",
+    "selection_order"
+  ],
+  "model": {
+    "name": "SourceToChoice",
+    "initial": "parent",
+    "states": [
+      {
+        "name": "parent",
+        "initial": "a",
+        "transitions": [
+          {
+            "source": "parent/a",
+            "on": "decide",
+            "target": "parent/choice",
+            "effects": [
+              {
+                "behavior": "effect_to_choice"
+              }
+            ]
+          }
+        ],
+        "states": [
+          {
+            "name": "a"
+          },
+          {
+            "name": "choice",
+            "kind": "choice",
+            "transitions": [
+              {
+                "guard": {
+                  "behavior": "guard_false"
+                },
+                "target": "b"
+              },
+              {
+                "guard": {
+                  "behavior": "guard_true"
+                },
+                "target": "c"
+              },
+              {
+                "target": "fallback"
+              }
+            ]
+          },
+          {
+            "name": "b"
+          },
+          {
+            "name": "c",
+            "entry": [
+              {
+                "behavior": "entry_c"
+              }
+            ]
+          },
+          {
+            "name": "fallback"
+          }
+        ]
+      }
+    ]
+  },
+  "behaviors": {
+    "effect_to_choice": [
+      {
+        "op": "trace",
+        "value": "effect:to-choice"
+      }
+    ],
+    "guard_false": [
+      {
+        "op": "trace",
+        "value": "guard:false"
+      },
+      {
+        "op": "return_value",
+        "value": false
+      }
+    ],
+    "guard_true": [
+      {
+        "op": "trace",
+        "value": "guard:true"
+      },
+      {
+        "op": "return_value",
+        "value": true
+      }
+    ],
+    "entry_c": [
+      {
+        "op": "trace",
+        "value": "enter:c"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "decide"
+    }
+  ],
+  "expect": {
+    "state": "/SourceToChoice/parent/c",
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "decide"
+      },
+      {
+        "type": "trace",
+        "value": "effect:to-choice"
+      },
+      {
+        "type": "trace",
+        "value": "guard:false"
+      },
+      {
+        "type": "trace",
+        "value": "guard:true"
+      },
+      {
+        "type": "trace",
+        "value": "enter:c"
+      },
+      {
+        "type": "stable",
+        "state": "/SourceToChoice/parent/c"
+      }
+    ]
+  }
+}

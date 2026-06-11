@@ -1,0 +1,323 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "defer_replay_after_deep_history_restore_target_resolution",
+  "description": "A deferred event replays only after a deep-history target recursively restores and enters its deepest active leaf.",
+  "features": [
+    "defer",
+    "queue",
+    "history",
+    "deep_history",
+    "nested"
+  ],
+  "model": {
+    "name": "DeferReplayAfterDeepHistoryRestoreTargetResolution",
+    "initial": "comp",
+    "states": [
+      {
+        "name": "comp",
+        "initial": "parent",
+        "transitions": [
+          {
+            "on": "work",
+            "target": "wrong_comp",
+            "effects": [
+              {
+                "behavior": "effect_wrong_comp"
+              }
+            ]
+          }
+        ],
+        "states": [
+          {
+            "name": "parent",
+            "initial": "alpha",
+            "transitions": [
+              {
+                "on": "work",
+                "target": "../../wrong_parent",
+                "effects": [
+                  {
+                    "behavior": "effect_wrong_parent"
+                  }
+                ]
+              }
+            ],
+            "states": [
+              {
+                "name": "alpha",
+                "entry": [
+                  {
+                    "behavior": "entry_alpha"
+                  }
+                ],
+                "transitions": [
+                  {
+                    "on": "to_beta",
+                    "target": "../beta"
+                  },
+                  {
+                    "on": "work",
+                    "target": "../../../wrong_alpha",
+                    "effects": [
+                      {
+                        "behavior": "effect_wrong_alpha"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "name": "beta",
+                "entry": [
+                  {
+                    "behavior": "entry_beta"
+                  }
+                ],
+                "transitions": [
+                  {
+                    "on": "leave",
+                    "target": "../../../blocked"
+                  },
+                  {
+                    "on": "work",
+                    "target": "../../../done",
+                    "effects": [
+                      {
+                        "behavior": "effect_work"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "name": "h",
+            "kind": "deep_history",
+            "transitions": [
+              {
+                "target": "parent/alpha"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "blocked",
+        "defer": [
+          "work"
+        ],
+        "exit": [
+          {
+            "behavior": "exit_blocked"
+          }
+        ],
+        "transitions": [
+          {
+            "on": "release",
+            "target": "comp/h",
+            "effects": [
+              {
+                "behavior": "effect_release"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "done",
+        "entry": [
+          {
+            "behavior": "entry_done"
+          }
+        ]
+      },
+      {
+        "name": "wrong_comp",
+        "entry": [
+          {
+            "behavior": "entry_wrong_comp"
+          }
+        ]
+      },
+      {
+        "name": "wrong_parent",
+        "entry": [
+          {
+            "behavior": "entry_wrong_parent"
+          }
+        ]
+      },
+      {
+        "name": "wrong_alpha",
+        "entry": [
+          {
+            "behavior": "entry_wrong_alpha"
+          }
+        ]
+      }
+    ]
+  },
+  "behaviors": {
+    "entry_alpha": [
+      {
+        "op": "trace",
+        "value": "entry:alpha"
+      }
+    ],
+    "entry_beta": [
+      {
+        "op": "trace",
+        "value": "entry:beta"
+      }
+    ],
+    "exit_blocked": [
+      {
+        "op": "trace",
+        "value": "exit:blocked"
+      }
+    ],
+    "effect_release": [
+      {
+        "op": "trace",
+        "value": "effect:release"
+      }
+    ],
+    "effect_work": [
+      {
+        "op": "trace",
+        "value": "effect:work"
+      }
+    ],
+    "entry_done": [
+      {
+        "op": "trace",
+        "value": "entry:done"
+      }
+    ],
+    "effect_wrong_comp": [
+      {
+        "op": "trace",
+        "value": "effect:wrong-comp"
+      }
+    ],
+    "entry_wrong_comp": [
+      {
+        "op": "trace",
+        "value": "entry:wrong-comp"
+      }
+    ],
+    "effect_wrong_parent": [
+      {
+        "op": "trace",
+        "value": "effect:wrong-parent"
+      }
+    ],
+    "entry_wrong_parent": [
+      {
+        "op": "trace",
+        "value": "entry:wrong-parent"
+      }
+    ],
+    "effect_wrong_alpha": [
+      {
+        "op": "trace",
+        "value": "effect:wrong-alpha"
+      }
+    ],
+    "entry_wrong_alpha": [
+      {
+        "op": "trace",
+        "value": "entry:wrong-alpha"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "to_beta"
+    },
+    {
+      "op": "dispatch",
+      "event": "leave"
+    },
+    {
+      "op": "dispatch",
+      "event": "work"
+    },
+    {
+      "op": "dispatch",
+      "event": "release"
+    }
+  ],
+  "expect": {
+    "state": "/DeferReplayAfterDeepHistoryRestoreTargetResolution/done",
+    "queue": {
+      "deferred": [
+        "work"
+      ],
+      "replay": "after_deep_history_restore_target_resolution"
+    },
+    "trace": [
+      {
+        "type": "trace",
+        "value": "entry:alpha"
+      },
+      {
+        "type": "dispatch",
+        "event": "to_beta"
+      },
+      {
+        "type": "trace",
+        "value": "entry:beta"
+      },
+      {
+        "type": "dispatch",
+        "event": "leave"
+      },
+      {
+        "type": "dispatch",
+        "event": "work"
+      },
+      {
+        "type": "defer",
+        "event": "work"
+      },
+      {
+        "type": "dispatch",
+        "event": "release"
+      },
+      {
+        "type": "undefer",
+        "event": "work"
+      },
+      {
+        "type": "trace",
+        "value": "exit:blocked"
+      },
+      {
+        "type": "trace",
+        "value": "effect:release"
+      },
+      {
+        "type": "trace",
+        "value": "entry:beta"
+      },
+      {
+        "type": "trace",
+        "value": "effect:work"
+      },
+      {
+        "type": "trace",
+        "value": "entry:done"
+      },
+      {
+        "type": "stable",
+        "state": "/DeferReplayAfterDeepHistoryRestoreTargetResolution/done"
+      }
+    ]
+  }
+}

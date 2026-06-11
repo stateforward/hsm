@@ -1,0 +1,130 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "return_attr_guard",
+  "description": "A guard can return a boolean attribute value directly with return_attr.",
+  "features": [
+    "attribute",
+    "guard",
+    "behavior_attr"
+  ],
+  "model": {
+    "name": "ReturnAttrGuard",
+    "initial": "idle",
+    "attributes": {
+      "enabled": {
+        "type": "boolean",
+        "default": false
+      }
+    },
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "on": "go",
+            "guard": {
+              "behavior": "guard_enabled"
+            },
+            "target": "done",
+            "effects": [
+              {
+                "behavior": "effect_done"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "done",
+        "entry": [
+          {
+            "behavior": "entry_done"
+          }
+        ]
+      }
+    ]
+  },
+  "behaviors": {
+    "guard_enabled": [
+      {
+        "op": "trace",
+        "value": "guard:enabled"
+      },
+      {
+        "op": "return_attr",
+        "name": "enabled"
+      }
+    ],
+    "effect_done": [
+      {
+        "op": "trace",
+        "value": "effect:done"
+      }
+    ],
+    "entry_done": [
+      {
+        "op": "trace",
+        "value": "enter:done"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "go"
+    },
+    {
+      "op": "set",
+      "attribute": "enabled",
+      "value": true
+    },
+    {
+      "op": "dispatch",
+      "event": "go"
+    }
+  ],
+  "expect": {
+    "state": "/ReturnAttrGuard/done",
+    "attributes": {
+      "enabled": true
+    },
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "go"
+      },
+      {
+        "type": "trace",
+        "value": "guard:enabled"
+      },
+      {
+        "type": "set",
+        "attribute": "enabled",
+        "value": true
+      },
+      {
+        "type": "dispatch",
+        "event": "go"
+      },
+      {
+        "type": "trace",
+        "value": "guard:enabled"
+      },
+      {
+        "type": "trace",
+        "value": "effect:done"
+      },
+      {
+        "type": "trace",
+        "value": "enter:done"
+      },
+      {
+        "type": "stable",
+        "state": "/ReturnAttrGuard/done"
+      }
+    ]
+  }
+}

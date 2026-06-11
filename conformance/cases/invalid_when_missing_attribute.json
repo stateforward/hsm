@@ -1,0 +1,39 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_when_missing_attribute",
+  "mode": "validation",
+  "description": "A when trigger using an attribute source must reference a declared model attribute.",
+  "features": [
+    "attribute",
+    "when",
+    "validation"
+  ],
+  "model": {
+    "name": "InvalidWhenMissingAttribute",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "trigger": {
+              "kind": "when",
+              "attribute": "missing"
+            },
+            "target": "done"
+          }
+        ]
+      },
+      {
+        "name": "done"
+      }
+    ]
+  },
+  "expect": {
+    "validation": [
+      {
+        "code": "missing_attribute"
+      }
+    ]
+  }
+}

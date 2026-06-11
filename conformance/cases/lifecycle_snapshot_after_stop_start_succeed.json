@@ -1,0 +1,64 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "lifecycle_snapshot_after_stop_start_succeed",
+  "description": "After stop followed by start, snapshot succeeds and reports the newly started initial state and reset attributes.",
+  "features": ["lifecycle", "stop", "snapshot", "attribute"],
+  "model": {
+    "name": "LifecycleSnapshotAfterStopStartSucceed",
+    "initial": "idle",
+    "attributes": {
+      "flag": {
+        "type": "boolean",
+        "default": false
+      }
+    },
+    "states": [
+      {
+        "name": "idle"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "set",
+      "attribute": "flag",
+      "value": true
+    },
+    {
+      "op": "stop"
+    },
+    {
+      "op": "start"
+    },
+    {
+      "op": "snapshot"
+    }
+  ],
+  "expect": {
+    "state": "/LifecycleSnapshotAfterStopStartSucceed/idle",
+    "snapshots": {
+      "last": {
+        "id": "default",
+        "qualified_name": "/LifecycleSnapshotAfterStopStartSucceed",
+        "state": "/LifecycleSnapshotAfterStopStartSucceed/idle",
+        "attributes": {
+          "flag": false
+        },
+        "queue_len": 0
+      }
+    },
+    "trace": [
+      {
+        "type": "snapshot",
+        "state": "/LifecycleSnapshotAfterStopStartSucceed/idle"
+      },
+      {
+        "type": "stable",
+        "state": "/LifecycleSnapshotAfterStopStartSucceed/idle"
+      }
+    ]
+  }
+}

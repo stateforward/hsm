@@ -1,0 +1,264 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "behavior_raise_event_object_identity_metadata",
+  "description": "A behavior raise op preserves event object id, source, target, and metadata fields for the raised-event handler.",
+  "features": ["queue", "reentrancy", "event_ownership"],
+  "model": {
+    "name": "BehaviorRaiseEventObjectIdentityMetadata",
+    "initial": "check_id",
+    "states": [
+      {
+        "name": "check_id",
+        "transitions": [
+          {
+            "on": "go_id",
+            "target": "id_wait",
+            "effects": [
+              {
+                "behavior": "raise_id"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "id_wait",
+        "transitions": [
+          {
+            "on": "audit",
+            "guard": {
+              "behavior": "id_ok"
+            },
+            "target": "check_source"
+          }
+        ]
+      },
+      {
+        "name": "check_source",
+        "transitions": [
+          {
+            "on": "go_source",
+            "target": "source_wait",
+            "effects": [
+              {
+                "behavior": "raise_source"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "source_wait",
+        "transitions": [
+          {
+            "on": "audit",
+            "guard": {
+              "behavior": "source_ok"
+            },
+            "target": "check_target"
+          }
+        ]
+      },
+      {
+        "name": "check_target",
+        "transitions": [
+          {
+            "on": "go_target",
+            "target": "target_wait",
+            "effects": [
+              {
+                "behavior": "raise_target"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "target_wait",
+        "transitions": [
+          {
+            "on": "audit",
+            "guard": {
+              "behavior": "target_ok"
+            },
+            "target": "check_metadata"
+          }
+        ]
+      },
+      {
+        "name": "check_metadata",
+        "transitions": [
+          {
+            "on": "go_metadata",
+            "target": "metadata_wait",
+            "effects": [
+              {
+                "behavior": "raise_metadata"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "metadata_wait",
+        "transitions": [
+          {
+            "on": "audit",
+            "guard": {
+              "behavior": "owner_ok"
+            },
+            "target": "done",
+            "effects": [
+              {
+                "behavior": "effect_done"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "done"
+      }
+    ]
+  },
+  "behaviors": {
+    "raise_id": [
+      {
+        "op": "raise",
+        "event": {
+          "name": "audit",
+          "id": "evt-id"
+        }
+      }
+    ],
+    "raise_source": [
+      {
+        "op": "raise",
+        "event": {
+          "name": "audit",
+          "source": "behavior-source"
+        }
+      }
+    ],
+    "raise_target": [
+      {
+        "op": "raise",
+        "event": {
+          "name": "audit",
+          "target": "behavior-target"
+        }
+      }
+    ],
+    "raise_metadata": [
+      {
+        "op": "raise",
+        "event": {
+          "name": "audit",
+          "metadata": {
+            "owner": "raise"
+          }
+        }
+      }
+    ],
+    "id_ok": [
+      {
+        "op": "event_metadata_equals",
+        "name": "id",
+        "value": "evt-id"
+      }
+    ],
+    "source_ok": [
+      {
+        "op": "event_metadata_equals",
+        "name": "source",
+        "value": "behavior-source"
+      }
+    ],
+    "target_ok": [
+      {
+        "op": "event_metadata_equals",
+        "name": "target",
+        "value": "behavior-target"
+      }
+    ],
+    "owner_ok": [
+      {
+        "op": "event_metadata_equals",
+        "name": "owner",
+        "value": "raise"
+      }
+    ],
+    "effect_done": [
+      {
+        "op": "trace",
+        "value": "effect:done"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "go_id"
+    },
+    {
+      "op": "dispatch",
+      "event": "go_source"
+    },
+    {
+      "op": "dispatch",
+      "event": "go_target"
+    },
+    {
+      "op": "dispatch",
+      "event": "go_metadata"
+    }
+  ],
+  "expect": {
+    "state": "/BehaviorRaiseEventObjectIdentityMetadata/done",
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "go_id"
+      },
+      {
+        "type": "raise",
+        "event": "audit"
+      },
+      {
+        "type": "dispatch",
+        "event": "go_source"
+      },
+      {
+        "type": "raise",
+        "event": "audit"
+      },
+      {
+        "type": "dispatch",
+        "event": "go_target"
+      },
+      {
+        "type": "raise",
+        "event": "audit"
+      },
+      {
+        "type": "dispatch",
+        "event": "go_metadata"
+      },
+      {
+        "type": "raise",
+        "event": "audit"
+      },
+      {
+        "type": "trace",
+        "value": "effect:done"
+      },
+      {
+        "type": "stable",
+        "state": "/BehaviorRaiseEventObjectIdentityMetadata/done"
+      }
+    ]
+  }
+}

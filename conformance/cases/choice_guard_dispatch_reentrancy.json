@@ -1,0 +1,10 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "choice_guard_dispatch_reentrancy",
+  "description": "A dispatch behavior op from a choice guard is queued until choice routing reaches the selected target.",
+  "features": ["choice", "guard", "queue", "reentrancy"],
+  "model": {"name": "ChoiceGuardDispatchReentrancy", "initial": "idle", "states": [{"name": "idle", "transitions": [{"on": "go", "target": "choice"}]}, {"name": "choice", "kind": "choice", "transitions": [{"guard": {"behavior": "guard_dispatch"}, "target": "waiting"}, {"target": "fallback"}]}, {"name": "waiting", "entry": [{"behavior": "entry_waiting"}], "transitions": [{"on": "audit", "target": "done", "effects": [{"behavior": "effect_audit"}]}]}, {"name": "fallback"}, {"name": "done"}]},
+  "behaviors": {"guard_dispatch": [{"op": "trace", "value": "guard:choice"}, {"op": "dispatch", "event": "audit"}, {"op": "return_value", "value": true}], "entry_waiting": [{"op": "trace", "value": "entry:waiting"}], "effect_audit": [{"op": "trace", "value": "effect:audit"}]},
+  "script": [{"op": "start"}, {"op": "dispatch", "event": "go"}],
+  "expect": {"state": "/ChoiceGuardDispatchReentrancy/done", "trace": [{"type": "dispatch", "event": "go"}, {"type": "trace", "value": "guard:choice"}, {"type": "dispatch", "event": "audit"}, {"type": "trace", "value": "entry:waiting"}, {"type": "trace", "value": "effect:audit"}, {"type": "stable", "state": "/ChoiceGuardDispatchReentrancy/done"}]}
+}

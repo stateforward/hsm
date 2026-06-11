@@ -1,0 +1,26 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "timer_cancel_on_restart",
+  "description": "Restarting an instance cancels the old pending timer and schedules a fresh timer for the restarted state.",
+  "features": ["timer", "after", "cancellation", "restart"],
+  "model": {
+    "name": "TimerCancelOnRestart",
+    "initial": "waiting",
+    "states": [
+      {"name": "waiting", "transitions": [{"trigger": {"kind": "after", "duration_ms": 100}, "target": "timeout", "effects": [{"behavior": "effect_timeout"}]}]},
+      {"name": "timeout"}
+    ]
+  },
+  "behaviors": {"effect_timeout": [{"op": "trace", "value": "effect:timeout"}]},
+  "script": [{"op": "start"}, {"op": "restart"}, {"op": "tick", "millis": 50}],
+  "expect": {
+    "state": "/TimerCancelOnRestart/waiting",
+    "trace": [
+      {"type": "timer_scheduled"},
+      {"type": "restart"},
+      {"type": "timer_cancelled"},
+      {"type": "timer_scheduled"},
+      {"type": "stable", "state": "/TimerCancelOnRestart/waiting"}
+    ]
+  }
+}

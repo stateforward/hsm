@@ -1,0 +1,134 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "defer_queue_per_instance_cleanup_on_restart",
+  "description": "Restart clears only that recipient's deferred queue while a sibling instance can still replay its deferred event.",
+  "features": ["defer", "queue", "lifecycle", "restart", "dispatch_to", "multi_target"],
+  "model": {
+    "name": "DeferQueuePerInstanceCleanupOnRestart",
+    "initial": "blocked",
+    "states": [
+      {
+        "name": "blocked",
+        "defer": [
+          "work"
+        ],
+        "transitions": [
+          {
+            "on": "release",
+            "target": "ready"
+          }
+        ]
+      },
+      {
+        "name": "ready",
+        "transitions": [
+          {
+            "on": "work",
+            "target": "done",
+            "effects": [
+              {
+                "behavior": "effect_work"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "done"
+      }
+    ]
+  },
+  "instances": [
+    {
+      "id": "restarted"
+    },
+    {
+      "id": "running"
+    }
+  ],
+  "behaviors": {
+    "effect_work": [
+      {
+        "op": "trace",
+        "value": "effect:work"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start",
+      "instance": "restarted"
+    },
+    {
+      "op": "start",
+      "instance": "running"
+    },
+    {
+      "op": "dispatch_to",
+      "targets": [
+        "restarted",
+        "running"
+      ],
+      "event": "work"
+    },
+    {
+      "op": "restart",
+      "instance": "restarted"
+    },
+    {
+      "op": "dispatch_to",
+      "targets": [
+        "restarted",
+        "running"
+      ],
+      "event": "release"
+    }
+  ],
+  "expect": {
+    "states": {
+      "restarted": "/DeferQueuePerInstanceCleanupOnRestart/ready",
+      "running": "/DeferQueuePerInstanceCleanupOnRestart/done"
+    },
+    "queue": {
+      "lifecycle_cleanup": "deferred_events_cleared_only_for_restarted_instance"
+    },
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "work",
+        "target": [
+          "restarted",
+          "running"
+        ]
+      },
+      {
+        "type": "defer",
+        "event": "work"
+      },
+      {
+        "type": "defer",
+        "event": "work"
+      },
+      {
+        "type": "dispatch",
+        "event": "release",
+        "target": [
+          "restarted",
+          "running"
+        ]
+      },
+      {
+        "type": "undefer",
+        "event": "work"
+      },
+      {
+        "type": "trace",
+        "value": "effect:work"
+      },
+      {
+        "type": "stable",
+        "state": "targets:restarted,running"
+      }
+    ]
+  }
+}

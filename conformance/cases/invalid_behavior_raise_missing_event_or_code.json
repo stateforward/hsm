@@ -1,0 +1,18 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_behavior_raise_missing_event_or_code",
+  "mode": "validation",
+  "description": "raise behavior ops must declare either a normal event or an error code.",
+  "features": ["validation"],
+  "model": {
+    "name": "InvalidBehaviorRaiseMissingEventOrCode",
+    "initial": "idle",
+    "states": [{"name": "idle"}]
+  },
+  "behaviors": {
+    "bad": [{"op": "raise"}]
+  },
+  "expect": {
+    "validation": [{"code": "invalid_behavior_op_operand"}]
+  }
+}

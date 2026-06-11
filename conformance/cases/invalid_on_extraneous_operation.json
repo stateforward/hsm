@@ -1,0 +1,49 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_on_extraneous_operation",
+  "mode": "validation",
+  "description": "An on trigger must not declare operation operands from on_call triggers.",
+  "features": ["operation", "validation"],
+  "model": {
+    "name": "InvalidOnExtraneousOperation",
+    "initial": "idle",
+    "operations": {
+      "approve": {
+        "behavior": "operation_approve"
+      }
+    },
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "trigger": {
+              "kind": "on",
+              "event": "go",
+              "operation": "approve"
+            },
+            "target": "done"
+          }
+        ]
+      },
+      {
+        "name": "done"
+      }
+    ]
+  },
+  "behaviors": {
+    "operation_approve": [
+      {
+        "op": "trace",
+        "value": "operation:approve"
+      }
+    ]
+  },
+  "expect": {
+    "validation": [
+      {
+        "code": "extraneous_trigger_operand"
+      }
+    ]
+  }
+}

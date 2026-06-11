@@ -1,0 +1,18 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_behavior_snapshot_extraneous_event",
+  "mode": "validation",
+  "description": "snapshot behavior ops do not accept event operands.",
+  "features": ["validation"],
+  "model": {
+    "name": "InvalidBehaviorSnapshotExtraneousEvent",
+    "initial": "idle",
+    "states": [{"name": "idle"}]
+  },
+  "behaviors": {
+    "bad": [{"op": "snapshot", "event": "go"}]
+  },
+  "expect": {
+    "validation": [{"code": "invalid_behavior_op_operand"}]
+  }
+}

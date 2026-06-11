@@ -1,0 +1,35 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_empty_on_events",
+  "mode": "validation",
+  "description": "An on trigger events array must contain at least one event reference.",
+  "features": ["validation"],
+  "model": {
+    "name": "InvalidEmptyOnEvents",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "trigger": {
+              "kind": "on",
+              "events": []
+            },
+            "target": "done"
+          }
+        ]
+      },
+      {
+        "name": "done"
+      }
+    ]
+  },
+  "expect": {
+    "validation": [
+      {
+        "code": "empty_event_array"
+      }
+    ]
+  }
+}

@@ -1,0 +1,78 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "config_queue_unhandled_event_uses_queue",
+  "description": "A caller-dispatched unhandled event still enters and leaves through the configured queue before completing as a no-op.",
+  "features": [
+    "queue",
+    "event"
+  ],
+  "model": {
+    "name": "ConfigQueueUnhandledEventUsesQueue",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "on": "handled",
+            "target": "done",
+            "effects": [
+              {
+                "behavior": "effect_done"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "done"
+      }
+    ]
+  },
+  "instances": [
+    {
+      "id": "default",
+      "config": {
+        "queue": "trace_fifo"
+      }
+    }
+  ],
+  "behaviors": {
+    "effect_done": [
+      {
+        "op": "trace",
+        "value": "effect:done"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "unknown"
+    }
+  ],
+  "expect": {
+    "state": "/ConfigQueueUnhandledEventUsesQueue/idle",
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "unknown"
+      },
+      {
+        "type": "trace",
+        "value": "queue:push:unknown"
+      },
+      {
+        "type": "trace",
+        "value": "queue:pop:unknown"
+      },
+      {
+        "type": "stable",
+        "state": "/ConfigQueueUnhandledEventUsesQueue/idle"
+      }
+    ]
+  }
+}

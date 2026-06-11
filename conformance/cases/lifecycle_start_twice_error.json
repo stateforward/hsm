@@ -1,0 +1,40 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "lifecycle_start_twice_error",
+  "description": "Starting an already-started instance produces a normalized lifecycle error and leaves the active state unchanged.",
+  "features": ["lifecycle", "error"],
+  "model": {
+    "name": "LifecycleStartTwiceError",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "start"
+    }
+  ],
+  "expect": {
+    "state": "/LifecycleStartTwiceError/idle",
+    "error": {
+      "code": "lifecycle_error",
+      "message_contains": "already"
+    },
+    "trace": [
+      {
+        "type": "error",
+        "code": "lifecycle_error"
+      },
+      {
+        "type": "stable",
+        "state": "/LifecycleStartTwiceError/idle"
+      }
+    ]
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "root_transition_effect_snapshot",
+  "description": "A behavior-side snapshot from a root-owned transition effect observes the source state before target entry.",
+  "features": ["root_transition", "snapshot"],
+  "model": {
+    "name": "RootTransitionEffectSnapshot",
+    "initial": "idle",
+    "states": [
+      {"name": "idle", "exit": [{"behavior": "exit_idle"}]},
+      {"name": "done", "entry": [{"behavior": "entry_done"}]}
+    ],
+    "transitions": [
+      {"on": "go", "target": "done", "effects": [{"behavior": "effect_snapshot"}]}
+    ]
+  },
+  "behaviors": {
+    "exit_idle": [{"op": "trace", "value": "exit:idle"}],
+    "effect_snapshot": [{"op": "snapshot"}],
+    "entry_done": [{"op": "trace", "value": "entry:done"}]
+  },
+  "script": [{"op": "start"}, {"op": "dispatch", "event": "go"}],
+  "expect": {
+    "state": "/RootTransitionEffectSnapshot/done",
+    "trace": [
+      {"type": "dispatch", "event": "go"},
+      {"type": "trace", "value": "exit:idle"},
+      {"type": "snapshot", "state": "/RootTransitionEffectSnapshot/idle"},
+      {"type": "trace", "value": "entry:done"},
+      {"type": "stable", "state": "/RootTransitionEffectSnapshot/done"}
+    ]
+  }
+}

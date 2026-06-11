@@ -1,0 +1,95 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "behavior_dispatch_unhandled_event_noop",
+  "description": "A behavior-dispatched event with no selectable transition is processed as a no-op after the current transition completes.",
+  "features": [
+    "event",
+    "queue",
+    "reentrancy"
+  ],
+  "model": {
+    "name": "BehaviorDispatchUnhandledEventNoop",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "on": "go",
+            "target": "sent",
+            "effects": [
+              {
+                "behavior": "dispatch_unhandled"
+              },
+              {
+                "behavior": "effect_after"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "sent",
+        "entry": [
+          {
+            "behavior": "entry_sent"
+          }
+        ]
+      }
+    ]
+  },
+  "behaviors": {
+    "dispatch_unhandled": [
+      {
+        "op": "dispatch",
+        "event": "audit"
+      }
+    ],
+    "effect_after": [
+      {
+        "op": "trace",
+        "value": "effect:after"
+      }
+    ],
+    "entry_sent": [
+      {
+        "op": "trace",
+        "value": "entry:sent"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "go"
+    }
+  ],
+  "expect": {
+    "state": "/BehaviorDispatchUnhandledEventNoop/sent",
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "go"
+      },
+      {
+        "type": "dispatch",
+        "event": "audit"
+      },
+      {
+        "type": "trace",
+        "value": "effect:after"
+      },
+      {
+        "type": "trace",
+        "value": "entry:sent"
+      },
+      {
+        "type": "stable",
+        "state": "/BehaviorDispatchUnhandledEventNoop/sent"
+      }
+    ]
+  }
+}

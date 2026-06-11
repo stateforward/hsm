@@ -1,0 +1,18 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_behavior_yield_extraneous_value",
+  "mode": "validation",
+  "description": "yield behavior ops do not accept value operands.",
+  "features": ["validation"],
+  "model": {
+    "name": "InvalidBehaviorYieldExtraneousValue",
+    "initial": "idle",
+    "states": [{"name": "idle"}]
+  },
+  "behaviors": {
+    "bad": [{"op": "yield", "value": true}]
+  },
+  "expect": {
+    "validation": [{"code": "invalid_behavior_op_operand"}]
+  }
+}

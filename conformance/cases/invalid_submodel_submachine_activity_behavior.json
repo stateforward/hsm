@@ -1,0 +1,52 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_submodel_submachine_activity_behavior",
+  "mode": "validation",
+  "description": "Activity behavior references declared on nested submachine boundary states inside child models must be validated recursively.",
+  "features": ["submachine", "activity", "validation"],
+  "model": {
+    "name": "InvalidSubmodelSubmachineActivityBehavior",
+    "initial": "drive",
+    "states": [
+      {
+        "name": "drive",
+        "kind": "submachine",
+        "machine": "ChildWithNestedSubmachineActivity"
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "ChildWithNestedSubmachineActivity",
+      "initial": "nested",
+      "states": [
+        {
+          "name": "nested",
+          "kind": "submachine",
+          "machine": "GrandchildWithoutBoundaryActivity",
+          "activity": [
+            {
+              "behavior": "missing_nested_boundary_activity"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "GrandchildWithoutBoundaryActivity",
+      "initial": "idle",
+      "states": [
+        {
+          "name": "idle"
+        }
+      ]
+    }
+  ],
+  "expect": {
+    "validation": [
+      {
+        "code": "missing_behavior"
+      }
+    ]
+  }
+}

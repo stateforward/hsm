@@ -1,0 +1,280 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "history_shallow_vs_deep_nested_restore",
+  "description": "Shallow history restores only the direct child while deep history restores the deepest remembered nested leaf.",
+  "features": [
+    "history",
+    "shallow_history",
+    "deep_history",
+    "nested"
+  ],
+  "model": {
+    "name": "HistoryShallowVsDeepNestedRestore",
+    "initial": "outside",
+    "states": [
+      {
+        "name": "outside",
+        "transitions": [
+          {
+            "on": "enter_shallow",
+            "target": "shallow/h"
+          },
+          {
+            "on": "enter_deep",
+            "target": "deep/h"
+          }
+        ]
+      },
+      {
+        "name": "shallow",
+        "initial": "a",
+        "states": [
+          {
+            "name": "a",
+            "transitions": [
+              {
+                "on": "to_hot",
+                "target": "../b/hot"
+              }
+            ]
+          },
+          {
+            "name": "b",
+            "initial": "cold",
+            "states": [
+              {
+                "name": "cold",
+                "entry": [
+                  {
+                    "behavior": "entry_shallow_cold"
+                  }
+                ]
+              },
+              {
+                "name": "hot",
+                "entry": [
+                  {
+                    "behavior": "entry_shallow_hot"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "name": "h",
+            "kind": "shallow_history",
+            "transitions": [
+              {
+                "target": "a"
+              }
+            ]
+          }
+        ],
+        "transitions": [
+          {
+            "source": "shallow/b/cold",
+            "on": "leave",
+            "target": "outside"
+          },
+          {
+            "source": "shallow/b/hot",
+            "on": "leave",
+            "target": "outside"
+          }
+        ]
+      },
+      {
+        "name": "deep",
+        "initial": "a",
+        "states": [
+          {
+            "name": "a",
+            "transitions": [
+              {
+                "on": "to_hot",
+                "target": "../b/hot"
+              }
+            ]
+          },
+          {
+            "name": "b",
+            "initial": "cold",
+            "states": [
+              {
+                "name": "cold",
+                "entry": [
+                  {
+                    "behavior": "entry_deep_cold"
+                  }
+                ]
+              },
+              {
+                "name": "hot",
+                "entry": [
+                  {
+                    "behavior": "entry_deep_hot"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "name": "h",
+            "kind": "deep_history",
+            "transitions": [
+              {
+                "target": "a"
+              }
+            ]
+          }
+        ],
+        "transitions": [
+          {
+            "source": "deep/b/cold",
+            "on": "leave",
+            "target": "outside"
+          },
+          {
+            "source": "deep/b/hot",
+            "on": "leave",
+            "target": "outside"
+          }
+        ]
+      }
+    ]
+  },
+  "behaviors": {
+    "entry_shallow_cold": [
+      {
+        "op": "trace",
+        "value": "entry:shallow-cold"
+      }
+    ],
+    "entry_shallow_hot": [
+      {
+        "op": "trace",
+        "value": "entry:shallow-hot"
+      }
+    ],
+    "entry_deep_cold": [
+      {
+        "op": "trace",
+        "value": "entry:deep-cold"
+      }
+    ],
+    "entry_deep_hot": [
+      {
+        "op": "trace",
+        "value": "entry:deep-hot"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "enter_shallow"
+    },
+    {
+      "op": "dispatch",
+      "event": "to_hot"
+    },
+    {
+      "op": "dispatch",
+      "event": "leave"
+    },
+    {
+      "op": "dispatch",
+      "event": "enter_shallow"
+    },
+    {
+      "op": "expect",
+      "expect": {
+        "state": "/HistoryShallowVsDeepNestedRestore/shallow/b/cold"
+      }
+    },
+    {
+      "op": "dispatch",
+      "event": "leave"
+    },
+    {
+      "op": "dispatch",
+      "event": "enter_deep"
+    },
+    {
+      "op": "dispatch",
+      "event": "to_hot"
+    },
+    {
+      "op": "dispatch",
+      "event": "leave"
+    },
+    {
+      "op": "dispatch",
+      "event": "enter_deep"
+    }
+  ],
+  "expect": {
+    "state": "/HistoryShallowVsDeepNestedRestore/deep/b/hot",
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "enter_shallow"
+      },
+      {
+        "type": "dispatch",
+        "event": "to_hot"
+      },
+      {
+        "type": "trace",
+        "value": "entry:shallow-hot"
+      },
+      {
+        "type": "dispatch",
+        "event": "leave"
+      },
+      {
+        "type": "dispatch",
+        "event": "enter_shallow"
+      },
+      {
+        "type": "trace",
+        "value": "entry:shallow-cold"
+      },
+      {
+        "type": "dispatch",
+        "event": "leave"
+      },
+      {
+        "type": "dispatch",
+        "event": "enter_deep"
+      },
+      {
+        "type": "dispatch",
+        "event": "to_hot"
+      },
+      {
+        "type": "trace",
+        "value": "entry:deep-hot"
+      },
+      {
+        "type": "dispatch",
+        "event": "leave"
+      },
+      {
+        "type": "dispatch",
+        "event": "enter_deep"
+      },
+      {
+        "type": "trace",
+        "value": "entry:deep-hot"
+      },
+      {
+        "type": "stable",
+        "state": "/HistoryShallowVsDeepNestedRestore/deep/b/hot"
+      }
+    ]
+  }
+}

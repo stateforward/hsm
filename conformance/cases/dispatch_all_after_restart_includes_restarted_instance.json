@@ -1,0 +1,105 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "dispatch_all_after_restart_includes_restarted_instance",
+  "description": "dispatch_all includes a restarted instance in the started-recipient set alongside an untouched started sibling.",
+  "features": ["broadcast", "lifecycle", "restart"],
+  "model": {
+    "name": "DispatchAllAfterRestartIncludesRestartedInstance",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "on": "dirty",
+            "target": "dirty"
+          },
+          {
+            "on": "go",
+            "target": "done",
+            "effects": [
+              {
+                "behavior": "effect_go"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "dirty"
+      },
+      {
+        "name": "done"
+      }
+    ]
+  },
+  "instances": [
+    {
+      "id": "reset"
+    },
+    {
+      "id": "sibling"
+    }
+  ],
+  "behaviors": {
+    "effect_go": [
+      {
+        "op": "trace",
+        "value": "effect:go"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start",
+      "instance": "reset"
+    },
+    {
+      "op": "start",
+      "instance": "sibling"
+    },
+    {
+      "op": "dispatch_to",
+      "target": "reset",
+      "event": "dirty"
+    },
+    {
+      "op": "restart",
+      "instance": "reset"
+    },
+    {
+      "op": "dispatch_all",
+      "event": "go"
+    }
+  ],
+  "expect": {
+    "states": {
+      "reset": "/DispatchAllAfterRestartIncludesRestartedInstance/done",
+      "sibling": "/DispatchAllAfterRestartIncludesRestartedInstance/done"
+    },
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "dirty",
+        "target": "reset"
+      },
+      {
+        "type": "dispatch",
+        "event": "go",
+        "target": "all"
+      },
+      {
+        "type": "trace",
+        "value": "effect:go"
+      },
+      {
+        "type": "trace",
+        "value": "effect:go"
+      },
+      {
+        "type": "stable",
+        "state": "all"
+      }
+    ]
+  }
+}

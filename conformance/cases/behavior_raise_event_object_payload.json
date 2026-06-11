@@ -1,0 +1,102 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "behavior_raise_event_object_payload",
+  "description": "A behavior raise op can emit an event object whose payload is visible to the raised-event handler.",
+  "features": ["queue", "reentrancy", "event_data"],
+  "model": {
+    "name": "BehaviorRaiseEventObjectPayload",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "on": "go",
+            "target": "waiting",
+            "effects": [
+              {
+                "behavior": "raise_audit"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "waiting",
+        "transitions": [
+          {
+            "on": "audit",
+            "guard": {
+              "behavior": "payload_ok"
+            },
+            "target": "done",
+            "effects": [
+              {
+                "behavior": "effect_audit"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "done"
+      }
+    ]
+  },
+  "behaviors": {
+    "raise_audit": [
+      {
+        "op": "raise",
+        "event": {
+          "name": "audit",
+          "data": {
+            "kind": "raised"
+          }
+        }
+      }
+    ],
+    "payload_ok": [
+      {
+        "op": "event_data_equals",
+        "path": "kind",
+        "value": "raised"
+      }
+    ],
+    "effect_audit": [
+      {
+        "op": "trace",
+        "value": "effect:audit"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "go"
+    }
+  ],
+  "expect": {
+    "state": "/BehaviorRaiseEventObjectPayload/done",
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "go"
+      },
+      {
+        "type": "raise",
+        "event": "audit"
+      },
+      {
+        "type": "trace",
+        "value": "effect:audit"
+      },
+      {
+        "type": "stable",
+        "state": "/BehaviorRaiseEventObjectPayload/done"
+      }
+    ]
+  }
+}

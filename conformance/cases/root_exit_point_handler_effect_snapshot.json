@@ -1,0 +1,11 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "root_exit_point_handler_effect_snapshot",
+  "description": "A snapshot from a root-owned exit-point handler effect observes the containing submachine boundary before the handler target is entered.",
+  "features": ["submachine", "exit_point", "source", "snapshot"],
+  "model": {"name": "RootExitPointHandlerEffectSnapshot", "initial": "drive", "states": [{"name": "drive", "kind": "submachine", "machine": "RootExitPointSnapshotChild"}, {"name": "done", "entry": [{"behavior": "entry_done"}]}], "transitions": [{"source": "drive", "trigger": {"kind": "exit_point", "exit_point": "done"}, "target": "done", "effects": [{"behavior": "handler_snapshot"}]}]},
+  "models": [{"name": "RootExitPointSnapshotChild", "initial": "active", "exit_points": [{"name": "done"}], "states": [{"name": "active", "transitions": [{"on": "finish", "target": "done"}]}]}],
+  "behaviors": {"handler_snapshot": [{"op": "snapshot"}], "entry_done": [{"op": "trace", "value": "entry:done"}]},
+  "script": [{"op": "start"}, {"op": "dispatch", "event": "finish"}],
+  "expect": {"state": "/RootExitPointHandlerEffectSnapshot/done", "trace": [{"type": "dispatch", "event": "finish"}, {"type": "snapshot", "state": "/RootExitPointHandlerEffectSnapshot/drive"}, {"type": "trace", "value": "entry:done"}, {"type": "stable", "state": "/RootExitPointHandlerEffectSnapshot/done"}]}
+}

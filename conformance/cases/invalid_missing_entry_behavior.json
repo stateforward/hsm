@@ -1,0 +1,30 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_missing_entry_behavior",
+  "mode": "validation",
+  "description": "State entry behavior references must resolve to declared portable behavior programs.",
+  "features": [
+    "validation"
+  ],
+  "model": {
+    "name": "InvalidMissingEntryBehavior",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle",
+        "entry": [
+          {
+            "behavior": "missing_entry"
+          }
+        ]
+      }
+    ]
+  },
+  "expect": {
+    "validation": [
+      {
+        "code": "missing_behavior"
+      }
+    ]
+  }
+}

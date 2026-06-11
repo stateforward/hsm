@@ -1,0 +1,79 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "get_attr_unknown_fallback",
+  "description": "A get_attr behavior op for an unknown attribute returns no truthy guard value and allows later transitions to match.",
+  "features": ["attribute", "guard", "selection_order", "behavior_attr"],
+  "model": {
+    "name": "GetAttrUnknownFallback",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "on": "go",
+            "guard": {
+              "behavior": "missing_attr_guard"
+            },
+            "target": "wrong"
+          },
+          {
+            "on": "go",
+            "target": "done",
+            "effects": [
+              {
+                "behavior": "effect_done"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "wrong"
+      },
+      {
+        "name": "done"
+      }
+    ]
+  },
+  "behaviors": {
+    "missing_attr_guard": [
+      {
+        "op": "get_attr",
+        "name": "missing"
+      }
+    ],
+    "effect_done": [
+      {
+        "op": "trace",
+        "value": "effect:done"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "go"
+    }
+  ],
+  "expect": {
+    "state": "/GetAttrUnknownFallback/done",
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "go"
+      },
+      {
+        "type": "trace",
+        "value": "effect:done"
+      },
+      {
+        "type": "stable",
+        "state": "/GetAttrUnknownFallback/done"
+      }
+    ]
+  }
+}

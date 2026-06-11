@@ -1,0 +1,139 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "config_queue_per_instance_isolation",
+  "description": "Custom queue hooks are instance-specific and do not affect other instances of sibling models.",
+  "features": [
+    "queue",
+    "dispatch_to",
+    "multi_target"
+  ],
+  "model": {
+    "name": "QueuedModel",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "on": "go",
+            "target": "done",
+            "effects": [
+              {
+                "behavior": "effect_queued"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "done"
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "PlainModel",
+      "initial": "idle",
+      "states": [
+        {
+          "name": "idle",
+          "transitions": [
+            {
+              "on": "go",
+              "target": "done",
+              "effects": [
+                {
+                  "behavior": "effect_plain"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "done"
+        }
+      ]
+    }
+  ],
+  "instances": [
+    {
+      "id": "queued",
+      "model": "QueuedModel",
+      "config": {
+        "queue": "trace_fifo"
+      }
+    },
+    {
+      "id": "plain",
+      "model": "PlainModel"
+    }
+  ],
+  "behaviors": {
+    "effect_queued": [
+      {
+        "op": "trace",
+        "value": "effect:queued"
+      }
+    ],
+    "effect_plain": [
+      {
+        "op": "trace",
+        "value": "effect:plain"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start",
+      "instance": "queued"
+    },
+    {
+      "op": "start",
+      "instance": "plain"
+    },
+    {
+      "op": "dispatch_to",
+      "targets": [
+        "queued",
+        "plain"
+      ],
+      "event": "go"
+    }
+  ],
+  "expect": {
+    "states": {
+      "queued": "/QueuedModel/done",
+      "plain": "/PlainModel/done"
+    },
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "go",
+        "target": [
+          "queued",
+          "plain"
+        ]
+      },
+      {
+        "type": "trace",
+        "value": "queue:push:go"
+      },
+      {
+        "type": "trace",
+        "value": "queue:pop:go"
+      },
+      {
+        "type": "trace",
+        "value": "effect:queued"
+      },
+      {
+        "type": "trace",
+        "value": "effect:plain"
+      },
+      {
+        "type": "stable",
+        "state": "targets:queued,plain"
+      }
+    ]
+  }
+}

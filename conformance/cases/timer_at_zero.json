@@ -1,0 +1,68 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "timer_at_zero",
+  "description": "An at timer with a current-time deadline fires immediately after state entry scheduling.",
+  "features": ["timer", "at"],
+  "model": {
+    "name": "TimerAtZero",
+    "initial": "waiting",
+    "states": [
+      {
+        "name": "waiting",
+        "transitions": [
+          {
+            "trigger": {
+              "kind": "at",
+              "time_ms": 0
+            },
+            "target": "fired",
+            "effects": [
+              {
+                "behavior": "effect_timer"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "fired"
+      }
+    ]
+  },
+  "behaviors": {
+    "effect_timer": [
+      {
+        "op": "trace",
+        "value": "effect:timer"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "tick",
+      "millis": 0
+    }
+  ],
+  "expect": {
+    "state": "/TimerAtZero/fired",
+    "trace": [
+      {
+        "type": "timer_scheduled"
+      },
+      {
+        "type": "timer_fired"
+      },
+      {
+        "type": "trace",
+        "value": "effect:timer"
+      },
+      {
+        "type": "stable",
+        "state": "/TimerAtZero/fired"
+      }
+    ]
+  }
+}

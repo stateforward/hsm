@@ -1,0 +1,10 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "operation_call_from_guard_false_external_fallback_replays",
+  "description": "A behavior-side operation call from a false guard is replayed only after a later external fallback transition enters its target.",
+  "features": ["operation", "on_call", "guard", "queue", "reentrancy", "selection_order"],
+  "model": {"name": "OperationCallFromGuardFalseExternalFallbackReplays", "initial": "idle", "operations": {"audit": {"behavior": "operation_audit"}}, "states": [{"name": "idle", "transitions": [{"on": "go", "guard": {"behavior": "guard_call_false"}, "target": "wrong"}, {"on": "go", "target": "waiting", "effects": [{"behavior": "effect_fallback"}]}]}, {"name": "waiting", "entry": [{"behavior": "entry_waiting"}], "transitions": [{"trigger": {"kind": "on_call", "operation": "audit"}, "target": "audit_handled", "effects": [{"behavior": "effect_audit"}]}]}, {"name": "wrong"}, {"name": "audit_handled"}]},
+  "behaviors": {"operation_audit": [{"op": "trace", "value": "operation:audit"}], "guard_call_false": [{"op": "trace", "value": "guard:before-call"}, {"op": "call", "name": "audit"}, {"op": "return_value", "value": false}], "effect_fallback": [{"op": "trace", "value": "effect:fallback"}], "entry_waiting": [{"op": "trace", "value": "entry:waiting"}], "effect_audit": [{"op": "trace", "value": "effect:audit"}]},
+  "script": [{"op": "start"}, {"op": "dispatch", "event": "go"}],
+  "expect": {"state": "/OperationCallFromGuardFalseExternalFallbackReplays/audit_handled", "trace": [{"type": "dispatch", "event": "go"}, {"type": "trace", "value": "guard:before-call"}, {"type": "trace", "value": "operation:audit"}, {"type": "trace", "value": "effect:fallback"}, {"type": "trace", "value": "entry:waiting"}, {"type": "trace", "value": "effect:audit"}, {"type": "stable", "state": "/OperationCallFromGuardFalseExternalFallbackReplays/audit_handled"}]}
+}

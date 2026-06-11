@@ -1,0 +1,69 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "script_expect_mid_run",
+  "description": "A script expect step can assert intermediate state and attributes before later script steps continue.",
+  "features": ["attribute"],
+  "model": {
+    "name": "ScriptExpectMidRun",
+    "initial": "idle",
+    "attributes": {
+      "count": {
+        "type": "number",
+        "default": 0
+      }
+    },
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "on": "finish",
+            "target": "done"
+          }
+        ]
+      },
+      {
+        "name": "done"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "set",
+      "attribute": "count",
+      "value": 1
+    },
+    {
+      "op": "expect",
+      "expect": {
+        "state": "/ScriptExpectMidRun/idle",
+        "attributes": {
+          "count": 1
+        }
+      }
+    },
+    {
+      "op": "dispatch",
+      "event": "finish"
+    }
+  ],
+  "expect": {
+    "state": "/ScriptExpectMidRun/done",
+    "attributes": {
+      "count": 1
+    },
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "finish"
+      },
+      {
+        "type": "stable",
+        "state": "/ScriptExpectMidRun/done"
+      }
+    ]
+  }
+}

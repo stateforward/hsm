@@ -1,0 +1,233 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "defer_replay_after_exit_point_priority",
+  "description": "A deferred child event replays only after a submachine exit-point handler has completed and entered its target.",
+  "features": [
+    "defer",
+    "queue",
+    "submachine",
+    "exit_point"
+  ],
+  "model": {
+    "name": "DeferReplayAfterExitPointPriority",
+    "initial": "drive",
+    "states": [
+      {
+        "name": "drive",
+        "kind": "submachine",
+        "machine": "ExitPointDeferredReplayChild",
+        "transitions": [
+          {
+            "on": "noise",
+            "target": "wrong",
+            "effects": [
+              {
+                "behavior": "effect_wrong"
+              }
+            ]
+          },
+          {
+            "trigger": {
+              "kind": "exit_point",
+              "exit_point": "done"
+            },
+            "target": "complete",
+            "effects": [
+              {
+                "behavior": "effect_parent_exit_point"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "complete",
+        "entry": [
+          {
+            "behavior": "entry_complete"
+          }
+        ],
+        "transitions": [
+          {
+            "on": "noise",
+            "target": "after_noise",
+            "effects": [
+              {
+                "behavior": "effect_noise"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "after_noise",
+        "entry": [
+          {
+            "behavior": "entry_after_noise"
+          }
+        ]
+      },
+      {
+        "name": "wrong",
+        "entry": [
+          {
+            "behavior": "entry_wrong"
+          }
+        ]
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "ExitPointDeferredReplayChild",
+      "initial": "active",
+      "exit_points": [
+        {
+          "name": "done",
+          "effects": [
+            {
+              "behavior": "effect_exit_point"
+            }
+          ]
+        }
+      ],
+      "states": [
+        {
+          "name": "active",
+          "defer": [
+            "noise"
+          ],
+          "transitions": [
+            {
+              "on": "finish",
+              "target": "done",
+              "effects": [
+                {
+                  "behavior": "effect_child_finish"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "behaviors": {
+    "effect_child_finish": [
+      {
+        "op": "trace",
+        "value": "effect:child-finish"
+      }
+    ],
+    "effect_exit_point": [
+      {
+        "op": "trace",
+        "value": "effect:exit-point"
+      }
+    ],
+    "effect_parent_exit_point": [
+      {
+        "op": "trace",
+        "value": "effect:parent-exit-point"
+      }
+    ],
+    "entry_complete": [
+      {
+        "op": "trace",
+        "value": "enter:complete"
+      }
+    ],
+    "effect_noise": [
+      {
+        "op": "trace",
+        "value": "effect:noise"
+      }
+    ],
+    "entry_after_noise": [
+      {
+        "op": "trace",
+        "value": "enter:after-noise"
+      }
+    ],
+    "effect_wrong": [
+      {
+        "op": "trace",
+        "value": "effect:wrong"
+      }
+    ],
+    "entry_wrong": [
+      {
+        "op": "trace",
+        "value": "enter:wrong"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "noise"
+    },
+    {
+      "op": "dispatch",
+      "event": "finish"
+    }
+  ],
+  "expect": {
+    "state": "/DeferReplayAfterExitPointPriority/after_noise",
+    "queue": {
+      "deferred": [
+        "noise"
+      ],
+      "replay": "after_exit_point_handler"
+    },
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "noise"
+      },
+      {
+        "type": "defer",
+        "event": "noise"
+      },
+      {
+        "type": "dispatch",
+        "event": "finish"
+      },
+      {
+        "type": "undefer",
+        "event": "noise"
+      },
+      {
+        "type": "trace",
+        "value": "effect:child-finish"
+      },
+      {
+        "type": "trace",
+        "value": "effect:exit-point"
+      },
+      {
+        "type": "trace",
+        "value": "effect:parent-exit-point"
+      },
+      {
+        "type": "trace",
+        "value": "enter:complete"
+      },
+      {
+        "type": "trace",
+        "value": "effect:noise"
+      },
+      {
+        "type": "trace",
+        "value": "enter:after-noise"
+      },
+      {
+        "type": "stable",
+        "state": "/DeferReplayAfterExitPointPriority/after_noise"
+      }
+    ]
+  }
+}

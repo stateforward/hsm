@@ -1,0 +1,106 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "event_metadata_get_guard",
+  "description": "A guard can read event metadata supplied by the caller without requiring payload data.",
+  "features": [
+    "event_ownership",
+    "guard"
+  ],
+  "model": {
+    "name": "EventMetadataGetGuard",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "trigger": {
+              "kind": "on",
+              "event": "submit"
+            },
+            "guard": {
+              "behavior": "has_owner"
+            },
+            "target": "accepted",
+            "effects": [
+              {
+                "behavior": "effect_accept"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "accepted",
+        "entry": [
+          {
+            "behavior": "entry_accepted"
+          }
+        ]
+      }
+    ]
+  },
+  "behaviors": {
+    "has_owner": [
+      {
+        "op": "trace",
+        "value": "guard:metadata-get"
+      },
+      {
+        "op": "event_metadata_get",
+        "name": "owner"
+      }
+    ],
+    "effect_accept": [
+      {
+        "op": "trace",
+        "value": "effect:accept"
+      }
+    ],
+    "entry_accepted": [
+      {
+        "op": "trace",
+        "value": "enter:accepted"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": {
+        "name": "submit",
+        "metadata": {
+          "owner": "caller"
+        }
+      }
+    }
+  ],
+  "expect": {
+    "state": "/EventMetadataGetGuard/accepted",
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "submit"
+      },
+      {
+        "type": "trace",
+        "value": "guard:metadata-get"
+      },
+      {
+        "type": "trace",
+        "value": "effect:accept"
+      },
+      {
+        "type": "trace",
+        "value": "enter:accepted"
+      },
+      {
+        "type": "stable",
+        "state": "/EventMetadataGetGuard/accepted"
+      }
+    ]
+  }
+}

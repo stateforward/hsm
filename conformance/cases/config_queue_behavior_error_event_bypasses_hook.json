@@ -1,0 +1,106 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "config_queue_behavior_error_event_bypasses_hook",
+  "description": "A runtime error produced by behavior execution bypasses the configured queue hook while the original regular event uses it.",
+  "features": [
+    "queue",
+    "error"
+  ],
+  "model": {
+    "name": "ConfigQueueBehaviorErrorEventBypassesHook",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "on": "go",
+            "target": "done",
+            "effects": [
+              {
+                "behavior": "effect_raises"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "done",
+        "entry": [
+          {
+            "behavior": "entry_done"
+          }
+        ]
+      }
+    ]
+  },
+  "instances": [
+    {
+      "id": "default",
+      "config": {
+        "queue": "trace_fifo"
+      }
+    }
+  ],
+  "behaviors": {
+    "effect_raises": [
+      {
+        "op": "trace",
+        "value": "effect:before-error"
+      },
+      {
+        "op": "raise",
+        "code": "behavior_error",
+        "value": "boom"
+      }
+    ],
+    "entry_done": [
+      {
+        "op": "trace",
+        "value": "entry:done"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "go"
+    }
+  ],
+  "expect": {
+    "state": "/ConfigQueueBehaviorErrorEventBypassesHook/idle",
+    "error": {
+      "code": "behavior_error",
+      "message_contains": "boom"
+    },
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "go"
+      },
+      {
+        "type": "trace",
+        "value": "queue:push:go"
+      },
+      {
+        "type": "trace",
+        "value": "queue:pop:go"
+      },
+      {
+        "type": "trace",
+        "value": "effect:before-error"
+      },
+      {
+        "type": "error",
+        "code": "behavior_error"
+      },
+      {
+        "type": "stable",
+        "state": "/ConfigQueueBehaviorErrorEventBypassesHook/idle"
+      }
+    ]
+  }
+}

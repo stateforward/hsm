@@ -1,0 +1,50 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_submodel_transition_behavior",
+  "mode": "validation",
+  "description": "Transition behavior references inside child models must be validated recursively.",
+  "features": ["submachine", "validation"],
+  "model": {
+    "name": "InvalidSubmodelTransitionBehavior",
+    "initial": "drive",
+    "states": [
+      {
+        "name": "drive",
+        "kind": "submachine",
+        "machine": "ChildWithMissingTransitionBehavior"
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "ChildWithMissingTransitionBehavior",
+      "initial": "idle",
+      "states": [
+        {
+          "name": "idle",
+          "transitions": [
+            {
+              "on": "go",
+              "target": "done",
+              "effects": [
+                {
+                  "behavior": "missing_child_effect"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "done"
+        }
+      ]
+    }
+  ],
+  "expect": {
+    "validation": [
+      {
+        "code": "missing_behavior"
+      }
+    ]
+  }
+}

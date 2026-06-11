@@ -1,0 +1,80 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "multiple_activity_error_startup",
+  "description": "A failing activity startup in an ordered activity array reports an error without preventing later activities from being started.",
+  "features": ["activity", "async", "error", "selection_order"],
+  "model": {
+    "name": "MultipleActivityErrorStartup",
+    "initial": "active",
+    "states": [
+      {
+        "name": "active",
+        "activity": [
+          {
+            "behavior": "activity_fail"
+          },
+          {
+            "behavior": "activity_after"
+          }
+        ]
+      }
+    ]
+  },
+  "behaviors": {
+    "activity_fail": [
+      {
+        "op": "trace",
+        "value": "activity:fail"
+      },
+      {
+        "op": "raise",
+        "code": "activity_error",
+        "value": "activity boom"
+      }
+    ],
+    "activity_after": [
+      {
+        "op": "trace",
+        "value": "activity:after"
+      },
+      {
+        "op": "sleep",
+        "millis": 1000
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "sleep",
+      "millis": 0
+    }
+  ],
+  "expect": {
+    "state": "/MultipleActivityErrorStartup/active",
+    "error": {
+      "code": "activity_error",
+      "message_contains": "activity boom"
+    },
+    "trace": [
+      {
+        "type": "trace",
+        "value": "activity:fail"
+      },
+      {
+        "type": "error",
+        "code": "activity_error"
+      },
+      {
+        "type": "trace",
+        "value": "activity:after"
+      },
+      {
+        "type": "stable",
+        "state": "/MultipleActivityErrorStartup/active"
+      }
+    ]
+  }
+}

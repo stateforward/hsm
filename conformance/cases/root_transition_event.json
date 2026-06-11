@@ -1,0 +1,93 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "root_transition_event",
+  "description": "A root-owned event transition without an explicit source acts as a global transition from the active state.",
+  "features": ["core", "entry", "exit", "effect"],
+  "model": {
+    "name": "RootTransitionEvent",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle",
+        "exit": [
+          {
+            "behavior": "exit_idle"
+          }
+        ]
+      },
+      {
+        "name": "done",
+        "entry": [
+          {
+            "behavior": "entry_done"
+          }
+        ]
+      }
+    ],
+    "transitions": [
+      {
+        "on": "go",
+        "target": "done",
+        "effects": [
+          {
+            "behavior": "effect_go"
+          }
+        ]
+      }
+    ]
+  },
+  "behaviors": {
+    "exit_idle": [
+      {
+        "op": "trace",
+        "value": "exit:idle"
+      }
+    ],
+    "effect_go": [
+      {
+        "op": "trace",
+        "value": "effect:go"
+      }
+    ],
+    "entry_done": [
+      {
+        "op": "trace",
+        "value": "entry:done"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "go"
+    }
+  ],
+  "expect": {
+    "state": "/RootTransitionEvent/done",
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "go"
+      },
+      {
+        "type": "trace",
+        "value": "exit:idle"
+      },
+      {
+        "type": "trace",
+        "value": "effect:go"
+      },
+      {
+        "type": "trace",
+        "value": "entry:done"
+      },
+      {
+        "type": "stable",
+        "state": "/RootTransitionEvent/done"
+      }
+    ]
+  }
+}

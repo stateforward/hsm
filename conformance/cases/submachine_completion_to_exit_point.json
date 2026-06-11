@@ -1,0 +1,174 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "submachine_completion_to_exit_point",
+  "description": "A child composite completion transition can target an exit point that is then handled by the containing submachine state.",
+  "features": [
+    "submachine",
+    "exit_point",
+    "completion",
+    "final",
+    "nested"
+  ],
+  "model": {
+    "name": "SubmachineCompletionExit",
+    "initial": "drive",
+    "states": [
+      {
+        "name": "drive",
+        "kind": "submachine",
+        "machine": "CompletionExitChild",
+        "transitions": [
+          {
+            "trigger": {
+              "kind": "exit_point",
+              "exit_point": "completed"
+            },
+            "target": "outside",
+            "effects": [
+              {
+                "behavior": "effect_parent_exit"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "outside",
+        "entry": [
+          {
+            "behavior": "entry_outside"
+          }
+        ]
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "CompletionExitChild",
+      "initial": "work",
+      "exit_points": [
+        {
+          "name": "completed",
+          "effects": [
+            {
+              "behavior": "effect_exit_point"
+            }
+          ]
+        }
+      ],
+      "states": [
+        {
+          "name": "work",
+          "initial": "active",
+          "states": [
+            {
+              "name": "active",
+              "transitions": [
+                {
+                  "on": "finish",
+                  "target": "../done",
+                  "effects": [
+                    {
+                      "behavior": "effect_finish"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "done",
+              "kind": "final"
+            }
+          ],
+          "transitions": [
+            {
+              "trigger": {
+                "kind": "completion"
+              },
+              "target": "completed",
+              "effects": [
+                {
+                  "behavior": "effect_work_complete"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "behaviors": {
+    "effect_finish": [
+      {
+        "op": "trace",
+        "value": "effect:finish"
+      }
+    ],
+    "effect_work_complete": [
+      {
+        "op": "trace",
+        "value": "effect:work-complete"
+      }
+    ],
+    "effect_exit_point": [
+      {
+        "op": "trace",
+        "value": "effect:exit-point"
+      }
+    ],
+    "effect_parent_exit": [
+      {
+        "op": "trace",
+        "value": "effect:parent-exit"
+      }
+    ],
+    "entry_outside": [
+      {
+        "op": "trace",
+        "value": "enter:outside"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "finish"
+    }
+  ],
+  "expect": {
+    "state": "/SubmachineCompletionExit/outside",
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "finish"
+      },
+      {
+        "type": "trace",
+        "value": "effect:finish"
+      },
+      {
+        "type": "trace",
+        "value": "effect:work-complete"
+      },
+      {
+        "type": "trace",
+        "value": "effect:exit-point"
+      },
+      {
+        "type": "trace",
+        "value": "effect:parent-exit"
+      },
+      {
+        "type": "trace",
+        "value": "enter:outside"
+      },
+      {
+        "type": "stable",
+        "state": "/SubmachineCompletionExit/outside"
+      }
+    ]
+  }
+}

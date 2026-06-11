@@ -1,0 +1,10 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "choice_transition_effect_order",
+  "description": "Choice pseudostate transition effects run before the selected target is entered.",
+  "features": ["choice", "effect"],
+  "model": {"name": "ChoiceTransitionEffectOrder", "initial": "idle", "states": [{"name": "idle", "transitions": [{"on": "go", "target": "choice"}]}, {"name": "choice", "kind": "choice", "transitions": [{"target": "done", "effects": [{"behavior": "choice_effect"}]}]}, {"name": "done", "entry": [{"behavior": "entry_done"}]}]},
+  "behaviors": {"choice_effect": [{"op": "trace", "value": "effect:choice"}], "entry_done": [{"op": "trace", "value": "entry:done"}]},
+  "script": [{"op": "start"}, {"op": "dispatch", "event": "go"}],
+  "expect": {"state": "/ChoiceTransitionEffectOrder/done", "trace": [{"type": "dispatch", "event": "go"}, {"type": "trace", "value": "effect:choice"}, {"type": "trace", "value": "entry:done"}, {"type": "stable", "state": "/ChoiceTransitionEffectOrder/done"}]}
+}

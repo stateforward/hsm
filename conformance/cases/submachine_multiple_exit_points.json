@@ -1,0 +1,173 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "submachine_multiple_exit_points",
+  "description": "Multiple exit points from the same child machine route to the matching parent transition.",
+  "features": [
+    "submachine",
+    "exit_point"
+  ],
+  "model": {
+    "name": "SubmachineMultipleExits",
+    "initial": "drive",
+    "states": [
+      {
+        "name": "drive",
+        "kind": "submachine",
+        "machine": "ExitChoiceChild",
+        "transitions": [
+          {
+            "trigger": {
+              "kind": "exit_point",
+              "exit_point": "ok"
+            },
+            "target": "success",
+            "effects": [
+              {
+                "behavior": "effect_ok"
+              }
+            ]
+          },
+          {
+            "trigger": {
+              "kind": "exit_point",
+              "exit_point": "fail"
+            },
+            "target": "failure",
+            "effects": [
+              {
+                "behavior": "effect_fail"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "success",
+        "entry": [
+          {
+            "behavior": "entry_success"
+          }
+        ]
+      },
+      {
+        "name": "failure",
+        "entry": [
+          {
+            "behavior": "entry_failure"
+          }
+        ]
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "ExitChoiceChild",
+      "initial": "running",
+      "exit_points": [
+        {
+          "name": "ok"
+        },
+        {
+          "name": "fail"
+        }
+      ],
+      "states": [
+        {
+          "name": "running",
+          "transitions": [
+            {
+              "on": "fail",
+              "target": "fail",
+              "effects": [
+                {
+                  "behavior": "effect_child_fail"
+                }
+              ]
+            },
+            {
+              "on": "ok",
+              "target": "ok",
+              "effects": [
+                {
+                  "behavior": "effect_child_ok"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "behaviors": {
+    "effect_child_fail": [
+      {
+        "op": "trace",
+        "value": "effect:child-fail"
+      }
+    ],
+    "effect_child_ok": [
+      {
+        "op": "trace",
+        "value": "effect:child-ok"
+      }
+    ],
+    "effect_ok": [
+      {
+        "op": "trace",
+        "value": "effect:ok"
+      }
+    ],
+    "effect_fail": [
+      {
+        "op": "trace",
+        "value": "effect:fail"
+      }
+    ],
+    "entry_success": [
+      {
+        "op": "trace",
+        "value": "enter:success"
+      }
+    ],
+    "entry_failure": [
+      {
+        "op": "trace",
+        "value": "enter:failure"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "fail"
+    }
+  ],
+  "expect": {
+    "state": "/SubmachineMultipleExits/failure",
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "fail"
+      },
+      {
+        "type": "trace",
+        "value": "effect:child-fail"
+      },
+      {
+        "type": "trace",
+        "value": "effect:fail"
+      },
+      {
+        "type": "trace",
+        "value": "enter:failure"
+      },
+      {
+        "type": "stable",
+        "state": "/SubmachineMultipleExits/failure"
+      }
+    ]
+  }
+}

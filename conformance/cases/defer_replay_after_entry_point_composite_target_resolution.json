@@ -1,0 +1,284 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "defer_replay_after_entry_point_composite_target_resolution",
+  "description": "A deferred event replays only after a submachine entry point resolves its composite target to the concrete nested leaf.",
+  "features": [
+    "defer",
+    "queue",
+    "submachine",
+    "entry_point",
+    "nested"
+  ],
+  "model": {
+    "name": "DeferReplayAfterEntryPointCompositeTargetResolution",
+    "initial": "blocked",
+    "states": [
+      {
+        "name": "blocked",
+        "defer": [
+          "work"
+        ],
+        "exit": [
+          {
+            "behavior": "exit_blocked"
+          }
+        ],
+        "transitions": [
+          {
+            "on": "release",
+            "target": "drive",
+            "entry_point": "warm",
+            "effects": [
+              {
+                "behavior": "effect_release"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "drive",
+        "kind": "submachine",
+        "machine": "EntryPointCompositeDeferredReplayChild",
+        "transitions": [
+          {
+            "on": "work",
+            "target": "wrong_parent",
+            "effects": [
+              {
+                "behavior": "effect_wrong_parent"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "wrong_parent",
+        "entry": [
+          {
+            "behavior": "entry_wrong_parent"
+          }
+        ]
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "EntryPointCompositeDeferredReplayChild",
+      "initial": "cold",
+      "entry_points": [
+        {
+          "name": "warm",
+          "target": "comp",
+          "effects": [
+            {
+              "behavior": "effect_warm"
+            }
+          ]
+        }
+      ],
+      "states": [
+        {
+          "name": "cold"
+        },
+        {
+          "name": "comp",
+          "initial": "leaf",
+          "entry": [
+            {
+              "behavior": "entry_comp"
+            }
+          ],
+          "transitions": [
+            {
+              "on": "work",
+              "target": "wrong_child",
+              "effects": [
+                {
+                  "behavior": "effect_wrong_child"
+                }
+              ]
+            }
+          ],
+          "states": [
+            {
+              "name": "leaf",
+              "entry": [
+                {
+                  "behavior": "entry_leaf"
+                }
+              ],
+              "transitions": [
+                {
+                  "on": "work",
+                  "target": "../done",
+                  "effects": [
+                    {
+                      "behavior": "effect_work"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "done",
+              "entry": [
+                {
+                  "behavior": "entry_done"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "wrong_child",
+          "entry": [
+            {
+              "behavior": "entry_wrong_child"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "behaviors": {
+    "exit_blocked": [
+      {
+        "op": "trace",
+        "value": "exit:blocked"
+      }
+    ],
+    "effect_release": [
+      {
+        "op": "trace",
+        "value": "effect:release"
+      }
+    ],
+    "effect_warm": [
+      {
+        "op": "trace",
+        "value": "effect:warm"
+      }
+    ],
+    "entry_comp": [
+      {
+        "op": "trace",
+        "value": "entry:comp"
+      }
+    ],
+    "entry_leaf": [
+      {
+        "op": "trace",
+        "value": "entry:leaf"
+      }
+    ],
+    "effect_work": [
+      {
+        "op": "trace",
+        "value": "effect:work"
+      }
+    ],
+    "entry_done": [
+      {
+        "op": "trace",
+        "value": "entry:done"
+      }
+    ],
+    "effect_wrong_parent": [
+      {
+        "op": "trace",
+        "value": "effect:wrong-parent"
+      }
+    ],
+    "entry_wrong_parent": [
+      {
+        "op": "trace",
+        "value": "entry:wrong-parent"
+      }
+    ],
+    "effect_wrong_child": [
+      {
+        "op": "trace",
+        "value": "effect:wrong-child"
+      }
+    ],
+    "entry_wrong_child": [
+      {
+        "op": "trace",
+        "value": "entry:wrong-child"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "work"
+    },
+    {
+      "op": "dispatch",
+      "event": "release"
+    }
+  ],
+  "expect": {
+    "state": "/DeferReplayAfterEntryPointCompositeTargetResolution/drive/EntryPointCompositeDeferredReplayChild/comp/done",
+    "queue": {
+      "deferred": [
+        "work"
+      ],
+      "replay": "after_entry_point_composite_target_resolution"
+    },
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "work"
+      },
+      {
+        "type": "defer",
+        "event": "work"
+      },
+      {
+        "type": "dispatch",
+        "event": "release"
+      },
+      {
+        "type": "undefer",
+        "event": "work"
+      },
+      {
+        "type": "trace",
+        "value": "exit:blocked"
+      },
+      {
+        "type": "trace",
+        "value": "effect:release"
+      },
+      {
+        "type": "trace",
+        "value": "effect:warm"
+      },
+      {
+        "type": "trace",
+        "value": "entry:comp"
+      },
+      {
+        "type": "trace",
+        "value": "entry:leaf"
+      },
+      {
+        "type": "trace",
+        "value": "effect:work"
+      },
+      {
+        "type": "trace",
+        "value": "entry:done"
+      },
+      {
+        "type": "stable",
+        "state": "/DeferReplayAfterEntryPointCompositeTargetResolution/drive/EntryPointCompositeDeferredReplayChild/comp/done"
+      }
+    ]
+  }
+}

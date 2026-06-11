@@ -1,0 +1,72 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "group_dispatch_unknown_group_error",
+  "description": "Runtime group dispatch to an unknown group id is reported as a normalized conformance error.",
+  "features": ["group", "error"],
+  "model": {
+    "name": "GroupDispatchUnknownGroupError",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle"
+      }
+    ]
+  },
+  "instances": [
+    {
+      "id": "one"
+    },
+    {
+      "id": "two"
+    }
+  ],
+  "groups": [
+    {
+      "id": "known",
+      "members": [
+        "one",
+        "two"
+      ]
+    }
+  ],
+  "script": [
+    {
+      "op": "start",
+      "instance": "one"
+    },
+    {
+      "op": "start",
+      "instance": "two"
+    },
+    {
+      "op": "group_dispatch",
+      "group": "missing",
+      "event": "go"
+    }
+  ],
+  "expect": {
+    "states": {
+      "one": "/GroupDispatchUnknownGroupError/idle",
+      "two": "/GroupDispatchUnknownGroupError/idle"
+    },
+    "error": {
+      "code": "runtime_error",
+      "message_contains": "group"
+    },
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "go",
+        "target": "missing"
+      },
+      {
+        "type": "error",
+        "code": "runtime_error"
+      },
+      {
+        "type": "stable",
+        "state": "/GroupDispatchUnknownGroupError/idle"
+      }
+    ]
+  }
+}

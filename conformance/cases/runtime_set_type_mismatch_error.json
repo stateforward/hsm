@@ -1,0 +1,56 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "runtime_set_type_mismatch_error",
+  "description": "Runtime set with a value of the wrong type produces a normalized runtime error and preserves the old attribute value.",
+  "features": ["attribute", "on_set", "error"],
+  "model": {
+    "name": "RuntimeSetTypeMismatchError",
+    "initial": "idle",
+    "attributes": {
+      "enabled": {
+        "type": "boolean",
+        "default": false
+      }
+    },
+    "states": [
+      {
+        "name": "idle"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "set",
+      "attribute": "enabled",
+      "value": "yes"
+    }
+  ],
+  "expect": {
+    "state": "/RuntimeSetTypeMismatchError/idle",
+    "attributes": {
+      "enabled": false
+    },
+    "error": {
+      "code": "attribute_error",
+      "message_contains": "enabled"
+    },
+    "trace": [
+      {
+        "type": "set",
+        "attribute": "enabled",
+        "value": "yes"
+      },
+      {
+        "type": "error",
+        "code": "attribute_error"
+      },
+      {
+        "type": "stable",
+        "state": "/RuntimeSetTypeMismatchError/idle"
+      }
+    ]
+  }
+}

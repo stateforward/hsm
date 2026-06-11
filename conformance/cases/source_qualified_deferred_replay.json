@@ -1,0 +1,120 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "source_qualified_deferred_replay",
+  "description": "A deferred event replays against the new active state and can select a parent-owned source-qualified transition for that state.",
+  "features": [
+    "source",
+    "defer",
+    "queue"
+  ],
+  "model": {
+    "name": "SourceDeferredReplay",
+    "initial": "parent",
+    "states": [
+      {
+        "name": "parent",
+        "initial": "blocked",
+        "transitions": [
+          {
+            "source": "parent/ready",
+            "on": "work",
+            "target": "done",
+            "effects": [
+              {
+                "behavior": "effect_work"
+              }
+            ]
+          }
+        ],
+        "states": [
+          {
+            "name": "blocked",
+            "defer": [
+              "work"
+            ],
+            "transitions": [
+              {
+                "on": "release",
+                "target": "../ready"
+              }
+            ]
+          },
+          {
+            "name": "ready"
+          }
+        ]
+      },
+      {
+        "name": "done",
+        "entry": [
+          {
+            "behavior": "entry_done"
+          }
+        ]
+      }
+    ]
+  },
+  "behaviors": {
+    "effect_work": [
+      {
+        "op": "trace",
+        "value": "effect:source-work"
+      }
+    ],
+    "entry_done": [
+      {
+        "op": "trace",
+        "value": "enter:done"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "work"
+    },
+    {
+      "op": "dispatch",
+      "event": "release"
+    }
+  ],
+  "expect": {
+    "state": "/SourceDeferredReplay/done",
+    "queue": {
+      "deferred_source": "replay_uses_new_active_state"
+    },
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "work"
+      },
+      {
+        "type": "defer",
+        "event": "work"
+      },
+      {
+        "type": "dispatch",
+        "event": "release"
+      },
+      {
+        "type": "undefer",
+        "event": "work"
+      },
+      {
+        "type": "trace",
+        "value": "effect:source-work"
+      },
+      {
+        "type": "trace",
+        "value": "enter:done"
+      },
+      {
+        "type": "stable",
+        "state": "/SourceDeferredReplay/done"
+      }
+    ]
+  }
+}

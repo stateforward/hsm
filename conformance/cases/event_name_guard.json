@@ -1,0 +1,116 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "event_name_guard",
+  "description": "A guard can read the current event name and reject or accept same-state transitions accordingly.",
+  "features": [
+    "event",
+    "guard"
+  ],
+  "model": {
+    "name": "EventNameGuard",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "trigger": {
+              "kind": "on",
+              "events": [
+                "wrong",
+                "right"
+              ]
+            },
+            "guard": {
+              "behavior": "is_right"
+            },
+            "target": "done",
+            "effects": [
+              {
+                "behavior": "effect_done"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "done",
+        "entry": [
+          {
+            "behavior": "entry_done"
+          }
+        ]
+      }
+    ]
+  },
+  "behaviors": {
+    "is_right": [
+      {
+        "op": "trace",
+        "value": "guard:event-name"
+      },
+      {
+        "op": "event_name_equals",
+        "value": "right"
+      }
+    ],
+    "effect_done": [
+      {
+        "op": "trace",
+        "value": "effect:done"
+      }
+    ],
+    "entry_done": [
+      {
+        "op": "trace",
+        "value": "enter:done"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "wrong"
+    },
+    {
+      "op": "dispatch",
+      "event": "right"
+    }
+  ],
+  "expect": {
+    "state": "/EventNameGuard/done",
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "wrong"
+      },
+      {
+        "type": "trace",
+        "value": "guard:event-name"
+      },
+      {
+        "type": "dispatch",
+        "event": "right"
+      },
+      {
+        "type": "trace",
+        "value": "guard:event-name"
+      },
+      {
+        "type": "trace",
+        "value": "effect:done"
+      },
+      {
+        "type": "trace",
+        "value": "enter:done"
+      },
+      {
+        "type": "stable",
+        "state": "/EventNameGuard/done"
+      }
+    ]
+  }
+}

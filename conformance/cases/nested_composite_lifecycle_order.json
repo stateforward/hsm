@@ -1,0 +1,137 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "nested_composite_lifecycle_order",
+  "description": "Stopping and restarting an ordinary nested composite exits the active leaf before its parent composite, and restart re-enters the default nested path.",
+  "features": [
+    "lifecycle",
+    "restart",
+    "stop",
+    "entry",
+    "exit",
+    "nested"
+  ],
+  "model": {
+    "name": "NestedCompositeLifecycleOrder",
+    "initial": "outer",
+    "states": [
+      {
+        "name": "outer",
+        "initial": "inner",
+        "entry": [
+          {
+            "behavior": "entry_outer"
+          }
+        ],
+        "exit": [
+          {
+            "behavior": "exit_outer"
+          }
+        ],
+        "states": [
+          {
+            "name": "inner",
+            "entry": [
+              {
+                "behavior": "entry_inner"
+              }
+            ],
+            "exit": [
+              {
+                "behavior": "exit_inner"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "behaviors": {
+    "entry_outer": [
+      {
+        "op": "trace",
+        "value": "enter:outer"
+      }
+    ],
+    "exit_outer": [
+      {
+        "op": "trace",
+        "value": "exit:outer"
+      }
+    ],
+    "entry_inner": [
+      {
+        "op": "trace",
+        "value": "enter:inner"
+      }
+    ],
+    "exit_inner": [
+      {
+        "op": "trace",
+        "value": "exit:inner"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "restart"
+    },
+    {
+      "op": "stop"
+    },
+    {
+      "op": "start"
+    }
+  ],
+  "expect": {
+    "state": "/NestedCompositeLifecycleOrder/outer/inner",
+    "trace": [
+      {
+        "type": "trace",
+        "value": "enter:outer"
+      },
+      {
+        "type": "trace",
+        "value": "enter:inner"
+      },
+      {
+        "type": "trace",
+        "value": "exit:inner"
+      },
+      {
+        "type": "trace",
+        "value": "exit:outer"
+      },
+      {
+        "type": "trace",
+        "value": "enter:outer"
+      },
+      {
+        "type": "trace",
+        "value": "enter:inner"
+      },
+      {
+        "type": "trace",
+        "value": "exit:inner"
+      },
+      {
+        "type": "trace",
+        "value": "exit:outer"
+      },
+      {
+        "type": "trace",
+        "value": "enter:outer"
+      },
+      {
+        "type": "trace",
+        "value": "enter:inner"
+      },
+      {
+        "type": "stable",
+        "state": "/NestedCompositeLifecycleOrder/outer/inner"
+      }
+    ]
+  }
+}

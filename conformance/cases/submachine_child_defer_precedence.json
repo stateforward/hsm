@@ -1,0 +1,159 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "submachine_child_defer_precedence",
+  "description": "A child state defer prevents an event from bubbling to the containing submachine state until the child leaves the deferring state.",
+  "features": [
+    "submachine",
+    "defer",
+    "queue"
+  ],
+  "model": {
+    "name": "SubmachineChildDefer",
+    "initial": "drive",
+    "states": [
+      {
+        "name": "drive",
+        "kind": "submachine",
+        "machine": "ChildDeferMachine",
+        "transitions": [
+          {
+            "on": "hold",
+            "target": "outside",
+            "effects": [
+              {
+                "behavior": "effect_parent_hold"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "outside",
+        "entry": [
+          {
+            "behavior": "entry_outside"
+          }
+        ]
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "ChildDeferMachine",
+      "initial": "blocked",
+      "states": [
+        {
+          "name": "blocked",
+          "defer": [
+            "hold"
+          ],
+          "transitions": [
+            {
+              "on": "release",
+              "target": "ready",
+              "effects": [
+                {
+                  "behavior": "effect_release"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "ready",
+          "entry": [
+            {
+              "behavior": "entry_ready"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "behaviors": {
+    "effect_parent_hold": [
+      {
+        "op": "trace",
+        "value": "effect:parent_hold"
+      }
+    ],
+    "effect_release": [
+      {
+        "op": "trace",
+        "value": "effect:release"
+      }
+    ],
+    "entry_ready": [
+      {
+        "op": "trace",
+        "value": "enter:ready"
+      }
+    ],
+    "entry_outside": [
+      {
+        "op": "trace",
+        "value": "enter:outside"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "hold"
+    },
+    {
+      "op": "dispatch",
+      "event": "release"
+    }
+  ],
+  "expect": {
+    "state": "/SubmachineChildDefer/outside",
+    "queue": {
+      "deferred": [
+        "hold"
+      ],
+      "replay": "fifo"
+    },
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "hold"
+      },
+      {
+        "type": "defer",
+        "event": "hold"
+      },
+      {
+        "type": "dispatch",
+        "event": "release"
+      },
+      {
+        "type": "undefer",
+        "event": "hold"
+      },
+      {
+        "type": "trace",
+        "value": "effect:release"
+      },
+      {
+        "type": "trace",
+        "value": "enter:ready"
+      },
+      {
+        "type": "trace",
+        "value": "effect:parent_hold"
+      },
+      {
+        "type": "trace",
+        "value": "enter:outside"
+      },
+      {
+        "type": "stable",
+        "state": "/SubmachineChildDefer/outside"
+      }
+    ]
+  }
+}

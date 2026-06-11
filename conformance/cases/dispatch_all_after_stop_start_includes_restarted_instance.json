@@ -1,0 +1,109 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "dispatch_all_after_stop_start_includes_restarted_instance",
+  "description": "dispatch_all includes an instance that was stopped and started again alongside an untouched started sibling.",
+  "features": ["broadcast", "lifecycle", "stop"],
+  "model": {
+    "name": "DispatchAllAfterStopStartIncludesRestartedInstance",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "on": "dirty",
+            "target": "dirty"
+          },
+          {
+            "on": "go",
+            "target": "done",
+            "effects": [
+              {
+                "behavior": "effect_go"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "dirty"
+      },
+      {
+        "name": "done"
+      }
+    ]
+  },
+  "instances": [
+    {
+      "id": "reset"
+    },
+    {
+      "id": "sibling"
+    }
+  ],
+  "behaviors": {
+    "effect_go": [
+      {
+        "op": "trace",
+        "value": "effect:go"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start",
+      "instance": "reset"
+    },
+    {
+      "op": "start",
+      "instance": "sibling"
+    },
+    {
+      "op": "dispatch_to",
+      "target": "reset",
+      "event": "dirty"
+    },
+    {
+      "op": "stop",
+      "instance": "reset"
+    },
+    {
+      "op": "start",
+      "instance": "reset"
+    },
+    {
+      "op": "dispatch_all",
+      "event": "go"
+    }
+  ],
+  "expect": {
+    "states": {
+      "reset": "/DispatchAllAfterStopStartIncludesRestartedInstance/done",
+      "sibling": "/DispatchAllAfterStopStartIncludesRestartedInstance/done"
+    },
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "dirty",
+        "target": "reset"
+      },
+      {
+        "type": "dispatch",
+        "event": "go",
+        "target": "all"
+      },
+      {
+        "type": "trace",
+        "value": "effect:go"
+      },
+      {
+        "type": "trace",
+        "value": "effect:go"
+      },
+      {
+        "type": "stable",
+        "state": "all"
+      }
+    ]
+  }
+}

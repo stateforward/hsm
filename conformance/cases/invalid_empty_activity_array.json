@@ -1,0 +1,24 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_empty_activity_array",
+  "mode": "validation",
+  "description": "State activity behavior arrays must not be empty when present.",
+  "features": ["activity", "validation"],
+  "model": {
+    "name": "InvalidEmptyActivityArray",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle",
+        "activity": []
+      }
+    ]
+  },
+  "expect": {
+    "validation": [
+      {
+        "code": "empty_behavior_array"
+      }
+    ]
+  }
+}

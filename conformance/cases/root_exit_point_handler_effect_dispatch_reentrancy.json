@@ -1,0 +1,11 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "root_exit_point_handler_effect_dispatch_reentrancy",
+  "description": "A dispatch behavior op from a root-owned exit-point handler effect is queued until the handler target is entered.",
+  "features": ["submachine", "exit_point", "source", "queue", "reentrancy"],
+  "model": {"name": "RootExitPointHandlerEffectDispatchReentrancy", "initial": "drive", "states": [{"name": "drive", "kind": "submachine", "machine": "RootExitPointDispatchChild"}, {"name": "waiting", "entry": [{"behavior": "entry_waiting"}], "transitions": [{"on": "audit", "target": "audited", "effects": [{"behavior": "effect_audit"}]}]}, {"name": "audited"}], "transitions": [{"source": "drive", "trigger": {"kind": "exit_point", "exit_point": "done"}, "target": "waiting", "effects": [{"behavior": "handler_dispatch"}]}]},
+  "models": [{"name": "RootExitPointDispatchChild", "initial": "active", "exit_points": [{"name": "done"}], "states": [{"name": "active", "transitions": [{"on": "finish", "target": "done"}]}]}],
+  "behaviors": {"handler_dispatch": [{"op": "dispatch", "event": "audit"}, {"op": "trace", "value": "effect:handler"}], "entry_waiting": [{"op": "trace", "value": "entry:waiting"}], "effect_audit": [{"op": "trace", "value": "effect:audit"}]},
+  "script": [{"op": "start"}, {"op": "dispatch", "event": "finish"}],
+  "expect": {"state": "/RootExitPointHandlerEffectDispatchReentrancy/audited", "trace": [{"type": "dispatch", "event": "finish"}, {"type": "dispatch", "event": "audit"}, {"type": "trace", "value": "effect:handler"}, {"type": "trace", "value": "entry:waiting"}, {"type": "trace", "value": "effect:audit"}, {"type": "stable", "state": "/RootExitPointHandlerEffectDispatchReentrancy/audited"}]}
+}

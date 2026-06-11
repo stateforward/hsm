@@ -1,0 +1,42 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "lifecycle_dispatch_before_start_error",
+  "description": "Dispatching to an instance before it has started produces a normalized lifecycle error.",
+  "features": ["lifecycle", "error"],
+  "model": {
+    "name": "LifecycleDispatchBeforeStartError",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "dispatch",
+      "event": "go"
+    }
+  ],
+  "expect": {
+    "state": "",
+    "error": {
+      "code": "lifecycle_error",
+      "message_contains": "started"
+    },
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "go"
+      },
+      {
+        "type": "error",
+        "code": "lifecycle_error"
+      },
+      {
+        "type": "stable",
+        "state": ""
+      }
+    ]
+  }
+}

@@ -1,0 +1,266 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "behavior_dispatch_event_object_payload_identity",
+  "description": "A behavior dispatch op preserves event object data, id, source, and target fields for the dispatched-event handler.",
+  "features": ["queue", "reentrancy", "event_data", "event_ownership"],
+  "model": {
+    "name": "BehaviorDispatchEventObjectPayloadIdentity",
+    "initial": "check_data",
+    "states": [
+      {
+        "name": "check_data",
+        "transitions": [
+          {
+            "on": "go_data",
+            "target": "data_wait",
+            "effects": [
+              {
+                "behavior": "dispatch_data"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "data_wait",
+        "transitions": [
+          {
+            "on": "audit",
+            "guard": {
+              "behavior": "data_ok"
+            },
+            "target": "check_id"
+          }
+        ]
+      },
+      {
+        "name": "check_id",
+        "transitions": [
+          {
+            "on": "go_id",
+            "target": "id_wait",
+            "effects": [
+              {
+                "behavior": "dispatch_id"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "id_wait",
+        "transitions": [
+          {
+            "on": "audit",
+            "guard": {
+              "behavior": "id_ok"
+            },
+            "target": "check_source"
+          }
+        ]
+      },
+      {
+        "name": "check_source",
+        "transitions": [
+          {
+            "on": "go_source",
+            "target": "source_wait",
+            "effects": [
+              {
+                "behavior": "dispatch_source"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "source_wait",
+        "transitions": [
+          {
+            "on": "audit",
+            "guard": {
+              "behavior": "source_ok"
+            },
+            "target": "check_target"
+          }
+        ]
+      },
+      {
+        "name": "check_target",
+        "transitions": [
+          {
+            "on": "go_target",
+            "target": "target_wait",
+            "effects": [
+              {
+                "behavior": "dispatch_target"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "target_wait",
+        "transitions": [
+          {
+            "on": "audit",
+            "guard": {
+              "behavior": "target_ok"
+            },
+            "target": "done",
+            "effects": [
+              {
+                "behavior": "effect_done"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "done"
+      }
+    ]
+  },
+  "behaviors": {
+    "dispatch_data": [
+      {
+        "op": "dispatch",
+        "event": {
+          "name": "audit",
+          "data": {
+            "nested": {
+              "ok": true
+            }
+          }
+        }
+      }
+    ],
+    "dispatch_id": [
+      {
+        "op": "dispatch",
+        "event": {
+          "name": "audit",
+          "id": "evt-id"
+        }
+      }
+    ],
+    "dispatch_source": [
+      {
+        "op": "dispatch",
+        "event": {
+          "name": "audit",
+          "source": "behavior-source"
+        }
+      }
+    ],
+    "dispatch_target": [
+      {
+        "op": "dispatch",
+        "event": {
+          "name": "audit",
+          "target": "behavior-target"
+        }
+      }
+    ],
+    "data_ok": [
+      {
+        "op": "event_data_equals",
+        "path": "nested.ok",
+        "value": true
+      }
+    ],
+    "id_ok": [
+      {
+        "op": "event_metadata_equals",
+        "name": "id",
+        "value": "evt-id"
+      }
+    ],
+    "source_ok": [
+      {
+        "op": "event_metadata_equals",
+        "name": "source",
+        "value": "behavior-source"
+      }
+    ],
+    "target_ok": [
+      {
+        "op": "event_metadata_equals",
+        "name": "target",
+        "value": "behavior-target"
+      }
+    ],
+    "effect_done": [
+      {
+        "op": "trace",
+        "value": "effect:done"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "go_data"
+    },
+    {
+      "op": "dispatch",
+      "event": "go_id"
+    },
+    {
+      "op": "dispatch",
+      "event": "go_source"
+    },
+    {
+      "op": "dispatch",
+      "event": "go_target"
+    }
+  ],
+  "expect": {
+    "state": "/BehaviorDispatchEventObjectPayloadIdentity/done",
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "go_data"
+      },
+      {
+        "type": "dispatch",
+        "event": "audit"
+      },
+      {
+        "type": "dispatch",
+        "event": "go_id"
+      },
+      {
+        "type": "dispatch",
+        "event": "audit"
+      },
+      {
+        "type": "dispatch",
+        "event": "go_source"
+      },
+      {
+        "type": "dispatch",
+        "event": "audit"
+      },
+      {
+        "type": "dispatch",
+        "event": "go_target"
+      },
+      {
+        "type": "dispatch",
+        "event": "audit"
+      },
+      {
+        "type": "trace",
+        "value": "effect:done"
+      },
+      {
+        "type": "stable",
+        "state": "/BehaviorDispatchEventObjectPayloadIdentity/done"
+      }
+    ]
+  }
+}

@@ -1,0 +1,61 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "lifecycle_snapshot_after_restart_succeed",
+  "description": "After restart, snapshot succeeds and reports the fresh initial state and reset attributes.",
+  "features": ["lifecycle", "restart", "snapshot", "attribute"],
+  "model": {
+    "name": "LifecycleSnapshotAfterRestartSucceed",
+    "initial": "idle",
+    "attributes": {
+      "flag": {
+        "type": "boolean",
+        "default": false
+      }
+    },
+    "states": [
+      {
+        "name": "idle"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "set",
+      "attribute": "flag",
+      "value": true
+    },
+    {
+      "op": "restart"
+    },
+    {
+      "op": "snapshot"
+    }
+  ],
+  "expect": {
+    "state": "/LifecycleSnapshotAfterRestartSucceed/idle",
+    "snapshots": {
+      "last": {
+        "id": "default",
+        "qualified_name": "/LifecycleSnapshotAfterRestartSucceed",
+        "state": "/LifecycleSnapshotAfterRestartSucceed/idle",
+        "attributes": {
+          "flag": false
+        },
+        "queue_len": 0
+      }
+    },
+    "trace": [
+      {
+        "type": "snapshot",
+        "state": "/LifecycleSnapshotAfterRestartSucceed/idle"
+      },
+      {
+        "type": "stable",
+        "state": "/LifecycleSnapshotAfterRestartSucceed/idle"
+      }
+    ]
+  }
+}

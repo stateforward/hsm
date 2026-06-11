@@ -1,0 +1,40 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_submodel_choice_empty",
+  "mode": "validation",
+  "description": "Choice pseudostates inside child models must declare at least one outgoing transition.",
+  "features": ["submachine", "choice", "validation"],
+  "model": {
+    "name": "InvalidSubmodelChoiceEmpty",
+    "initial": "drive",
+    "states": [
+      {
+        "name": "drive",
+        "kind": "submachine",
+        "machine": "ChildChoiceEmpty"
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "ChildChoiceEmpty",
+      "initial": "choice",
+      "states": [
+        {
+          "name": "choice",
+          "kind": "choice"
+        },
+        {
+          "name": "done"
+        }
+      ]
+    }
+  ],
+  "expect": {
+    "validation": [
+      {
+        "code": "choice_missing_transition"
+      }
+    ]
+  }
+}

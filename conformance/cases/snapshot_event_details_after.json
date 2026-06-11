@@ -1,0 +1,76 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "snapshot_event_details_after",
+  "description": "Snapshots include transition snapshot triggers for after timer transitions selectable from the current state.",
+  "features": [
+    "snapshot",
+    "timer",
+    "after"
+  ],
+  "model": {
+    "name": "SnapshotEventDetailsAfter",
+    "initial": "waiting",
+    "states": [
+      {
+        "name": "waiting",
+        "transitions": [
+          {
+            "trigger": {
+              "kind": "after",
+              "duration_ms": 100
+            },
+            "target": "fired"
+          }
+        ]
+      },
+      {
+        "name": "fired"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "snapshot"
+    }
+  ],
+  "expect": {
+    "state": "/SnapshotEventDetailsAfter/waiting",
+    "snapshots": {
+      "last": {
+        "id": "default",
+        "qualified_name": "/SnapshotEventDetailsAfter",
+        "state": "/SnapshotEventDetailsAfter/waiting",
+        "attributes": {},
+        "queue_len": 0,
+        "transitions": [
+          {
+            "name": "/SnapshotEventDetailsAfter/waiting/transition_4",
+            "kind": 67343,
+            "source": "/SnapshotEventDetailsAfter/waiting",
+            "target": "/SnapshotEventDetailsAfter/fired",
+            "events": [
+              "/SnapshotEventDetailsAfter/waiting/transition_4/duration"
+            ],
+            "guard": true
+          }
+        ]
+      }
+    },
+    "trace": [
+      {
+        "type": "timer_scheduled"
+      },
+      {
+        "type": "snapshot",
+        "state": "/SnapshotEventDetailsAfter/waiting"
+      },
+      {
+        "type": "stable",
+        "state": "/SnapshotEventDetailsAfter/waiting"
+      }
+    ]
+  }
+}

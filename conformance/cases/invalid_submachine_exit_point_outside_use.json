@@ -1,0 +1,38 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_submachine_exit_point_outside_use",
+  "mode": "validation",
+  "features": [
+    "submachine",
+    "exit_point",
+    "validation"
+  ],
+  "model": {
+    "name": "InvalidExitPointOutsideUse",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "trigger": {
+              "kind": "exit_point",
+              "exit_point": "done"
+            },
+            "target": "finished"
+          }
+        ]
+      },
+      {
+        "name": "finished"
+      }
+    ]
+  },
+  "expect": {
+    "validation": [
+      {
+        "code": "invalid_exit_point_usage"
+      }
+    ]
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_completion_extraneous_event",
+  "mode": "validation",
+  "description": "A completion trigger must not declare event operands.",
+  "features": ["completion", "validation"],
+  "model": {
+    "name": "InvalidCompletionExtraneousEvent",
+    "initial": "done",
+    "states": [
+      {
+        "name": "done",
+        "kind": "final"
+      },
+      {
+        "name": "complete"
+      }
+    ],
+    "transitions": [
+      {
+        "trigger": {
+          "kind": "completion",
+          "event": "done"
+        },
+        "target": "complete"
+      }
+    ]
+  },
+  "expect": {
+    "validation": [
+      {
+        "code": "extraneous_trigger_operand"
+      }
+    ]
+  }
+}

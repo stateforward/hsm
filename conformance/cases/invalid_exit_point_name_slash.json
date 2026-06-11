@@ -1,0 +1,41 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_exit_point_name_slash",
+  "mode": "validation",
+  "description": "Exit point names must not contain path separators.",
+  "features": ["submachine", "exit_point", "validation"],
+  "model": {
+    "name": "InvalidExitPointNameSlash",
+    "initial": "drive",
+    "states": [
+      {
+        "name": "drive",
+        "kind": "submachine",
+        "machine": "BadExitNameChild"
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "BadExitNameChild",
+      "initial": "idle",
+      "exit_points": [
+        {
+          "name": "bad/exit"
+        }
+      ],
+      "states": [
+        {
+          "name": "idle"
+        }
+      ]
+    }
+  ],
+  "expect": {
+    "validation": [
+      {
+        "code": "invalid_name"
+      }
+    ]
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "path_resolution_initial_target_forms",
+  "description": "Root and nested initial targets accept absolute and ./ relative path forms.",
+  "features": ["path_resolution", "initial", "nested"],
+  "model": {
+    "name": "PathResolutionInitialTargetForms",
+    "initial": "/PathResolutionInitialTargetForms/parent",
+    "states": [
+      {
+        "name": "parent",
+        "initial": {
+          "target": "./child",
+          "effects": [{"behavior": "effect_initial"}]
+        },
+        "entry": [{"behavior": "entry_parent"}],
+        "states": [
+          {"name": "child", "entry": [{"behavior": "entry_child"}]}
+        ]
+      }
+    ]
+  },
+  "behaviors": {
+    "entry_parent": [{"op": "trace", "value": "entry:parent"}],
+    "effect_initial": [{"op": "trace", "value": "effect:initial"}],
+    "entry_child": [{"op": "trace", "value": "entry:child"}]
+  },
+  "script": [{"op": "start"}],
+  "expect": {
+    "state": "/PathResolutionInitialTargetForms/parent/child",
+    "trace": [
+      {"type": "trace", "value": "entry:parent"},
+      {"type": "trace", "value": "effect:initial"},
+      {"type": "trace", "value": "entry:child"},
+      {"type": "stable", "state": "/PathResolutionInitialTargetForms/parent/child"}
+    ]
+  }
+}

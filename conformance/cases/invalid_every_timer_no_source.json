@@ -1,0 +1,34 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_every_timer_no_source",
+  "mode": "validation",
+  "description": "An every timer trigger must declare exactly one interval source.",
+  "features": ["timer", "every", "validation"],
+  "model": {
+    "name": "InvalidEveryTimerNoSource",
+    "initial": "waiting",
+    "states": [
+      {
+        "name": "waiting",
+        "transitions": [
+          {
+            "trigger": {
+              "kind": "every"
+            },
+            "target": "done"
+          }
+        ]
+      },
+      {
+        "name": "done"
+      }
+    ]
+  },
+  "expect": {
+    "validation": [
+      {
+        "code": "invalid_timer_source"
+      }
+    ]
+  }
+}

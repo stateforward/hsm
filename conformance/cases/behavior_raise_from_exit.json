@@ -1,0 +1,95 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "behavior_raise_from_exit",
+  "description": "A normal internal event raised from exit behavior is processed after the triggering transition completes.",
+  "features": ["exit", "queue", "reentrancy"],
+  "model": {
+    "name": "BehaviorRaiseFromExit",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle",
+        "exit": [
+          {
+            "behavior": "exit_raise"
+          }
+        ],
+        "transitions": [
+          {
+            "on": "go",
+            "target": "waiting"
+          }
+        ]
+      },
+      {
+        "name": "waiting",
+        "transitions": [
+          {
+            "on": "audit",
+            "target": "done",
+            "effects": [
+              {
+                "behavior": "effect_audit"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "done"
+      }
+    ]
+  },
+  "behaviors": {
+    "exit_raise": [
+      {
+        "op": "raise",
+        "event": "audit"
+      },
+      {
+        "op": "trace",
+        "value": "exit:idle"
+      }
+    ],
+    "effect_audit": [
+      {
+        "op": "trace",
+        "value": "effect:audit"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "go"
+    }
+  ],
+  "expect": {
+    "state": "/BehaviorRaiseFromExit/done",
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "go"
+      },
+      {
+        "type": "raise",
+        "event": "audit"
+      },
+      {
+        "type": "trace",
+        "value": "exit:idle"
+      },
+      {
+        "type": "trace",
+        "value": "effect:audit"
+      },
+      {
+        "type": "stable",
+        "state": "/BehaviorRaiseFromExit/done"
+      }
+    ]
+  }
+}

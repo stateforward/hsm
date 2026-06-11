@@ -1,0 +1,112 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "config_clock_submachine_every_timer_fires",
+  "description": "An every timer scheduled inside an active child submachine uses the parent instance configured clock.",
+  "features": [
+    "submachine",
+    "timer",
+    "every"
+  ],
+  "model": {
+    "name": "ConfigClockSubmachineEveryTimerFires",
+    "initial": "drive",
+    "states": [
+      {
+        "name": "drive",
+        "kind": "submachine",
+        "machine": "ClockEveryTimerChild"
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "ClockEveryTimerChild",
+      "initial": "waiting",
+      "states": [
+        {
+          "name": "waiting",
+          "transitions": [
+            {
+              "trigger": {
+                "kind": "every",
+                "duration_ms": 25
+              },
+              "target": "timeout",
+              "effects": [
+                {
+                  "behavior": "effect_timeout"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "timeout",
+          "entry": [
+            {
+              "behavior": "entry_timeout"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "instances": [
+    {
+      "id": "default",
+      "config": {
+        "clock": "trace_yield_sleep"
+      }
+    }
+  ],
+  "behaviors": {
+    "effect_timeout": [
+      {
+        "op": "trace",
+        "value": "effect:timeout"
+      }
+    ],
+    "entry_timeout": [
+      {
+        "op": "trace",
+        "value": "entry:timeout"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "tick",
+      "millis": 25
+    }
+  ],
+  "expect": {
+    "state": "/ConfigClockSubmachineEveryTimerFires/drive/ClockEveryTimerChild/timeout",
+    "trace": [
+      {
+        "type": "timer_scheduled"
+      },
+      {
+        "type": "trace",
+        "value": "clock:sleep:25"
+      },
+      {
+        "type": "timer_fired"
+      },
+      {
+        "type": "trace",
+        "value": "effect:timeout"
+      },
+      {
+        "type": "trace",
+        "value": "entry:timeout"
+      },
+      {
+        "type": "stable",
+        "state": "/ConfigClockSubmachineEveryTimerFires/drive/ClockEveryTimerChild/timeout"
+      }
+    ]
+  }
+}

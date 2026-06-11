@@ -1,0 +1,152 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "nested_child_defer_precedence",
+  "description": "A nested child state defer prevents an event from bubbling to an ordinary parent transition until the child leaves the deferring state.",
+  "features": [
+    "defer",
+    "queue",
+    "nested"
+  ],
+  "model": {
+    "name": "NestedChildDeferPrecedence",
+    "initial": "parent",
+    "states": [
+      {
+        "name": "parent",
+        "initial": "blocked",
+        "transitions": [
+          {
+            "on": "hold",
+            "target": "outside",
+            "effects": [
+              {
+                "behavior": "effect_parent_hold"
+              }
+            ]
+          }
+        ],
+        "states": [
+          {
+            "name": "blocked",
+            "defer": [
+              "hold"
+            ],
+            "transitions": [
+              {
+                "on": "release",
+                "target": "../ready",
+                "effects": [
+                  {
+                    "behavior": "effect_release"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "name": "ready",
+            "entry": [
+              {
+                "behavior": "entry_ready"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "outside",
+        "entry": [
+          {
+            "behavior": "entry_outside"
+          }
+        ]
+      }
+    ]
+  },
+  "behaviors": {
+    "effect_parent_hold": [
+      {
+        "op": "trace",
+        "value": "effect:parent_hold"
+      }
+    ],
+    "effect_release": [
+      {
+        "op": "trace",
+        "value": "effect:release"
+      }
+    ],
+    "entry_ready": [
+      {
+        "op": "trace",
+        "value": "enter:ready"
+      }
+    ],
+    "entry_outside": [
+      {
+        "op": "trace",
+        "value": "enter:outside"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "hold"
+    },
+    {
+      "op": "dispatch",
+      "event": "release"
+    }
+  ],
+  "expect": {
+    "state": "/NestedChildDeferPrecedence/outside",
+    "queue": {
+      "deferred": [
+        "hold"
+      ],
+      "replay": "fifo"
+    },
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "hold"
+      },
+      {
+        "type": "defer",
+        "event": "hold"
+      },
+      {
+        "type": "dispatch",
+        "event": "release"
+      },
+      {
+        "type": "undefer",
+        "event": "hold"
+      },
+      {
+        "type": "trace",
+        "value": "effect:release"
+      },
+      {
+        "type": "trace",
+        "value": "enter:ready"
+      },
+      {
+        "type": "trace",
+        "value": "effect:parent_hold"
+      },
+      {
+        "type": "trace",
+        "value": "enter:outside"
+      },
+      {
+        "type": "stable",
+        "state": "/NestedChildDeferPrecedence/outside"
+      }
+    ]
+  }
+}

@@ -30,7 +30,9 @@ Every implementation shares the same compile-time DSL, the same semantics, and t
 
 All implementations conform to the [HSM DSL Reference](dsl.md) — a language-agnostic specification that defines:
 
+<!-- public DSL function groups from dsl.md -->
 - **Model definition** — `hsm.Define`, `hsm.State`, `hsm.Final`
+- **Submachine composition** — `hsm.SubmachineState`, `hsm.EntryPoint`, `hsm.ExitPoint`
 - **Pseudostates** — `hsm.Choice`, `hsm.ShallowHistory`, `hsm.DeepHistory`
 - **Transitions** — `hsm.Transition`, `hsm.Initial`, `hsm.Target`, `hsm.Source`
 - **Events** — `hsm.On`, `hsm.OnCall`, `hsm.When` / `hsm.OnSet`

@@ -1,0 +1,80 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "snapshot_event_details_event_object_on",
+  "description": "Snapshots include transition snapshots for on triggers declared with an event object reference.",
+  "features": [
+    "snapshot",
+    "event"
+  ],
+  "model": {
+    "name": "SnapshotEventDetailsEventObjectOn",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "trigger": {
+              "kind": "on",
+              "event": {
+                "name": "submit",
+                "data": {
+                  "declared": true
+                },
+                "metadata": {
+                  "owner": "model"
+                }
+              }
+            },
+            "target": "done"
+          }
+        ]
+      },
+      {
+        "name": "done"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "snapshot"
+    }
+  ],
+  "expect": {
+    "state": "/SnapshotEventDetailsEventObjectOn/idle",
+    "snapshots": {
+      "last": {
+        "id": "default",
+        "qualified_name": "/SnapshotEventDetailsEventObjectOn",
+        "state": "/SnapshotEventDetailsEventObjectOn/idle",
+        "attributes": {},
+        "queue_len": 0,
+        "transitions": [
+          {
+            "name": "/SnapshotEventDetailsEventObjectOn/idle/transition_4",
+            "kind": 67343,
+            "source": "/SnapshotEventDetailsEventObjectOn/idle",
+            "target": "/SnapshotEventDetailsEventObjectOn/done",
+            "events": [
+              "submit"
+            ],
+            "guard": false
+          }
+        ]
+      }
+    },
+    "trace": [
+      {
+        "type": "snapshot",
+        "state": "/SnapshotEventDetailsEventObjectOn/idle"
+      },
+      {
+        "type": "stable",
+        "state": "/SnapshotEventDetailsEventObjectOn/idle"
+      }
+    ]
+  }
+}

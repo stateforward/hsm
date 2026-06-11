@@ -1,0 +1,37 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_root_transition_on_and_trigger",
+  "mode": "validation",
+  "description": "Root-owned transitions must not declare both shorthand on and explicit trigger.",
+  "features": ["validation"],
+  "model": {
+    "name": "InvalidRootTransitionOnAndTrigger",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle"
+      },
+      {
+        "name": "done"
+      }
+    ],
+    "transitions": [
+      {
+        "source": "idle",
+        "on": "go",
+        "trigger": {
+          "kind": "on",
+          "event": "go"
+        },
+        "target": "done"
+      }
+    ]
+  },
+  "expect": {
+    "validation": [
+      {
+        "code": "multiple_transition_triggers"
+      }
+    ]
+  }
+}

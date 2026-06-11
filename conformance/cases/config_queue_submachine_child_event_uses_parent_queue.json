@@ -1,0 +1,131 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "config_queue_submachine_child_event_uses_parent_queue",
+  "description": "A caller-dispatched event handled by an active child submachine enters through the parent instance's configured queue before child selection.",
+  "features": [
+    "queue",
+    "submachine",
+    "selection_order"
+  ],
+  "model": {
+    "name": "ConfigQueueSubmachineChildEventUsesParentQueue",
+    "initial": "drive",
+    "states": [
+      {
+        "name": "drive",
+        "kind": "submachine",
+        "machine": "ConfigQueueChildHandlesEvent",
+        "transitions": [
+          {
+            "on": "work",
+            "target": "parent_wrong",
+            "effects": [
+              {
+                "behavior": "effect_parent_wrong"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "parent_wrong"
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "ConfigQueueChildHandlesEvent",
+      "initial": "idle",
+      "states": [
+        {
+          "name": "idle",
+          "transitions": [
+            {
+              "on": "work",
+              "target": "handled",
+              "effects": [
+                {
+                  "behavior": "effect_child_work"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "handled",
+          "entry": [
+            {
+              "behavior": "entry_handled"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "instances": [
+    {
+      "id": "default",
+      "config": {
+        "queue": "trace_fifo"
+      }
+    }
+  ],
+  "behaviors": {
+    "effect_child_work": [
+      {
+        "op": "trace",
+        "value": "effect:child-work"
+      }
+    ],
+    "entry_handled": [
+      {
+        "op": "trace",
+        "value": "entry:handled"
+      }
+    ],
+    "effect_parent_wrong": [
+      {
+        "op": "trace",
+        "value": "effect:parent-wrong"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "work"
+    }
+  ],
+  "expect": {
+    "state": "/ConfigQueueSubmachineChildEventUsesParentQueue/drive/ConfigQueueChildHandlesEvent/handled",
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "work"
+      },
+      {
+        "type": "trace",
+        "value": "queue:push:work"
+      },
+      {
+        "type": "trace",
+        "value": "queue:pop:work"
+      },
+      {
+        "type": "trace",
+        "value": "effect:child-work"
+      },
+      {
+        "type": "trace",
+        "value": "entry:handled"
+      },
+      {
+        "type": "stable",
+        "state": "/ConfigQueueSubmachineChildEventUsesParentQueue/drive/ConfigQueueChildHandlesEvent/handled"
+      }
+    ]
+  }
+}

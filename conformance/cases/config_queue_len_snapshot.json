@@ -1,0 +1,53 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "config_queue_len_snapshot",
+  "description": "A snapshot obtains queue_len from the instance config queue Len hook.",
+  "features": ["queue", "snapshot"],
+  "model": {
+    "name": "ConfigQueueLenSnapshot",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle"
+      }
+    ]
+  },
+  "instances": [
+    {
+      "id": "default",
+      "config": {
+        "queue": "len_seven"
+      }
+    }
+  ],
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "snapshot"
+    }
+  ],
+  "expect": {
+    "state": "/ConfigQueueLenSnapshot/idle",
+    "snapshots": {
+      "last": {
+        "id": "default",
+        "qualified_name": "/ConfigQueueLenSnapshot",
+        "state": "/ConfigQueueLenSnapshot/idle",
+        "attributes": {},
+        "queue_len": 7
+      }
+    },
+    "trace": [
+      {
+        "type": "snapshot",
+        "state": "/ConfigQueueLenSnapshot/idle"
+      },
+      {
+        "type": "stable",
+        "state": "/ConfigQueueLenSnapshot/idle"
+      }
+    ]
+  }
+}

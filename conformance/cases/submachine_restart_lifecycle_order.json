@@ -1,0 +1,127 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "submachine_restart_lifecycle_order",
+  "description": "Restarting a parent machine while a submachine is active exits the child leaf before the submachine boundary and then re-enters the default child path.",
+  "features": [
+    "submachine",
+    "lifecycle",
+    "restart",
+    "entry",
+    "exit"
+  ],
+  "model": {
+    "name": "SubmachineRestartLifecycle",
+    "initial": "drive",
+    "states": [
+      {
+        "name": "drive",
+        "kind": "submachine",
+        "machine": "RestartLifecycleChild",
+        "entry": [
+          {
+            "behavior": "entry_drive"
+          }
+        ],
+        "exit": [
+          {
+            "behavior": "exit_drive"
+          }
+        ]
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "RestartLifecycleChild",
+      "initial": "active",
+      "states": [
+        {
+          "name": "active",
+          "entry": [
+            {
+              "behavior": "entry_active"
+            }
+          ],
+          "exit": [
+            {
+              "behavior": "exit_active"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "behaviors": {
+    "entry_drive": [
+      {
+        "op": "trace",
+        "value": "enter:drive"
+      }
+    ],
+    "exit_drive": [
+      {
+        "op": "trace",
+        "value": "exit:drive"
+      }
+    ],
+    "entry_active": [
+      {
+        "op": "trace",
+        "value": "enter:active"
+      }
+    ],
+    "exit_active": [
+      {
+        "op": "trace",
+        "value": "exit:active"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "restart"
+    }
+  ],
+  "expect": {
+    "state": "/SubmachineRestartLifecycle/drive/RestartLifecycleChild/active",
+    "trace": [
+      {
+        "type": "start"
+      },
+      {
+        "type": "trace",
+        "value": "enter:drive"
+      },
+      {
+        "type": "trace",
+        "value": "enter:active"
+      },
+      {
+        "type": "restart"
+      },
+      {
+        "type": "trace",
+        "value": "exit:active"
+      },
+      {
+        "type": "trace",
+        "value": "exit:drive"
+      },
+      {
+        "type": "trace",
+        "value": "enter:drive"
+      },
+      {
+        "type": "trace",
+        "value": "enter:active"
+      },
+      {
+        "type": "stable",
+        "state": "/SubmachineRestartLifecycle/drive/RestartLifecycleChild/active"
+      }
+    ]
+  }
+}

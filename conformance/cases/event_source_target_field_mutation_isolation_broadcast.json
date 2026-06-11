@@ -1,0 +1,54 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "event_source_target_field_mutation_isolation_broadcast",
+  "description": "dispatch_all recipients each see caller-declared source and target fields before local mutation, proving broadcast routing metadata does not overwrite reserved event fields.",
+  "features": ["event_ownership", "broadcast", "guard"],
+  "model": {
+    "name": "EventSourceTargetFieldMutationIsolationBroadcast",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {"on": "mutate", "guard": {"behavior": "source_and_target_original"}, "target": "done", "effects": [{"behavior": "mutate_source_target"}]},
+          {"on": "mutate", "target": "leaked", "effects": [{"behavior": "effect_leaked"}]}
+        ]
+      },
+      {"name": "done"},
+      {"name": "leaked"}
+    ]
+  },
+  "instances": [{"id": "first"}, {"id": "second"}],
+  "behaviors": {
+    "source_and_target_original": [
+      {"op": "trace", "value": "guard:source-target-original"},
+      {"op": "event_metadata_equals", "name": "source", "value": "declared-source"},
+      {"op": "event_metadata_equals", "name": "target", "value": "declared-target"}
+    ],
+    "mutate_source_target": [
+      {"op": "event_metadata_set", "name": "source", "value": "changed-source"},
+      {"op": "event_metadata_set", "name": "target", "value": "changed-target"},
+      {"op": "trace", "value": "effect:isolated"}
+    ],
+    "effect_leaked": [{"op": "trace", "value": "effect:leaked"}]
+  },
+  "script": [
+    {"op": "start", "instance": "first"},
+    {"op": "start", "instance": "second"},
+    {"op": "dispatch_all", "event": {"name": "mutate", "id": "evt-1", "source": "declared-source", "target": "declared-target"}}
+  ],
+  "expect": {
+    "states": {
+      "first": "/EventSourceTargetFieldMutationIsolationBroadcast/done",
+      "second": "/EventSourceTargetFieldMutationIsolationBroadcast/done"
+    },
+    "trace": [
+      {"type": "dispatch", "event": "mutate", "target": "all"},
+      {"type": "trace", "value": "guard:source-target-original"},
+      {"type": "trace", "value": "effect:isolated"},
+      {"type": "trace", "value": "guard:source-target-original"},
+      {"type": "trace", "value": "effect:isolated"},
+      {"type": "stable", "state": "all"}
+    ]
+  }
+}

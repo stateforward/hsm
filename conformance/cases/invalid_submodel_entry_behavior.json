@@ -1,0 +1,41 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_submodel_entry_behavior",
+  "mode": "validation",
+  "description": "Behavior references inside child models must be validated recursively.",
+  "features": ["submachine", "validation"],
+  "model": {
+    "name": "InvalidSubmodelEntryBehavior",
+    "initial": "drive",
+    "states": [
+      {
+        "name": "drive",
+        "kind": "submachine",
+        "machine": "ChildWithMissingEntryBehavior"
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "ChildWithMissingEntryBehavior",
+      "initial": "idle",
+      "states": [
+        {
+          "name": "idle",
+          "entry": [
+            {
+              "behavior": "missing_child_entry"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "expect": {
+    "validation": [
+      {
+        "code": "missing_behavior"
+      }
+    ]
+  }
+}

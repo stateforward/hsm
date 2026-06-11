@@ -1,0 +1,128 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "event_data_get_falsy_fallback",
+  "description": "Falsy values returned by event_data_get disable a guarded transition and allow the next matching transition to run.",
+  "features": [
+    "event_data",
+    "guard",
+    "selection_order"
+  ],
+  "model": {
+    "name": "EventDataGetFalsy",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "trigger": {
+              "kind": "on",
+              "event": "submit"
+            },
+            "guard": {
+              "behavior": "payload_flag"
+            },
+            "target": "accepted",
+            "effects": [
+              {
+                "behavior": "effect_accepted"
+              }
+            ]
+          },
+          {
+            "trigger": {
+              "kind": "on",
+              "event": "submit"
+            },
+            "target": "fallback",
+            "effects": [
+              {
+                "behavior": "effect_fallback"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "accepted"
+      },
+      {
+        "name": "fallback",
+        "entry": [
+          {
+            "behavior": "entry_fallback"
+          }
+        ]
+      }
+    ]
+  },
+  "behaviors": {
+    "payload_flag": [
+      {
+        "op": "trace",
+        "value": "guard:data-get"
+      },
+      {
+        "op": "event_data_get",
+        "path": "ok"
+      }
+    ],
+    "effect_accepted": [
+      {
+        "op": "trace",
+        "value": "effect:accepted"
+      }
+    ],
+    "effect_fallback": [
+      {
+        "op": "trace",
+        "value": "effect:fallback"
+      }
+    ],
+    "entry_fallback": [
+      {
+        "op": "trace",
+        "value": "enter:fallback"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": {
+        "name": "submit",
+        "data": {
+          "ok": false
+        }
+      }
+    }
+  ],
+  "expect": {
+    "state": "/EventDataGetFalsy/fallback",
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "submit"
+      },
+      {
+        "type": "trace",
+        "value": "guard:data-get"
+      },
+      {
+        "type": "trace",
+        "value": "effect:fallback"
+      },
+      {
+        "type": "trace",
+        "value": "enter:fallback"
+      },
+      {
+        "type": "stable",
+        "state": "/EventDataGetFalsy/fallback"
+      }
+    ]
+  }
+}

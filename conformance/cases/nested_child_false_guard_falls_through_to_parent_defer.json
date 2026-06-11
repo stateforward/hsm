@@ -1,0 +1,188 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "nested_child_false_guard_falls_through_to_parent_defer",
+  "description": "A false child guard allows selection to continue upward so an ancestor defer can queue the event.",
+  "features": [
+    "defer",
+    "queue",
+    "nested",
+    "guard",
+    "selection_order"
+  ],
+  "model": {
+    "name": "NestedChildFalseGuardFallsThroughToParentDefer",
+    "initial": "parent",
+    "states": [
+      {
+        "name": "parent",
+        "initial": "child",
+        "defer": [
+          "maybe"
+        ],
+        "transitions": [
+          {
+            "on": "release",
+            "target": "outside",
+            "effects": [
+              {
+                "behavior": "effect_release"
+              }
+            ]
+          }
+        ],
+        "states": [
+          {
+            "name": "child",
+            "transitions": [
+              {
+                "on": "maybe",
+                "guard": {
+                  "behavior": "guard_false"
+                },
+                "target": "../wrong"
+              }
+            ]
+          },
+          {
+            "name": "wrong",
+            "entry": [
+              {
+                "behavior": "entry_wrong"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "outside",
+        "entry": [
+          {
+            "behavior": "entry_outside"
+          }
+        ],
+        "transitions": [
+          {
+            "on": "maybe",
+            "target": "done",
+            "effects": [
+              {
+                "behavior": "effect_maybe"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "done",
+        "entry": [
+          {
+            "behavior": "entry_done"
+          }
+        ]
+      }
+    ]
+  },
+  "behaviors": {
+    "guard_false": [
+      {
+        "op": "trace",
+        "value": "guard:false"
+      },
+      {
+        "op": "return_value",
+        "value": false
+      }
+    ],
+    "effect_release": [
+      {
+        "op": "trace",
+        "value": "effect:release"
+      }
+    ],
+    "entry_outside": [
+      {
+        "op": "trace",
+        "value": "entry:outside"
+      }
+    ],
+    "effect_maybe": [
+      {
+        "op": "trace",
+        "value": "effect:maybe"
+      }
+    ],
+    "entry_done": [
+      {
+        "op": "trace",
+        "value": "entry:done"
+      }
+    ],
+    "entry_wrong": [
+      {
+        "op": "trace",
+        "value": "entry:wrong"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "maybe"
+    },
+    {
+      "op": "dispatch",
+      "event": "release"
+    }
+  ],
+  "expect": {
+    "state": "/NestedChildFalseGuardFallsThroughToParentDefer/done",
+    "queue": {
+      "nested_false_guard": "falls_through_to_parent_defer"
+    },
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "maybe"
+      },
+      {
+        "type": "trace",
+        "value": "guard:false"
+      },
+      {
+        "type": "defer",
+        "event": "maybe"
+      },
+      {
+        "type": "dispatch",
+        "event": "release"
+      },
+      {
+        "type": "undefer",
+        "event": "maybe"
+      },
+      {
+        "type": "trace",
+        "value": "effect:release"
+      },
+      {
+        "type": "trace",
+        "value": "entry:outside"
+      },
+      {
+        "type": "trace",
+        "value": "effect:maybe"
+      },
+      {
+        "type": "trace",
+        "value": "entry:done"
+      },
+      {
+        "type": "stable",
+        "state": "/NestedChildFalseGuardFallsThroughToParentDefer/done"
+      }
+    ]
+  }
+}

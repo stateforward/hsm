@@ -1,0 +1,45 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "operation_call_unknown_error",
+  "description": "Script call of an unknown operation produces a normalized runtime error and leaves state unchanged.",
+  "features": ["operation", "error"],
+  "model": {
+    "name": "OperationCallUnknownError",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "call",
+      "operation": "missing"
+    }
+  ],
+  "expect": {
+    "state": "/OperationCallUnknownError/idle",
+    "error": {
+      "code": "operation_error",
+      "message_contains": "missing"
+    },
+    "trace": [
+      {
+        "type": "call",
+        "operation": "missing"
+      },
+      {
+        "type": "error",
+        "code": "operation_error"
+      },
+      {
+        "type": "stable",
+        "state": "/OperationCallUnknownError/idle"
+      }
+    ]
+  }
+}

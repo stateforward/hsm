@@ -1,0 +1,55 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "nested_parent_fallback_after_child_false_guard",
+  "description": "A false guard on an active nested child transition falls through to an ancestor transition for the same event.",
+  "features": ["nested", "guard", "selection_order"],
+  "model": {
+    "name": "NestedParentFallbackAfterChildFalseGuard",
+    "initial": "parent",
+    "states": [
+      {
+        "name": "parent",
+        "initial": "child",
+        "transitions": [
+          {
+            "on": "maybe",
+            "target": "parent/parent_handled",
+            "effects": [{"behavior": "effect_parent"}]
+          }
+        ],
+        "states": [
+          {
+            "name": "child",
+            "transitions": [
+              {
+                "on": "maybe",
+                "guard": {"behavior": "guard_false"},
+                "target": "../wrong",
+                "effects": [{"behavior": "effect_child"}]
+              }
+            ]
+          },
+          {"name": "parent_handled", "entry": [{"behavior": "entry_parent"}]},
+          {"name": "wrong"}
+        ]
+      }
+    ]
+  },
+  "behaviors": {
+    "guard_false": [{"op": "trace", "value": "guard:child"}, {"op": "return_value", "value": false}],
+    "effect_child": [{"op": "trace", "value": "effect:child"}],
+    "effect_parent": [{"op": "trace", "value": "effect:parent"}],
+    "entry_parent": [{"op": "trace", "value": "entry:parent"}]
+  },
+  "script": [{"op": "start"}, {"op": "dispatch", "event": "maybe"}],
+  "expect": {
+    "state": "/NestedParentFallbackAfterChildFalseGuard/parent/parent_handled",
+    "trace": [
+      {"type": "dispatch", "event": "maybe"},
+      {"type": "trace", "value": "guard:child"},
+      {"type": "trace", "value": "effect:parent"},
+      {"type": "trace", "value": "entry:parent"},
+      {"type": "stable", "state": "/NestedParentFallbackAfterChildFalseGuard/parent/parent_handled"}
+    ]
+  }
+}

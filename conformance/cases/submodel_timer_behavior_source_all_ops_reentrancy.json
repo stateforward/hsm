@@ -1,0 +1,250 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "submodel_timer_behavior_source_all_ops_reentrancy",
+  "description": "Child-model generated trigger/timer behavior-op reentrancy runs in child scope under a submachine boundary.",
+  "features": [
+    "submachine",
+    "timer",
+    "guard",
+    "snapshot",
+    "operation",
+    "on_call",
+    "queue",
+    "reentrancy"
+  ],
+  "model": {
+    "name": "SubmodelTimerBehaviorSourceAllOpsReentrancy",
+    "initial": "drive",
+    "states": [
+      {
+        "name": "drive",
+        "kind": "submachine",
+        "machine": "ChildSubmodelTimerBehaviorSourceAllOpsReentrancy"
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "ChildSubmodelTimerBehaviorSourceAllOpsReentrancy",
+      "initial": "idle",
+      "operations": {
+        "audit_call": {
+          "behavior": "operation_audit"
+        }
+      },
+      "attributes": {},
+      "states": [
+        {
+          "name": "idle",
+          "entry": [],
+          "transitions": [
+            {
+              "trigger": {
+                "kind": "after",
+                "behavior": "compute_all"
+              },
+              "target": "target"
+            },
+            {
+              "on": "audit_dispatch",
+              "target": "dispatch_seen",
+              "effects": [
+                {
+                  "behavior": "effect_dispatch"
+                }
+              ]
+            },
+            {
+              "on": "audit_raise",
+              "target": "raise_seen",
+              "effects": [
+                {
+                  "behavior": "effect_raise"
+                }
+              ]
+            },
+            {
+              "trigger": {
+                "kind": "on_call",
+                "operation": "audit_call"
+              },
+              "target": "call_seen",
+              "effects": [
+                {
+                  "behavior": "effect_call"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "target",
+          "entry": [
+            {
+              "behavior": "entry_target"
+            }
+          ]
+        },
+        {
+          "name": "dispatch_seen",
+          "transitions": [
+            {
+              "on": "audit_raise",
+              "target": "raise_seen",
+              "effects": [
+                {
+                  "behavior": "effect_raise"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "raise_seen",
+          "transitions": [
+            {
+              "trigger": {
+                "kind": "on_call",
+                "operation": "audit_call"
+              },
+              "target": "all_seen",
+              "effects": [
+                {
+                  "behavior": "effect_call"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "call_seen"
+        },
+        {
+          "name": "all_seen"
+        }
+      ]
+    }
+  ],
+  "behaviors": {
+    "operation_audit": [
+      {
+        "op": "trace",
+        "value": "operation:audit"
+      }
+    ],
+    "guard_all": [
+      {
+        "op": "snapshot"
+      },
+      {
+        "op": "dispatch",
+        "event": "audit_dispatch"
+      },
+      {
+        "op": "return_value",
+        "value": true
+      }
+    ],
+    "effect_all": [
+      {
+        "op": "raise",
+        "event": "audit_raise"
+      },
+      {
+        "op": "call",
+        "name": "audit_call"
+      },
+      {
+        "op": "trace",
+        "value": "effect:trigger"
+      }
+    ],
+    "entry_target": [
+      {
+        "op": "trace",
+        "value": "entry:target"
+      }
+    ],
+    "effect_dispatch": [
+      {
+        "op": "trace",
+        "value": "effect:dispatch"
+      }
+    ],
+    "effect_raise": [
+      {
+        "op": "trace",
+        "value": "effect:raise"
+      }
+    ],
+    "effect_call": [
+      {
+        "op": "trace",
+        "value": "effect:call"
+      }
+    ],
+    "compute_all": [
+      {
+        "op": "snapshot"
+      },
+      {
+        "op": "dispatch",
+        "event": "audit_dispatch"
+      },
+      {
+        "op": "raise",
+        "event": "audit_raise"
+      },
+      {
+        "op": "call",
+        "name": "audit_call"
+      },
+      {
+        "op": "return_value",
+        "value": 10
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    }
+  ],
+  "expect": {
+    "state": "/SubmodelTimerBehaviorSourceAllOpsReentrancy/drive/ChildSubmodelTimerBehaviorSourceAllOpsReentrancy/all_seen",
+    "trace": [
+      {
+        "type": "snapshot",
+        "state": "/SubmodelTimerBehaviorSourceAllOpsReentrancy/drive/ChildSubmodelTimerBehaviorSourceAllOpsReentrancy/idle"
+      },
+      {
+        "type": "dispatch",
+        "event": "audit_dispatch"
+      },
+      {
+        "type": "raise",
+        "event": "audit_raise"
+      },
+      {
+        "type": "trace",
+        "value": "operation:audit"
+      },
+      {
+        "type": "trace",
+        "value": "effect:dispatch"
+      },
+      {
+        "type": "trace",
+        "value": "effect:raise"
+      },
+      {
+        "type": "trace",
+        "value": "effect:call"
+      },
+      {
+        "type": "stable",
+        "state": "/SubmodelTimerBehaviorSourceAllOpsReentrancy/drive/ChildSubmodelTimerBehaviorSourceAllOpsReentrancy/all_seen"
+      }
+    ]
+  }
+}

@@ -1,0 +1,178 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "config_queue_deferred_custom_pop_order_respected",
+  "description": "Deferred regular events replay through the configured queue and obey its non-FIFO Pop policy after requeue.",
+  "features": ["queue", "defer", "queue_order"],
+  "model": {
+    "name": "ConfigQueueDeferredCustomPopOrderRespected",
+    "initial": "blocked",
+    "states": [
+      {
+        "name": "blocked",
+        "defer": [
+          "low",
+          "high"
+        ],
+        "transitions": [
+          {
+            "on": "release",
+            "target": "ready"
+          }
+        ]
+      },
+      {
+        "name": "ready",
+        "transitions": [
+          {
+            "on": "low",
+            "target": "low_seen",
+            "effects": [
+              {
+                "behavior": "effect_low"
+              }
+            ]
+          },
+          {
+            "on": "high",
+            "target": "high_seen",
+            "effects": [
+              {
+                "behavior": "effect_high"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "low_seen"
+      },
+      {
+        "name": "high_seen"
+      }
+    ]
+  },
+  "instances": [
+    {
+      "id": "default",
+      "config": {
+        "queue": "trace_lifo"
+      }
+    }
+  ],
+  "behaviors": {
+    "effect_low": [
+      {
+        "op": "trace",
+        "value": "effect:low"
+      }
+    ],
+    "effect_high": [
+      {
+        "op": "trace",
+        "value": "effect:high"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "low"
+    },
+    {
+      "op": "dispatch",
+      "event": "high"
+    },
+    {
+      "op": "dispatch",
+      "event": "release"
+    }
+  ],
+  "expect": {
+    "state": "/ConfigQueueDeferredCustomPopOrderRespected/low_seen",
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "low"
+      },
+      {
+        "type": "defer",
+        "event": "low"
+      },
+      {
+        "type": "trace",
+        "value": "queue:push:low"
+      },
+      {
+        "type": "trace",
+        "value": "queue:pop:low"
+      },
+      {
+        "type": "trace",
+        "value": "queue:push:low"
+      },
+      {
+        "type": "dispatch",
+        "event": "high"
+      },
+      {
+        "type": "defer",
+        "event": "high"
+      },
+      {
+        "type": "trace",
+        "value": "queue:push:high"
+      },
+      {
+        "type": "trace",
+        "value": "queue:pop:high"
+      },
+      {
+        "type": "trace",
+        "value": "queue:pop:low"
+      },
+      {
+        "type": "trace",
+        "value": "queue:push:high"
+      },
+      {
+        "type": "trace",
+        "value": "queue:push:low"
+      },
+      {
+        "type": "dispatch",
+        "event": "release"
+      },
+      {
+        "type": "undefer",
+        "event": "low"
+      },
+      {
+        "type": "trace",
+        "value": "queue:push:release"
+      },
+      {
+        "type": "trace",
+        "value": "queue:pop:release"
+      },
+      {
+        "type": "trace",
+        "value": "queue:pop:low"
+      },
+      {
+        "type": "trace",
+        "value": "effect:low"
+      },
+      {
+        "type": "trace",
+        "value": "queue:pop:high"
+      },
+      {
+        "type": "stable",
+        "state": "/ConfigQueueDeferredCustomPopOrderRespected/low_seen"
+      }
+    ]
+  }
+}

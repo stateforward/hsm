@@ -1,0 +1,10 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "nested_completion_effect_snapshot",
+  "description": "A snapshot from a state-owned completion transition effect observes the completed nested final state before the completion target is entered.",
+  "features": ["completion", "final", "nested", "snapshot"],
+  "model": {"name": "NestedCompletionEffectSnapshot", "initial": "parent", "states": [{"name": "parent", "initial": "work", "states": [{"name": "work", "transitions": [{"on": "finish", "target": "../done"}]}, {"name": "done", "kind": "final"}], "transitions": [{"trigger": {"kind": "completion"}, "target": "complete", "effects": [{"behavior": "completion_snapshot"}]}]}, {"name": "complete", "entry": [{"behavior": "entry_complete"}]}]},
+  "behaviors": {"completion_snapshot": [{"op": "snapshot"}], "entry_complete": [{"op": "trace", "value": "entry:complete"}]},
+  "script": [{"op": "start"}, {"op": "dispatch", "event": "finish"}],
+  "expect": {"state": "/NestedCompletionEffectSnapshot/complete", "trace": [{"type": "dispatch", "event": "finish"}, {"type": "snapshot", "state": "/NestedCompletionEffectSnapshot/parent/done"}, {"type": "trace", "value": "entry:complete"}, {"type": "stable", "state": "/NestedCompletionEffectSnapshot/complete"}]}
+}

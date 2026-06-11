@@ -1,0 +1,90 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "attribute_string_object_array_snapshot",
+  "description": "String, object, and array attributes can be set and observed through snapshots.",
+  "features": ["attribute", "snapshot"],
+  "model": {
+    "name": "AttributeStringObjectArraySnapshot",
+    "initial": "idle",
+    "attributes": {
+      "label": {
+        "type": "string",
+        "default": "old"
+      },
+      "payload": {
+        "type": "object",
+        "default": {
+          "old": true
+        }
+      },
+      "items": {
+        "type": "array",
+        "default": []
+      }
+    },
+    "states": [
+      {
+        "name": "idle"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "set",
+      "attribute": "label",
+      "value": "new"
+    },
+    {
+      "op": "set",
+      "attribute": "payload",
+      "value": {
+        "ok": true
+      }
+    },
+    {
+      "op": "set",
+      "attribute": "items",
+      "value": [
+        1,
+        2
+      ]
+    },
+    {
+      "op": "snapshot"
+    }
+  ],
+  "expect": {
+    "state": "/AttributeStringObjectArraySnapshot/idle",
+    "snapshots": {
+      "last": {
+        "id": "default",
+        "qualified_name": "/AttributeStringObjectArraySnapshot",
+        "state": "/AttributeStringObjectArraySnapshot/idle",
+        "attributes": {
+          "label": "new",
+          "payload": {
+            "ok": true
+          },
+          "items": [
+            1,
+            2
+          ]
+        },
+        "queue_len": 0
+      }
+    },
+    "trace": [
+      {
+        "type": "snapshot",
+        "state": "/AttributeStringObjectArraySnapshot/idle"
+      },
+      {
+        "type": "stable",
+        "state": "/AttributeStringObjectArraySnapshot/idle"
+      }
+    ]
+  }
+}

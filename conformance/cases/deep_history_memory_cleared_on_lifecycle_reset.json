@@ -1,0 +1,100 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "deep_history_memory_cleared_on_lifecycle_reset",
+  "description": "Restart and stop/start clear deep-history memory so later history entry uses the default nested target.",
+  "features": ["history", "deep_history", "lifecycle", "restart", "stop", "nested"],
+  "model": {
+    "name": "DeepHistoryMemoryClearedOnLifecycleReset",
+    "initial": "outside",
+    "states": [
+      {
+        "name": "outside",
+        "transitions": [
+          {
+            "on": "enter_history",
+            "target": "comp/h",
+            "effects": [{"behavior": "effect_enter_history"}]
+          }
+        ]
+      },
+      {
+        "name": "comp",
+        "initial": "a",
+        "states": [
+          {
+            "name": "a",
+            "entry": [{"behavior": "entry_a"}],
+            "transitions": [
+              {"on": "to_b", "target": "../b/nested/deep"}
+            ]
+          },
+          {
+            "name": "b",
+            "initial": "nested",
+            "states": [
+              {
+                "name": "nested",
+                "initial": "deep",
+                "states": [
+                  {
+                    "name": "deep",
+                    "entry": [{"behavior": "entry_deep"}]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "name": "h",
+            "kind": "deep_history",
+            "transitions": [
+              {"target": "a"}
+            ]
+          }
+        ],
+        "transitions": [
+          {"source": "comp/b/nested/deep", "on": "leave", "target": "outside"}
+        ]
+      }
+    ]
+  },
+  "behaviors": {
+    "effect_enter_history": [{"op": "trace", "value": "effect:history"}],
+    "entry_a": [{"op": "trace", "value": "entry:a"}],
+    "entry_deep": [{"op": "trace", "value": "entry:deep"}]
+  },
+  "script": [
+    {"op": "start"},
+    {"op": "dispatch", "event": "enter_history"},
+    {"op": "dispatch", "event": "to_b"},
+    {"op": "dispatch", "event": "leave"},
+    {"op": "restart"},
+    {"op": "dispatch", "event": "enter_history"},
+    {"op": "dispatch", "event": "to_b"},
+    {"op": "dispatch", "event": "leave"},
+    {"op": "stop"},
+    {"op": "start"},
+    {"op": "dispatch", "event": "enter_history"}
+  ],
+  "expect": {
+    "state": "/DeepHistoryMemoryClearedOnLifecycleReset/comp/a",
+    "trace": [
+      {"type": "dispatch", "event": "enter_history"},
+      {"type": "trace", "value": "effect:history"},
+      {"type": "trace", "value": "entry:a"},
+      {"type": "dispatch", "event": "to_b"},
+      {"type": "trace", "value": "entry:deep"},
+      {"type": "dispatch", "event": "leave"},
+      {"type": "dispatch", "event": "enter_history"},
+      {"type": "trace", "value": "effect:history"},
+      {"type": "trace", "value": "entry:a"},
+      {"type": "dispatch", "event": "to_b"},
+      {"type": "trace", "value": "entry:deep"},
+      {"type": "dispatch", "event": "leave"},
+      {"type": "dispatch", "event": "enter_history"},
+      {"type": "trace", "value": "effect:history"},
+      {"type": "trace", "value": "entry:a"},
+      {"type": "stable", "state": "/DeepHistoryMemoryClearedOnLifecycleReset/comp/a"}
+    ]
+  }
+}

@@ -1,0 +1,80 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "config_queue_behavior_dispatch_to_inactive_target_bypasses_queue_hook",
+  "description": "Behavior-originated dispatch_to filters stopped and never-started targets before invoking their configured queue hooks.",
+  "features": ["queue", "dispatch_to", "lifecycle", "stop"],
+  "model": {
+    "name": "ConfigQueueBehaviorDispatchToInactiveTargetBypassesQueueHookProducer",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "on": "go",
+            "target": "sent",
+            "effects": [
+              {"behavior": "dispatch_inactive"},
+              {"behavior": "effect_after"}
+            ]
+          }
+        ]
+      },
+      {"name": "sent", "entry": [{"behavior": "entry_sent"}]}
+    ]
+  },
+  "models": [
+    {
+      "name": "ConfigQueueBehaviorDispatchToInactiveTargetBypassesQueueHookWorker",
+      "initial": "idle",
+      "states": [
+        {
+          "name": "idle",
+          "transitions": [
+            {
+              "on": "audit",
+              "target": "done",
+              "effects": [{"behavior": "effect_audit"}]
+            }
+          ]
+        },
+        {"name": "done"}
+      ]
+    }
+  ],
+  "instances": [
+    {"id": "producer"},
+    {"id": "stopped", "model": "ConfigQueueBehaviorDispatchToInactiveTargetBypassesQueueHookWorker", "config": {"queue": "push_error"}},
+    {"id": "never", "model": "ConfigQueueBehaviorDispatchToInactiveTargetBypassesQueueHookWorker", "config": {"queue": "push_error"}}
+  ],
+  "behaviors": {
+    "dispatch_inactive": [
+      {"op": "dispatch", "event": "audit", "target": "stopped"},
+      {"op": "dispatch", "event": "audit", "target": "never"}
+    ],
+    "effect_after": [{"op": "trace", "value": "effect:after"}],
+    "entry_sent": [{"op": "trace", "value": "entry:sent"}],
+    "effect_audit": [{"op": "trace", "value": "effect:audit"}]
+  },
+  "script": [
+    {"op": "start", "instance": "producer"},
+    {"op": "start", "instance": "stopped"},
+    {"op": "stop", "instance": "stopped"},
+    {"op": "dispatch_to", "target": "producer", "event": "go"}
+  ],
+  "expect": {
+    "states": {
+      "producer": "/ConfigQueueBehaviorDispatchToInactiveTargetBypassesQueueHookProducer/sent",
+      "stopped": "/ConfigQueueBehaviorDispatchToInactiveTargetBypassesQueueHookWorker",
+      "never": ""
+    },
+    "trace": [
+      {"type": "dispatch", "event": "go", "target": "producer"},
+      {"type": "dispatch", "event": "audit", "target": "stopped"},
+      {"type": "dispatch", "event": "audit", "target": "never"},
+      {"type": "trace", "value": "effect:after"},
+      {"type": "trace", "value": "entry:sent"},
+      {"type": "stable", "state": "producer"}
+    ]
+  }
+}

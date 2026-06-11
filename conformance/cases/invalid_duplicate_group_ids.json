@@ -1,0 +1,45 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_duplicate_group_ids",
+  "mode": "validation",
+  "description": "Group declarations must not reuse the same id.",
+  "features": [
+    "group",
+    "validation"
+  ],
+  "model": {
+    "name": "InvalidDuplicateGroupIDs",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle"
+      }
+    ]
+  },
+  "instances": [
+    {
+      "id": "one"
+    }
+  ],
+  "groups": [
+    {
+      "id": "same",
+      "members": [
+        "one"
+      ]
+    },
+    {
+      "id": "same",
+      "members": [
+        "one"
+      ]
+    }
+  ],
+  "expect": {
+    "validation": [
+      {
+        "code": "duplicate_group"
+      }
+    ]
+  }
+}

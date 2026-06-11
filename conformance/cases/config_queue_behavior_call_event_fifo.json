@@ -1,0 +1,68 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "config_queue_behavior_call_event_fifo",
+  "description": "A behavior-side call generated operation event is routed through the configured FIFO queue before on_call transition selection.",
+  "features": ["queue", "operation", "on_call", "reentrancy"],
+  "model": {
+    "name": "ConfigQueueBehaviorCallEventFifo",
+    "initial": "idle",
+    "operations": {
+      "approve": {"behavior": "operation_approve"}
+    },
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "on": "go",
+            "target": "ready",
+            "effects": [{"behavior": "call_approve"}]
+          }
+        ]
+      },
+      {
+        "name": "ready",
+        "entry": [{"behavior": "entry_ready"}],
+        "transitions": [
+          {
+            "trigger": {"kind": "on_call", "operation": "approve"},
+            "target": "approved",
+            "effects": [{"behavior": "effect_approved"}]
+          }
+        ]
+      },
+      {"name": "approved", "entry": [{"behavior": "entry_approved"}]}
+    ]
+  },
+  "instances": [{"id": "default", "config": {"queue": "trace_fifo"}}],
+  "behaviors": {
+    "operation_approve": [{"op": "trace", "value": "operation:approve"}],
+    "call_approve": [
+      {"op": "call", "name": "approve"},
+      {"op": "trace", "value": "effect:call-approve"}
+    ],
+    "entry_ready": [{"op": "trace", "value": "entry:ready"}],
+    "effect_approved": [{"op": "trace", "value": "effect:approved"}],
+    "entry_approved": [{"op": "trace", "value": "entry:approved"}]
+  },
+  "script": [
+    {"op": "start"},
+    {"op": "dispatch", "event": "go"}
+  ],
+  "expect": {
+    "state": "/ConfigQueueBehaviorCallEventFifo/approved",
+    "trace": [
+      {"type": "dispatch", "event": "go"},
+      {"type": "trace", "value": "queue:push:go"},
+      {"type": "trace", "value": "queue:pop:go"},
+      {"type": "trace", "value": "operation:approve"},
+      {"type": "trace", "value": "queue:push:@call:approve"},
+      {"type": "trace", "value": "effect:call-approve"},
+      {"type": "trace", "value": "entry:ready"},
+      {"type": "trace", "value": "queue:pop:@call:approve"},
+      {"type": "trace", "value": "effect:approved"},
+      {"type": "trace", "value": "entry:approved"},
+      {"type": "stable", "state": "/ConfigQueueBehaviorCallEventFifo/approved"}
+    ]
+  }
+}

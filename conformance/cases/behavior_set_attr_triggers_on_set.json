@@ -1,0 +1,106 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "behavior_set_attr_triggers_on_set",
+  "description": "A behavior-side set_attr operation updates attributes and triggers on_set transitions through the same runtime path as script set.",
+  "features": [
+    "attribute",
+    "on_set",
+    "behavior_attr"
+  ],
+  "model": {
+    "name": "BehaviorSetAttr",
+    "initial": "idle",
+    "attributes": {
+      "flag": {
+        "type": "boolean",
+        "default": false
+      }
+    },
+    "states": [
+      {
+        "name": "idle",
+        "entry": [
+          {
+            "behavior": "entry_set_flag"
+          }
+        ],
+        "transitions": [
+          {
+            "trigger": {
+              "kind": "on_set",
+              "attribute": "flag"
+            },
+            "target": "changed",
+            "effects": [
+              {
+                "behavior": "effect_changed"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "changed",
+        "entry": [
+          {
+            "behavior": "entry_changed"
+          }
+        ]
+      }
+    ]
+  },
+  "behaviors": {
+    "entry_set_flag": [
+      {
+        "op": "trace",
+        "value": "entry:set-flag"
+      },
+      {
+        "op": "set_attr",
+        "name": "flag",
+        "value": true
+      }
+    ],
+    "effect_changed": [
+      {
+        "op": "trace",
+        "value": "effect:on-set"
+      }
+    ],
+    "entry_changed": [
+      {
+        "op": "trace",
+        "value": "enter:changed"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    }
+  ],
+  "expect": {
+    "state": "/BehaviorSetAttr/changed",
+    "attributes": {
+      "flag": true
+    },
+    "trace": [
+      {
+        "type": "trace",
+        "value": "entry:set-flag"
+      },
+      {
+        "type": "trace",
+        "value": "effect:on-set"
+      },
+      {
+        "type": "trace",
+        "value": "enter:changed"
+      },
+      {
+        "type": "stable",
+        "state": "/BehaviorSetAttr/changed"
+      }
+    ]
+  }
+}

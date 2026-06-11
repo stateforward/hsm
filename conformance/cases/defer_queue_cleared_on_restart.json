@@ -1,0 +1,89 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "defer_queue_cleared_on_restart",
+  "description": "Restart clears deferred events from the previous lifecycle so release after restart does not replay stale work.",
+  "features": ["defer", "queue", "lifecycle", "restart"],
+  "model": {
+    "name": "DeferQueueClearedOnRestart",
+    "initial": "blocked",
+    "states": [
+      {
+        "name": "blocked",
+        "defer": [
+          "work"
+        ],
+        "transitions": [
+          {
+            "on": "release",
+            "target": "ready"
+          }
+        ]
+      },
+      {
+        "name": "ready",
+        "transitions": [
+          {
+            "on": "work",
+            "target": "done",
+            "effects": [
+              {
+                "behavior": "effect_work"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "done"
+      }
+    ]
+  },
+  "behaviors": {
+    "effect_work": [
+      {
+        "op": "trace",
+        "value": "effect:work"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "work"
+    },
+    {
+      "op": "restart"
+    },
+    {
+      "op": "dispatch",
+      "event": "release"
+    }
+  ],
+  "expect": {
+    "state": "/DeferQueueClearedOnRestart/ready",
+    "queue": {
+      "lifecycle_cleanup": "deferred_events_cleared_on_restart"
+    },
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "work"
+      },
+      {
+        "type": "defer",
+        "event": "work"
+      },
+      {
+        "type": "dispatch",
+        "event": "release"
+      },
+      {
+        "type": "stable",
+        "state": "/DeferQueueClearedOnRestart/ready"
+      }
+    ]
+  }
+}

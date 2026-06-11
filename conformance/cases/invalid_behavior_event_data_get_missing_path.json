@@ -1,0 +1,18 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_behavior_event_data_get_missing_path",
+  "mode": "validation",
+  "description": "event_data_get behavior ops must declare a payload path.",
+  "features": ["validation"],
+  "model": {
+    "name": "InvalidBehaviorEventDataGetMissingPath",
+    "initial": "idle",
+    "states": [{"name": "idle"}]
+  },
+  "behaviors": {
+    "bad": [{"op": "event_data_get"}]
+  },
+  "expect": {
+    "validation": [{"code": "invalid_behavior_op_operand"}]
+  }
+}

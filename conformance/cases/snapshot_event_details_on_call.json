@@ -1,0 +1,86 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "snapshot_event_details_on_call",
+  "description": "Snapshots include transition snapshot triggers for on_call transitions selectable from the current state.",
+  "features": [
+    "snapshot",
+    "operation",
+    "on_call"
+  ],
+  "model": {
+    "name": "SnapshotEventDetailsOnCall",
+    "initial": "idle",
+    "operations": {
+      "approve": {
+        "behavior": "operation_approve"
+      }
+    },
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "trigger": {
+              "kind": "on_call",
+              "operation": "approve"
+            },
+            "target": "done"
+          }
+        ]
+      },
+      {
+        "name": "done"
+      }
+    ]
+  },
+  "behaviors": {
+    "operation_approve": [
+      {
+        "op": "trace",
+        "value": "operation:approve"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "snapshot"
+    }
+  ],
+  "expect": {
+    "state": "/SnapshotEventDetailsOnCall/idle",
+    "snapshots": {
+      "last": {
+        "id": "default",
+        "qualified_name": "/SnapshotEventDetailsOnCall",
+        "state": "/SnapshotEventDetailsOnCall/idle",
+        "attributes": {},
+        "queue_len": 0,
+        "transitions": [
+          {
+            "name": "/SnapshotEventDetailsOnCall/idle/transition_4",
+            "kind": 67343,
+            "source": "/SnapshotEventDetailsOnCall/idle",
+            "target": "/SnapshotEventDetailsOnCall/done",
+            "events": [
+              "@call:approve"
+            ],
+            "guard": false
+          }
+        ]
+      }
+    },
+    "trace": [
+      {
+        "type": "snapshot",
+        "state": "/SnapshotEventDetailsOnCall/idle"
+      },
+      {
+        "type": "stable",
+        "state": "/SnapshotEventDetailsOnCall/idle"
+      }
+    ]
+  }
+}

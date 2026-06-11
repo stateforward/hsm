@@ -1,0 +1,104 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "dispatch_to_multiple_targets",
+  "description": "A single dispatch_to step can target multiple instance ids in order while ignoring missing ids.",
+  "features": [
+    "dispatch_to",
+    "multi_target"
+  ],
+  "model": {
+    "name": "DispatchToMultiple",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "on": "go",
+            "target": "done",
+            "effects": [
+              {
+                "behavior": "effect_go"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "done"
+      }
+    ]
+  },
+  "instances": [
+    {
+      "id": "one"
+    },
+    {
+      "id": "two"
+    },
+    {
+      "id": "three"
+    }
+  ],
+  "behaviors": {
+    "effect_go": [
+      {
+        "op": "trace",
+        "value": "effect:targeted"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start",
+      "instance": "one"
+    },
+    {
+      "op": "start",
+      "instance": "two"
+    },
+    {
+      "op": "start",
+      "instance": "three"
+    },
+    {
+      "op": "dispatch_to",
+      "targets": [
+        "two",
+        "missing",
+        "one"
+      ],
+      "event": "go"
+    }
+  ],
+  "expect": {
+    "states": {
+      "one": "/DispatchToMultiple/done",
+      "two": "/DispatchToMultiple/done",
+      "three": "/DispatchToMultiple/idle"
+    },
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "go",
+        "target": [
+          "two",
+          "missing",
+          "one"
+        ]
+      },
+      {
+        "type": "trace",
+        "value": "effect:targeted"
+      },
+      {
+        "type": "trace",
+        "value": "effect:targeted"
+      },
+      {
+        "type": "stable",
+        "state": "targets:two,missing,one"
+      }
+    ]
+  }
+}

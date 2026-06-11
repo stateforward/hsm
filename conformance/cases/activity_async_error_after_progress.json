@@ -1,0 +1,38 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "activity_async_error_after_progress",
+  "description": "An activity that fails after yielding reports a normalized runtime error while the source state remains active.",
+  "features": ["activity", "async", "error"],
+  "model": {
+    "name": "ActivityAsyncErrorAfterProgress",
+    "initial": "active",
+    "states": [
+      {
+        "name": "active",
+        "activity": [{"behavior": "activity_fail_later"}]
+      }
+    ]
+  },
+  "behaviors": {
+    "activity_fail_later": [
+      {"op": "trace", "value": "activity:start"},
+      {"op": "yield"},
+      {"op": "trace", "value": "activity:progress"},
+      {"op": "raise", "code": "activity_error", "value": "activity delayed boom"}
+    ]
+  },
+  "script": [{"op": "start"}, {"op": "sleep", "millis": 0}],
+  "expect": {
+    "state": "/ActivityAsyncErrorAfterProgress/active",
+    "error": {
+      "code": "activity_error",
+      "message_contains": "activity delayed boom"
+    },
+    "trace": [
+      {"type": "trace", "value": "activity:start"},
+      {"type": "trace", "value": "activity:progress"},
+      {"type": "error", "code": "activity_error"},
+      {"type": "stable", "state": "/ActivityAsyncErrorAfterProgress/active"}
+    ]
+  }
+}

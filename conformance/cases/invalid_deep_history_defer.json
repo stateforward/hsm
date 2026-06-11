@@ -1,0 +1,41 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_deep_history_defer",
+  "mode": "validation",
+  "description": "Deep history pseudostates must not declare deferred events.",
+  "features": ["history", "deep_history", "defer", "validation"],
+  "model": {
+    "name": "InvalidDeepHistoryDefer",
+    "initial": "parent",
+    "states": [
+      {
+        "name": "parent",
+        "initial": "h",
+        "states": [
+          {
+            "name": "h",
+            "kind": "deep_history",
+            "defer": [
+              "work"
+            ],
+            "transitions": [
+              {
+                "target": "idle"
+              }
+            ]
+          },
+          {
+            "name": "idle"
+          }
+        ]
+      }
+    ]
+  },
+  "expect": {
+    "validation": [
+      {
+        "code": "invalid_pseudostate_contents"
+      }
+    ]
+  }
+}

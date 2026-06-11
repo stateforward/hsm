@@ -1,0 +1,143 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "submachine_source_qualified_entry_point_target",
+  "description": "A source-qualified ancestor transition from a nested active state can target a submachine through an entry point.",
+  "features": [
+    "submachine",
+    "entry_point",
+    "source",
+    "nested"
+  ],
+  "model": {
+    "name": "SubmachineSourceEntryTarget",
+    "initial": "outer",
+    "states": [
+      {
+        "name": "outer",
+        "initial": "idle",
+        "states": [
+          {
+            "name": "idle",
+            "exit": [
+              {
+                "behavior": "exit_idle"
+              }
+            ]
+          },
+          {
+            "name": "drive",
+            "kind": "submachine",
+            "machine": "SourceEntryChild"
+          }
+        ]
+      }
+    ],
+    "transitions": [
+      {
+        "source": "outer/idle",
+        "on": "go",
+        "target": "outer/drive",
+        "entry_point": "resume",
+        "effects": [
+          {
+            "behavior": "effect_go"
+          }
+        ]
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "SourceEntryChild",
+      "initial": "cold",
+      "entry_points": [
+        {
+          "name": "resume",
+          "target": "running",
+          "effects": [
+            {
+              "behavior": "effect_resume"
+            }
+          ]
+        }
+      ],
+      "states": [
+        {
+          "name": "cold"
+        },
+        {
+          "name": "running",
+          "entry": [
+            {
+              "behavior": "entry_running"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "behaviors": {
+    "exit_idle": [
+      {
+        "op": "trace",
+        "value": "exit:idle"
+      }
+    ],
+    "effect_go": [
+      {
+        "op": "trace",
+        "value": "effect:go"
+      }
+    ],
+    "effect_resume": [
+      {
+        "op": "trace",
+        "value": "effect:resume"
+      }
+    ],
+    "entry_running": [
+      {
+        "op": "trace",
+        "value": "enter:running"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "go"
+    }
+  ],
+  "expect": {
+    "state": "/SubmachineSourceEntryTarget/outer/drive/SourceEntryChild/running",
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "go"
+      },
+      {
+        "type": "trace",
+        "value": "exit:idle"
+      },
+      {
+        "type": "trace",
+        "value": "effect:go"
+      },
+      {
+        "type": "trace",
+        "value": "effect:resume"
+      },
+      {
+        "type": "trace",
+        "value": "enter:running"
+      },
+      {
+        "type": "stable",
+        "state": "/SubmachineSourceEntryTarget/outer/drive/SourceEntryChild/running"
+      }
+    ]
+  }
+}

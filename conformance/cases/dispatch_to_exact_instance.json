@@ -1,0 +1,83 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "dispatch_to_exact_instance",
+  "description": "dispatch_to delivers a regular event only to the named instance and leaves sibling instances unchanged.",
+  "features": [
+    "dispatch_to"
+  ],
+  "model": {
+    "name": "DispatchToExact",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "on": "go",
+            "target": "done",
+            "effects": [
+              {
+                "behavior": "effect_go"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "done"
+      }
+    ]
+  },
+  "instances": [
+    {
+      "id": "one"
+    },
+    {
+      "id": "two"
+    }
+  ],
+  "behaviors": {
+    "effect_go": [
+      {
+        "op": "trace",
+        "value": "effect:targeted"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start",
+      "instance": "one"
+    },
+    {
+      "op": "start",
+      "instance": "two"
+    },
+    {
+      "op": "dispatch_to",
+      "instance": "two",
+      "event": "go"
+    }
+  ],
+  "expect": {
+    "states": {
+      "one": "/DispatchToExact/idle",
+      "two": "/DispatchToExact/done"
+    },
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "go",
+        "target": "two"
+      },
+      {
+        "type": "trace",
+        "value": "effect:targeted"
+      },
+      {
+        "type": "stable",
+        "state": "two"
+      }
+    ]
+  }
+}

@@ -1,0 +1,238 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "defer_replay_after_choice_target_resolution",
+  "description": "A deferred event replays only after a choice target resolves to its concrete nested leaf state.",
+  "features": [
+    "defer",
+    "queue",
+    "choice",
+    "nested"
+  ],
+  "model": {
+    "name": "DeferReplayAfterChoiceTargetResolution",
+    "initial": "blocked",
+    "states": [
+      {
+        "name": "blocked",
+        "defer": [
+          "work"
+        ],
+        "exit": [
+          {
+            "behavior": "exit_blocked"
+          }
+        ],
+        "transitions": [
+          {
+            "on": "release",
+            "target": "route",
+            "effects": [
+              {
+                "behavior": "effect_release"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "route",
+        "kind": "choice",
+        "transitions": [
+          {
+            "target": "ready",
+            "effects": [
+              {
+                "behavior": "effect_choice"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "ready",
+        "initial": "child",
+        "entry": [
+          {
+            "behavior": "entry_ready"
+          }
+        ],
+        "transitions": [
+          {
+            "on": "work",
+            "target": "wrong",
+            "effects": [
+              {
+                "behavior": "effect_wrong"
+              }
+            ]
+          }
+        ],
+        "states": [
+          {
+            "name": "child",
+            "entry": [
+              {
+                "behavior": "entry_child"
+              }
+            ],
+            "transitions": [
+              {
+                "on": "work",
+                "target": "../../done",
+                "effects": [
+                  {
+                    "behavior": "effect_work"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "done",
+        "entry": [
+          {
+            "behavior": "entry_done"
+          }
+        ]
+      },
+      {
+        "name": "wrong",
+        "entry": [
+          {
+            "behavior": "entry_wrong"
+          }
+        ]
+      }
+    ]
+  },
+  "behaviors": {
+    "exit_blocked": [
+      {
+        "op": "trace",
+        "value": "exit:blocked"
+      }
+    ],
+    "effect_release": [
+      {
+        "op": "trace",
+        "value": "effect:release"
+      }
+    ],
+    "effect_choice": [
+      {
+        "op": "trace",
+        "value": "effect:choice"
+      }
+    ],
+    "entry_ready": [
+      {
+        "op": "trace",
+        "value": "entry:ready"
+      }
+    ],
+    "entry_child": [
+      {
+        "op": "trace",
+        "value": "entry:child"
+      }
+    ],
+    "effect_work": [
+      {
+        "op": "trace",
+        "value": "effect:work"
+      }
+    ],
+    "entry_done": [
+      {
+        "op": "trace",
+        "value": "entry:done"
+      }
+    ],
+    "effect_wrong": [
+      {
+        "op": "trace",
+        "value": "effect:wrong"
+      }
+    ],
+    "entry_wrong": [
+      {
+        "op": "trace",
+        "value": "entry:wrong"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "work"
+    },
+    {
+      "op": "dispatch",
+      "event": "release"
+    }
+  ],
+  "expect": {
+    "state": "/DeferReplayAfterChoiceTargetResolution/done",
+    "queue": {
+      "deferred": [
+        "work"
+      ],
+      "replay": "after_choice_target_resolution"
+    },
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "work"
+      },
+      {
+        "type": "defer",
+        "event": "work"
+      },
+      {
+        "type": "dispatch",
+        "event": "release"
+      },
+      {
+        "type": "undefer",
+        "event": "work"
+      },
+      {
+        "type": "trace",
+        "value": "exit:blocked"
+      },
+      {
+        "type": "trace",
+        "value": "effect:release"
+      },
+      {
+        "type": "trace",
+        "value": "effect:choice"
+      },
+      {
+        "type": "trace",
+        "value": "entry:ready"
+      },
+      {
+        "type": "trace",
+        "value": "entry:child"
+      },
+      {
+        "type": "trace",
+        "value": "effect:work"
+      },
+      {
+        "type": "trace",
+        "value": "entry:done"
+      },
+      {
+        "type": "stable",
+        "state": "/DeferReplayAfterChoiceTargetResolution/done"
+      }
+    ]
+  }
+}

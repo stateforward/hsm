@@ -1,0 +1,107 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "multiple_activity_order_cancel",
+  "description": "Multiple activity behavior references start in declaration order and are all cancelled when the state exits.",
+  "features": ["activity", "async", "cancellation", "selection_order"],
+  "model": {
+    "name": "MultipleActivityOrderCancel",
+    "initial": "active",
+    "states": [
+      {
+        "name": "active",
+        "activity": [
+          {
+            "behavior": "activity_one"
+          },
+          {
+            "behavior": "activity_two"
+          }
+        ],
+        "transitions": [
+          {
+            "on": "stop",
+            "target": "done"
+          }
+        ]
+      },
+      {
+        "name": "done",
+        "entry": [
+          {
+            "behavior": "entry_done"
+          }
+        ]
+      }
+    ]
+  },
+  "behaviors": {
+    "activity_one": [
+      {
+        "op": "trace",
+        "value": "activity:one:start"
+      },
+      {
+        "op": "sleep",
+        "millis": 1000
+      }
+    ],
+    "activity_two": [
+      {
+        "op": "trace",
+        "value": "activity:two:start"
+      },
+      {
+        "op": "sleep",
+        "millis": 1000
+      }
+    ],
+    "entry_done": [
+      {
+        "op": "trace",
+        "value": "enter:done"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "stop"
+    }
+  ],
+  "expect": {
+    "state": "/MultipleActivityOrderCancel/done",
+    "trace": [
+      {
+        "type": "trace",
+        "value": "activity:one:start"
+      },
+      {
+        "type": "trace",
+        "value": "activity:two:start"
+      },
+      {
+        "type": "dispatch",
+        "event": "stop"
+      },
+      {
+        "type": "activity_cancel",
+        "behavior": "activity_one"
+      },
+      {
+        "type": "activity_cancel",
+        "behavior": "activity_two"
+      },
+      {
+        "type": "trace",
+        "value": "enter:done"
+      },
+      {
+        "type": "stable",
+        "state": "/MultipleActivityOrderCancel/done"
+      }
+    ]
+  }
+}

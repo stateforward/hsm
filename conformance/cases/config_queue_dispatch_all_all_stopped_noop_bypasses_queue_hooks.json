@@ -1,0 +1,49 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "config_queue_dispatch_all_all_stopped_noop_bypasses_queue_hooks",
+  "description": "Caller-originated broadcast with only stopped recipients is a no-op and bypasses stopped recipients' configured queue hooks.",
+  "features": ["queue", "broadcast", "lifecycle", "stop"],
+  "model": {
+    "name": "ConfigQueueDispatchAllAllStoppedNoopBypassesQueueHooks",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "on": "audit",
+            "target": "wrong",
+            "effects": [{"behavior": "effect_wrong"}]
+          }
+        ]
+      },
+      {
+        "name": "wrong"
+      }
+    ]
+  },
+  "instances": [
+    {"id": "stopped_a", "config": {"queue": "push_error"}},
+    {"id": "stopped_b", "config": {"queue": "push_error"}}
+  ],
+  "behaviors": {
+    "effect_wrong": [{"op": "trace", "value": "effect:wrong"}]
+  },
+  "script": [
+    {"op": "start", "instance": "stopped_a"},
+    {"op": "start", "instance": "stopped_b"},
+    {"op": "stop", "instance": "stopped_a"},
+    {"op": "stop", "instance": "stopped_b"},
+    {"op": "dispatch_all", "event": "audit"}
+  ],
+  "expect": {
+    "states": {
+      "stopped_a": "/ConfigQueueDispatchAllAllStoppedNoopBypassesQueueHooks",
+      "stopped_b": "/ConfigQueueDispatchAllAllStoppedNoopBypassesQueueHooks"
+    },
+    "trace": [
+      {"type": "dispatch", "event": "audit", "target": "all"},
+      {"type": "stable", "state": "all"}
+    ]
+  }
+}

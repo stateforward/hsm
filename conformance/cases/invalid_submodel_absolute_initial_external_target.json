@@ -1,0 +1,39 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_submodel_absolute_initial_external_target",
+  "mode": "validation",
+  "description": "Absolute initial targets in reusable child models resolve in the child model namespace; paths naming host-model states must not escape the child root.",
+  "features": ["submachine", "initial", "path_resolution", "validation"],
+  "model": {
+    "name": "InvalidSubmodelAbsoluteInitialExternalTarget",
+    "initial": "drive",
+    "states": [
+      {
+        "name": "drive",
+        "kind": "submachine",
+        "machine": "ChildAbsoluteInitialExternalTarget"
+      },
+      {
+        "name": "outside"
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "ChildAbsoluteInitialExternalTarget",
+      "initial": "/InvalidSubmodelAbsoluteInitialExternalTarget/outside",
+      "states": [
+        {
+          "name": "idle"
+        }
+      ]
+    }
+  ],
+  "expect": {
+    "validation": [
+      {
+        "code": "missing_target"
+      }
+    ]
+  }
+}

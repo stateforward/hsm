@@ -1,0 +1,114 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "config_queue_fanout_filters_inactive_before_queue_hooks",
+  "description": "Fanout dispatch filters inactive recipients before invoking configured queue hooks, so skipped recipients cannot mask delivery with queue errors.",
+  "features": ["queue", "dispatch_to", "multi_target", "lifecycle", "stop"],
+  "model": {
+    "name": "ConfigQueueFanoutFiltersInactiveBeforeQueueHooks",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "on": "go",
+            "target": "done",
+            "effects": [
+              {
+                "behavior": "effect_go"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "done"
+      }
+    ]
+  },
+  "instances": [
+    {
+      "id": "started",
+      "config": {
+        "queue": "trace_fifo"
+      }
+    },
+    {
+      "id": "stopped",
+      "config": {
+        "queue": "push_error"
+      }
+    },
+    {
+      "id": "never",
+      "config": {
+        "queue": "push_error"
+      }
+    }
+  ],
+  "behaviors": {
+    "effect_go": [
+      {
+        "op": "trace",
+        "value": "effect:go"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start",
+      "instance": "started"
+    },
+    {
+      "op": "start",
+      "instance": "stopped"
+    },
+    {
+      "op": "stop",
+      "instance": "stopped"
+    },
+    {
+      "op": "dispatch_to",
+      "targets": [
+        "stopped",
+        "never",
+        "started"
+      ],
+      "event": "go"
+    }
+  ],
+  "expect": {
+    "states": {
+      "started": "/ConfigQueueFanoutFiltersInactiveBeforeQueueHooks/done",
+      "stopped": "/ConfigQueueFanoutFiltersInactiveBeforeQueueHooks",
+      "never": ""
+    },
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "go",
+        "target": [
+          "stopped",
+          "never",
+          "started"
+        ]
+      },
+      {
+        "type": "trace",
+        "value": "queue:push:go"
+      },
+      {
+        "type": "trace",
+        "value": "queue:pop:go"
+      },
+      {
+        "type": "trace",
+        "value": "effect:go"
+      },
+      {
+        "type": "stable",
+        "state": "targets:stopped,never,started"
+      }
+    ]
+  }
+}

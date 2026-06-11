@@ -1,0 +1,18 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_behavior_event_data_get_extraneous_value",
+  "mode": "validation",
+  "description": "event_data_get behavior ops do not accept comparison values.",
+  "features": ["validation"],
+  "model": {
+    "name": "InvalidBehaviorEventDataGetExtraneousValue",
+    "initial": "idle",
+    "states": [{"name": "idle"}]
+  },
+  "behaviors": {
+    "bad": [{"op": "event_data_get", "path": "ok", "value": true}]
+  },
+  "expect": {
+    "validation": [{"code": "invalid_behavior_op_operand"}]
+  }
+}

@@ -1,0 +1,127 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "path_resolution_current_state_target",
+  "description": "A source-qualified transition target using . resolves to the current source state, not the transition owner.",
+  "features": ["path_resolution", "source", "nested"],
+  "model": {
+    "name": "PathResolutionCurrentStateTarget",
+    "initial": "parent",
+    "states": [
+      {
+        "name": "parent",
+        "initial": "leaf",
+        "entry": [
+          {
+            "behavior": "entry_parent"
+          }
+        ],
+        "exit": [
+          {
+            "behavior": "exit_parent"
+          }
+        ],
+        "transitions": [
+          {
+            "source": "./leaf",
+            "on": "again",
+            "target": ".",
+            "effects": [
+              {
+                "behavior": "effect_again"
+              }
+            ]
+          }
+        ],
+        "states": [
+          {
+            "name": "leaf",
+            "entry": [
+              {
+                "behavior": "entry_leaf"
+              }
+            ],
+            "exit": [
+              {
+                "behavior": "exit_leaf"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "behaviors": {
+    "entry_parent": [
+      {
+        "op": "trace",
+        "value": "entry:parent"
+      }
+    ],
+    "exit_parent": [
+      {
+        "op": "trace",
+        "value": "exit:parent"
+      }
+    ],
+    "entry_leaf": [
+      {
+        "op": "trace",
+        "value": "entry:leaf"
+      }
+    ],
+    "exit_leaf": [
+      {
+        "op": "trace",
+        "value": "exit:leaf"
+      }
+    ],
+    "effect_again": [
+      {
+        "op": "trace",
+        "value": "effect:again"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "again"
+    }
+  ],
+  "expect": {
+    "state": "/PathResolutionCurrentStateTarget/parent/leaf",
+    "trace": [
+      {
+        "type": "trace",
+        "value": "entry:parent"
+      },
+      {
+        "type": "trace",
+        "value": "entry:leaf"
+      },
+      {
+        "type": "dispatch",
+        "event": "again"
+      },
+      {
+        "type": "trace",
+        "value": "exit:leaf"
+      },
+      {
+        "type": "trace",
+        "value": "effect:again"
+      },
+      {
+        "type": "trace",
+        "value": "entry:leaf"
+      },
+      {
+        "type": "stable",
+        "state": "/PathResolutionCurrentStateTarget/parent/leaf"
+      }
+    ]
+  }
+}

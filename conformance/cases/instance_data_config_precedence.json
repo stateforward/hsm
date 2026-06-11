@@ -1,0 +1,66 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "instance_data_config_precedence",
+  "description": "When both instance data and config data are present, config data supplies the initial event payload.",
+  "features": ["attribute", "initial"],
+  "model": {
+    "name": "InstanceDataConfigPrecedence",
+    "initial": {
+      "target": "idle",
+      "effects": [
+        {
+          "behavior": "capture_seed"
+        }
+      ]
+    },
+    "attributes": {
+      "seed": {
+        "type": "number",
+        "default": 0
+      }
+    },
+    "states": [
+      {
+        "name": "idle"
+      }
+    ]
+  },
+  "instances": [
+    {
+      "id": "one",
+      "data": {
+        "seed": 1
+      },
+      "config": {
+        "data": {
+          "seed": 9
+        }
+      }
+    }
+  ],
+  "behaviors": {
+    "capture_seed": [
+      {
+        "op": "set_attr_from_event_data",
+        "name": "seed",
+        "path": "seed"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start",
+      "instance": "one"
+    }
+  ],
+  "expect": {
+    "states": {
+      "one": "/InstanceDataConfigPrecedence/idle"
+    },
+    "instance_attributes": {
+      "one": {
+        "seed": 9
+      }
+    }
+  }
+}

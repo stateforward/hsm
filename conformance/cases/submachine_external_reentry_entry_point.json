@@ -1,0 +1,168 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "submachine_external_reentry_entry_point",
+  "description": "A default external transition targeting the currently active submachine through an entry point exits and re-enters the submachine boundary.",
+  "features": [
+    "submachine",
+    "entry_point",
+    "external",
+    "entry",
+    "exit"
+  ],
+  "model": {
+    "name": "SubmachineExternalReentry",
+    "initial": "drive",
+    "states": [
+      {
+        "name": "drive",
+        "kind": "submachine",
+        "machine": "ExternalReentryChild",
+        "entry": [
+          {
+            "behavior": "entry_drive"
+          }
+        ],
+        "exit": [
+          {
+            "behavior": "exit_drive"
+          }
+        ],
+        "transitions": [
+          {
+            "on": "reset",
+            "target": "drive",
+            "entry_point": "warm",
+            "effects": [
+              {
+                "behavior": "effect_reset"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "ExternalReentryChild",
+      "initial": "cold",
+      "entry_points": [
+        {
+          "name": "warm",
+          "target": "running",
+          "effects": [
+            {
+              "behavior": "effect_warm"
+            }
+          ]
+        }
+      ],
+      "states": [
+        {
+          "name": "cold",
+          "exit": [
+            {
+              "behavior": "exit_cold"
+            }
+          ]
+        },
+        {
+          "name": "running",
+          "entry": [
+            {
+              "behavior": "entry_running"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "behaviors": {
+    "entry_drive": [
+      {
+        "op": "trace",
+        "value": "enter:drive"
+      }
+    ],
+    "exit_drive": [
+      {
+        "op": "trace",
+        "value": "exit:drive"
+      }
+    ],
+    "exit_cold": [
+      {
+        "op": "trace",
+        "value": "exit:cold"
+      }
+    ],
+    "effect_reset": [
+      {
+        "op": "trace",
+        "value": "effect:reset"
+      }
+    ],
+    "effect_warm": [
+      {
+        "op": "trace",
+        "value": "effect:warm"
+      }
+    ],
+    "entry_running": [
+      {
+        "op": "trace",
+        "value": "enter:running"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "reset"
+    }
+  ],
+  "expect": {
+    "state": "/SubmachineExternalReentry/drive/ExternalReentryChild/running",
+    "trace": [
+      {
+        "type": "trace",
+        "value": "enter:drive"
+      },
+      {
+        "type": "dispatch",
+        "event": "reset"
+      },
+      {
+        "type": "trace",
+        "value": "exit:cold"
+      },
+      {
+        "type": "trace",
+        "value": "exit:drive"
+      },
+      {
+        "type": "trace",
+        "value": "effect:reset"
+      },
+      {
+        "type": "trace",
+        "value": "effect:warm"
+      },
+      {
+        "type": "trace",
+        "value": "enter:drive"
+      },
+      {
+        "type": "trace",
+        "value": "enter:running"
+      },
+      {
+        "type": "stable",
+        "state": "/SubmachineExternalReentry/drive/ExternalReentryChild/running"
+      }
+    ]
+  }
+}

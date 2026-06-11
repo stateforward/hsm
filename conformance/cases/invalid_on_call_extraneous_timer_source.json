@@ -1,0 +1,49 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_on_call_extraneous_timer_source",
+  "mode": "validation",
+  "description": "An on_call trigger must not declare timer source operands.",
+  "features": ["operation", "on_call", "timer", "validation"],
+  "model": {
+    "name": "InvalidOnCallExtraneousTimerSource",
+    "initial": "idle",
+    "operations": {
+      "approve": {
+        "behavior": "operation_approve"
+      }
+    },
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "trigger": {
+              "kind": "on_call",
+              "operation": "approve",
+              "duration_ms": 10
+            },
+            "target": "done"
+          }
+        ]
+      },
+      {
+        "name": "done"
+      }
+    ]
+  },
+  "behaviors": {
+    "operation_approve": [
+      {
+        "op": "trace",
+        "value": "operation:approve"
+      }
+    ]
+  },
+  "expect": {
+    "validation": [
+      {
+        "code": "extraneous_trigger_operand"
+      }
+    ]
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_behavior_set_attr_from_event_data_missing_path",
+  "mode": "validation",
+  "description": "set_attr_from_event_data behavior ops must declare a source payload path.",
+  "features": ["validation"],
+  "model": {
+    "name": "InvalidBehaviorSetAttrFromEventDataMissingPath",
+    "initial": "idle",
+    "states": [{"name": "idle"}]
+  },
+  "behaviors": {
+    "bad": [{"op": "set_attr_from_event_data", "name": "flag"}]
+  },
+  "expect": {
+    "validation": [{"code": "invalid_behavior_op_operand"}]
+  }
+}

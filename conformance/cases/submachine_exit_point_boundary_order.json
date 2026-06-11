@@ -1,0 +1,156 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "submachine_exit_point_boundary_order",
+  "description": "Exit-point routing orders child leaf exit, exit-point effects, submachine boundary exit, parent transition effects, and target entry.",
+  "features": [
+    "submachine",
+    "exit_point",
+    "entry",
+    "exit",
+    "effect"
+  ],
+  "model": {
+    "name": "SubmachineExitOrder",
+    "initial": "drive",
+    "states": [
+      {
+        "name": "drive",
+        "kind": "submachine",
+        "machine": "ExitOrderChild",
+        "exit": [
+          {
+            "behavior": "exit_drive"
+          }
+        ],
+        "transitions": [
+          {
+            "trigger": {
+              "kind": "exit_point",
+              "exit_point": "done"
+            },
+            "target": "outside",
+            "effects": [
+              {
+                "behavior": "effect_parent"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "outside",
+        "entry": [
+          {
+            "behavior": "entry_outside"
+          }
+        ]
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "ExitOrderChild",
+      "initial": "active",
+      "exit_points": [
+        {
+          "name": "done",
+          "effects": [
+            {
+              "behavior": "effect_exit_point"
+            }
+          ]
+        }
+      ],
+      "states": [
+        {
+          "name": "active",
+          "exit": [
+            {
+              "behavior": "exit_active"
+            }
+          ],
+          "transitions": [
+            {
+              "on": "finish",
+              "target": "done"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "behaviors": {
+    "exit_active": [
+      {
+        "op": "trace",
+        "value": "exit:active"
+      }
+    ],
+    "effect_exit_point": [
+      {
+        "op": "trace",
+        "value": "effect:exit-point"
+      }
+    ],
+    "exit_drive": [
+      {
+        "op": "trace",
+        "value": "exit:drive"
+      }
+    ],
+    "effect_parent": [
+      {
+        "op": "trace",
+        "value": "effect:parent"
+      }
+    ],
+    "entry_outside": [
+      {
+        "op": "trace",
+        "value": "enter:outside"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "finish"
+    }
+  ],
+  "expect": {
+    "state": "/SubmachineExitOrder/outside",
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "finish"
+      },
+      {
+        "type": "trace",
+        "value": "exit:active"
+      },
+      {
+        "type": "trace",
+        "value": "effect:exit-point"
+      },
+      {
+        "type": "trace",
+        "value": "exit:drive"
+      },
+      {
+        "type": "trace",
+        "value": "effect:parent"
+      },
+      {
+        "type": "trace",
+        "value": "enter:outside"
+      },
+      {
+        "type": "stable",
+        "state": "/SubmachineExitOrder/outside"
+      }
+    ]
+  }
+}

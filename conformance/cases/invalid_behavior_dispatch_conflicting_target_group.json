@@ -1,0 +1,18 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_behavior_dispatch_conflicting_target_group",
+  "mode": "validation",
+  "description": "dispatch behavior ops cannot declare both a broadcast target and a group.",
+  "features": ["validation"],
+  "model": {
+    "name": "InvalidBehaviorDispatchConflictingTargetGroup",
+    "initial": "idle",
+    "states": [{"name": "idle"}]
+  },
+  "behaviors": {
+    "bad": [{"op": "dispatch", "event": "go", "target": "all", "group": "both"}]
+  },
+  "expect": {
+    "validation": [{"code": "invalid_behavior_op_operand"}]
+  }
+}

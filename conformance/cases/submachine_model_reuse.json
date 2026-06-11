@@ -1,0 +1,86 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "submachine_model_reuse",
+  "description": "Two submachine states may reference the same child model without sharing active state.",
+  "features": [
+    "submachine"
+  ],
+  "model": {
+    "name": "SubmachineReuse",
+    "initial": "first",
+    "states": [
+      {
+        "name": "first",
+        "kind": "submachine",
+        "machine": "Toggle",
+        "transitions": [
+          {
+            "on": "switch",
+            "target": "second"
+          }
+        ]
+      },
+      {
+        "name": "second",
+        "kind": "submachine",
+        "machine": "Toggle"
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "Toggle",
+      "initial": "a",
+      "states": [
+        {
+          "name": "a",
+          "transitions": [
+            {
+              "on": "flip",
+              "target": "b"
+            }
+          ]
+        },
+        {
+          "name": "b",
+          "transitions": [
+            {
+              "on": "flip",
+              "target": "a"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "flip"
+    },
+    {
+      "op": "dispatch",
+      "event": "switch"
+    }
+  ],
+  "expect": {
+    "state": "/SubmachineReuse/second/Toggle/a",
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "flip"
+      },
+      {
+        "type": "dispatch",
+        "event": "switch"
+      },
+      {
+        "type": "stable",
+        "state": "/SubmachineReuse/second/Toggle/a"
+      }
+    ]
+  }
+}

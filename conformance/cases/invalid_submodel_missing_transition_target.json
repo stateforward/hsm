@@ -1,0 +1,42 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_submodel_missing_transition_target",
+  "mode": "validation",
+  "description": "Child model transition targets must resolve inside the child model.",
+  "features": ["submachine", "validation"],
+  "model": {
+    "name": "InvalidSubmodelMissingTransitionTarget",
+    "initial": "drive",
+    "states": [
+      {
+        "name": "drive",
+        "kind": "submachine",
+        "machine": "ChildMissingTransitionTarget"
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "ChildMissingTransitionTarget",
+      "initial": "idle",
+      "states": [
+        {
+          "name": "idle",
+          "transitions": [
+            {
+              "on": "go",
+              "target": "missing"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "expect": {
+    "validation": [
+      {
+        "code": "missing_target"
+      }
+    ]
+  }
+}

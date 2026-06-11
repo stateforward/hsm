@@ -1,0 +1,124 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "submachine_reused_entry_point_target_disambiguation",
+  "description": "Sibling submachine states reusing the same child model resolve the same entry-point name under the selected sibling state.",
+  "features": [
+    "submachine",
+    "entry_point"
+  ],
+  "model": {
+    "name": "SubmachineEntryDisambiguation",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "on": "go",
+            "target": "second",
+            "entry_point": "resume",
+            "effects": [
+              {
+                "behavior": "effect_go"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "first",
+        "kind": "submachine",
+        "machine": "ReusableEntryChild"
+      },
+      {
+        "name": "second",
+        "kind": "submachine",
+        "machine": "ReusableEntryChild"
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "ReusableEntryChild",
+      "initial": "cold",
+      "entry_points": [
+        {
+          "name": "resume",
+          "target": "running",
+          "effects": [
+            {
+              "behavior": "effect_resume"
+            }
+          ]
+        }
+      ],
+      "states": [
+        {
+          "name": "cold"
+        },
+        {
+          "name": "running",
+          "entry": [
+            {
+              "behavior": "entry_running"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "behaviors": {
+    "effect_go": [
+      {
+        "op": "trace",
+        "value": "effect:go"
+      }
+    ],
+    "effect_resume": [
+      {
+        "op": "trace",
+        "value": "effect:resume"
+      }
+    ],
+    "entry_running": [
+      {
+        "op": "trace",
+        "value": "enter:running"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "go"
+    }
+  ],
+  "expect": {
+    "state": "/SubmachineEntryDisambiguation/second/ReusableEntryChild/running",
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "go"
+      },
+      {
+        "type": "trace",
+        "value": "effect:go"
+      },
+      {
+        "type": "trace",
+        "value": "effect:resume"
+      },
+      {
+        "type": "trace",
+        "value": "enter:running"
+      },
+      {
+        "type": "stable",
+        "state": "/SubmachineEntryDisambiguation/second/ReusableEntryChild/running"
+      }
+    ]
+  }
+}

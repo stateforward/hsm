@@ -1,0 +1,34 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_duplicate_group_members",
+  "mode": "validation",
+  "description": "A group declaration must not list the same member id more than once.",
+  "features": ["group", "validation"],
+  "model": {
+    "name": "InvalidDuplicateGroupMembers",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle"
+      }
+    ]
+  },
+  "instances": [
+    {
+      "id": "one"
+    }
+  ],
+  "groups": [
+    {
+      "id": "dupes",
+      "members": ["one", "one"]
+    }
+  ],
+  "expect": {
+    "validation": [
+      {
+        "code": "duplicate_group_member"
+      }
+    ]
+  }
+}

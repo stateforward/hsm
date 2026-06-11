@@ -1,0 +1,10 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "completion_guard_selection_order",
+  "description": "Completion transition guards are evaluated in order and fall through to a later matching completion transition.",
+  "features": ["completion", "final", "guard", "selection_order"],
+  "model": {"name": "CompletionGuardSelectionOrder", "initial": "work", "states": [{"name": "work", "transitions": [{"on": "finish", "target": "done"}]}, {"name": "done", "kind": "final"}, {"name": "first"}, {"name": "fallback", "entry": [{"behavior": "entry_fallback"}]}], "transitions": [{"trigger": {"kind": "completion"}, "guard": {"behavior": "guard_first"}, "target": "first"}, {"trigger": {"kind": "completion"}, "target": "fallback", "effects": [{"behavior": "effect_fallback"}]}]},
+  "behaviors": {"guard_first": [{"op": "trace", "value": "guard:first"}, {"op": "return_value", "value": false}], "effect_fallback": [{"op": "trace", "value": "effect:fallback"}], "entry_fallback": [{"op": "trace", "value": "entry:fallback"}]},
+  "script": [{"op": "start"}, {"op": "dispatch", "event": "finish"}],
+  "expect": {"state": "/CompletionGuardSelectionOrder/fallback", "trace": [{"type": "dispatch", "event": "finish"}, {"type": "trace", "value": "guard:first"}, {"type": "trace", "value": "effect:fallback"}, {"type": "trace", "value": "entry:fallback"}, {"type": "stable", "state": "/CompletionGuardSelectionOrder/fallback"}]}
+}

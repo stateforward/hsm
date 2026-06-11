@@ -1,0 +1,83 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "config_clock_trace_every",
+  "description": "An instance config clock hook is used by every timers.",
+  "features": [
+    "timer",
+    "every"
+  ],
+  "model": {
+    "name": "ConfigClockTraceEvery",
+    "initial": "waiting",
+    "states": [
+      {
+        "name": "waiting",
+        "transitions": [
+          {
+            "trigger": {
+              "kind": "every",
+              "duration_ms": 25
+            },
+            "target": "fired",
+            "effects": [
+              {
+                "behavior": "effect_timer"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "fired"
+      }
+    ]
+  },
+  "instances": [
+    {
+      "id": "default",
+      "config": {
+        "clock": "trace_yield_sleep"
+      }
+    }
+  ],
+  "behaviors": {
+    "effect_timer": [
+      {
+        "op": "trace",
+        "value": "effect:timer"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "tick",
+      "millis": 25
+    }
+  ],
+  "expect": {
+    "state": "/ConfigClockTraceEvery/fired",
+    "trace": [
+      {
+        "type": "timer_scheduled"
+      },
+      {
+        "type": "trace",
+        "value": "clock:sleep:25"
+      },
+      {
+        "type": "timer_fired"
+      },
+      {
+        "type": "trace",
+        "value": "effect:timer"
+      },
+      {
+        "type": "stable",
+        "state": "/ConfigClockTraceEvery/fired"
+      }
+    ]
+  }
+}

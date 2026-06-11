@@ -1,0 +1,37 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_timer_no_source",
+  "mode": "validation",
+  "description": "A timer trigger must declare exactly one time source.",
+  "features": [
+    "timer",
+    "validation"
+  ],
+  "model": {
+    "name": "InvalidTimerNoSource",
+    "initial": "waiting",
+    "states": [
+      {
+        "name": "waiting",
+        "transitions": [
+          {
+            "trigger": {
+              "kind": "after"
+            },
+            "target": "done"
+          }
+        ]
+      },
+      {
+        "name": "done"
+      }
+    ]
+  },
+  "expect": {
+    "validation": [
+      {
+        "code": "invalid_timer_source"
+      }
+    ]
+  }
+}

@@ -1,0 +1,186 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "submachine_ancestor_entry_point_local_entry",
+  "description": "An ancestor-owned local transition can enter a descendant submachine through an entry point while preserving local transition semantics.",
+  "features": [
+    "submachine",
+    "entry_point",
+    "local",
+    "nested",
+    "entry",
+    "exit"
+  ],
+  "model": {
+    "name": "SubmachineAncestorEntryLocal",
+    "initial": "outer",
+    "states": [
+      {
+        "name": "outer",
+        "initial": "idle",
+        "entry": [
+          {
+            "behavior": "entry_outer"
+          }
+        ],
+        "exit": [
+          {
+            "behavior": "exit_outer"
+          }
+        ],
+        "transitions": [
+          {
+            "on": "activate",
+            "kind": "local",
+            "target": "outer/drive",
+            "entry_point": "resume",
+            "effects": [
+              {
+                "behavior": "effect_activate"
+              }
+            ]
+          }
+        ],
+        "states": [
+          {
+            "name": "idle",
+            "exit": [
+              {
+                "behavior": "exit_idle"
+              }
+            ]
+          },
+          {
+            "name": "drive",
+            "kind": "submachine",
+            "machine": "AncestorEntryChild",
+            "entry": [
+              {
+                "behavior": "entry_drive"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "AncestorEntryChild",
+      "initial": "cold",
+      "entry_points": [
+        {
+          "name": "resume",
+          "target": "running",
+          "effects": [
+            {
+              "behavior": "effect_resume"
+            }
+          ]
+        }
+      ],
+      "states": [
+        {
+          "name": "cold"
+        },
+        {
+          "name": "running",
+          "entry": [
+            {
+              "behavior": "entry_running"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "behaviors": {
+    "entry_outer": [
+      {
+        "op": "trace",
+        "value": "enter:outer"
+      }
+    ],
+    "exit_outer": [
+      {
+        "op": "trace",
+        "value": "exit:outer"
+      }
+    ],
+    "exit_idle": [
+      {
+        "op": "trace",
+        "value": "exit:idle"
+      }
+    ],
+    "effect_activate": [
+      {
+        "op": "trace",
+        "value": "effect:activate"
+      }
+    ],
+    "effect_resume": [
+      {
+        "op": "trace",
+        "value": "effect:resume"
+      }
+    ],
+    "entry_drive": [
+      {
+        "op": "trace",
+        "value": "enter:drive"
+      }
+    ],
+    "entry_running": [
+      {
+        "op": "trace",
+        "value": "enter:running"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "activate"
+    }
+  ],
+  "expect": {
+    "state": "/SubmachineAncestorEntryLocal/outer/drive/AncestorEntryChild/running",
+    "trace": [
+      {
+        "type": "trace",
+        "value": "enter:outer"
+      },
+      {
+        "type": "dispatch",
+        "event": "activate"
+      },
+      {
+        "type": "trace",
+        "value": "exit:idle"
+      },
+      {
+        "type": "trace",
+        "value": "effect:activate"
+      },
+      {
+        "type": "trace",
+        "value": "effect:resume"
+      },
+      {
+        "type": "trace",
+        "value": "enter:drive"
+      },
+      {
+        "type": "trace",
+        "value": "enter:running"
+      },
+      {
+        "type": "stable",
+        "state": "/SubmachineAncestorEntryLocal/outer/drive/AncestorEntryChild/running"
+      }
+    ]
+  }
+}

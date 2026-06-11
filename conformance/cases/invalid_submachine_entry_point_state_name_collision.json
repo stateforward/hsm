@@ -1,0 +1,46 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_submachine_entry_point_state_name_collision",
+  "mode": "validation",
+  "description": "A child model must not reuse the same public name for an entry point and a state.",
+  "features": [
+    "submachine",
+    "entry_point",
+    "validation"
+  ],
+  "model": {
+    "name": "InvalidEntryPointStateCollision",
+    "initial": "drive",
+    "states": [
+      {
+        "name": "drive",
+        "kind": "submachine",
+        "machine": "EntryPointCollisionChild"
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "EntryPointCollisionChild",
+      "initial": "ready",
+      "entry_points": [
+        {
+          "name": "ready",
+          "target": "ready"
+        }
+      ],
+      "states": [
+        {
+          "name": "ready"
+        }
+      ]
+    }
+  ],
+  "expect": {
+    "validation": [
+      {
+        "code": "connection_point_name_collision"
+      }
+    ]
+  }
+}

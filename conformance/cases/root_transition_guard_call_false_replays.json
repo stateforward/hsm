@@ -1,0 +1,55 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "root_transition_guard_call_false_replays",
+  "description": "A behavior-side operation call from a false root-owned transition guard is replayed after selection leaves the source active.",
+  "features": ["operation", "on_call", "guard", "root_transition", "queue", "reentrancy", "selection_order"],
+  "model": {
+    "name": "RootTransitionGuardCallFalseReplays",
+    "initial": "idle",
+    "operations": {"audit": {"behavior": "operation_audit"}},
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "trigger": {"kind": "on_call", "operation": "audit"},
+            "target": "audit_handled",
+            "effects": [{"behavior": "effect_audit"}]
+          }
+        ]
+      },
+      {"name": "done"},
+      {"name": "audit_handled", "entry": [{"behavior": "entry_audit_handled"}]}
+    ],
+    "transitions": [
+      {"on": "go", "guard": {"behavior": "guard_call_false"}, "target": "done"},
+      {"on": "go", "kind": "internal", "effects": [{"behavior": "effect_fallback"}]}
+    ]
+  },
+  "behaviors": {
+    "operation_audit": [{"op": "trace", "value": "operation:audit"}],
+    "guard_call_false": [
+      {"op": "trace", "value": "guard:before-call"},
+      {"op": "call", "name": "audit"},
+      {"op": "trace", "value": "guard:after-call"},
+      {"op": "return_value", "value": false}
+    ],
+    "effect_fallback": [{"op": "trace", "value": "effect:fallback"}],
+    "effect_audit": [{"op": "trace", "value": "effect:audit"}],
+    "entry_audit_handled": [{"op": "trace", "value": "entry:audit-handled"}]
+  },
+  "script": [{"op": "start"}, {"op": "dispatch", "event": "go"}],
+  "expect": {
+    "state": "/RootTransitionGuardCallFalseReplays/audit_handled",
+    "trace": [
+      {"type": "dispatch", "event": "go"},
+      {"type": "trace", "value": "guard:before-call"},
+      {"type": "trace", "value": "operation:audit"},
+      {"type": "trace", "value": "guard:after-call"},
+      {"type": "trace", "value": "effect:fallback"},
+      {"type": "trace", "value": "effect:audit"},
+      {"type": "trace", "value": "entry:audit-handled"},
+      {"type": "stable", "state": "/RootTransitionGuardCallFalseReplays/audit_handled"}
+    ]
+  }
+}

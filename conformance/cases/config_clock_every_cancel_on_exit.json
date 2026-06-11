@@ -1,0 +1,99 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "config_clock_every_cancel_on_exit",
+  "description": "A repeating timer using an instance config clock is cancelled when its source state exits before firing.",
+  "features": [
+    "timer",
+    "every",
+    "cancellation"
+  ],
+  "model": {
+    "name": "ConfigClockEveryCancelOnExit",
+    "initial": "waiting",
+    "states": [
+      {
+        "name": "waiting",
+        "transitions": [
+          {
+            "trigger": {
+              "kind": "every",
+              "duration_ms": 100
+            },
+            "target": "tick"
+          },
+          {
+            "on": "leave",
+            "target": "done"
+          }
+        ]
+      },
+      {
+        "name": "tick"
+      },
+      {
+        "name": "done",
+        "entry": [
+          {
+            "behavior": "entry_done"
+          }
+        ]
+      }
+    ]
+  },
+  "instances": [
+    {
+      "id": "default",
+      "config": {
+        "clock": "trace_yield_sleep"
+      }
+    }
+  ],
+  "behaviors": {
+    "entry_done": [
+      {
+        "op": "trace",
+        "value": "enter:done"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "leave"
+    },
+    {
+      "op": "tick",
+      "millis": 10
+    }
+  ],
+  "expect": {
+    "state": "/ConfigClockEveryCancelOnExit/done",
+    "trace": [
+      {
+        "type": "timer_scheduled"
+      },
+      {
+        "type": "trace",
+        "value": "clock:sleep:100"
+      },
+      {
+        "type": "dispatch",
+        "event": "leave"
+      },
+      {
+        "type": "timer_cancelled"
+      },
+      {
+        "type": "trace",
+        "value": "enter:done"
+      },
+      {
+        "type": "stable",
+        "state": "/ConfigClockEveryCancelOnExit/done"
+      }
+    ]
+  }
+}

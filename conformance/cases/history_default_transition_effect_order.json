@@ -1,0 +1,10 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "history_default_transition_effect_order",
+  "description": "A history pseudostate default transition effect runs before the restored/default target is entered.",
+  "features": ["history", "history_default", "effect"],
+  "model": {"name": "HistoryDefaultTransitionEffectOrder", "initial": "outside", "states": [{"name": "outside", "transitions": [{"on": "enter", "target": "comp/h"}]}, {"name": "comp", "states": [{"name": "a", "entry": [{"behavior": "entry_a"}]}, {"name": "h", "kind": "shallow_history", "transitions": [{"target": "a", "effects": [{"behavior": "history_effect"}]}]}]}]},
+  "behaviors": {"history_effect": [{"op": "trace", "value": "effect:history"}], "entry_a": [{"op": "trace", "value": "entry:a"}]},
+  "script": [{"op": "start"}, {"op": "dispatch", "event": "enter"}],
+  "expect": {"state": "/HistoryDefaultTransitionEffectOrder/comp/a", "trace": [{"type": "dispatch", "event": "enter"}, {"type": "trace", "value": "effect:history"}, {"type": "trace", "value": "entry:a"}, {"type": "stable", "state": "/HistoryDefaultTransitionEffectOrder/comp/a"}]}
+}

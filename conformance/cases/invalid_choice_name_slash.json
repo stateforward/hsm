@@ -1,0 +1,32 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_choice_name_slash",
+  "mode": "validation",
+  "description": "Choice pseudostate names must not contain path separators.",
+  "features": ["choice", "validation"],
+  "model": {
+    "name": "InvalidChoiceNameSlash",
+    "initial": "bad/choice",
+    "states": [
+      {
+        "name": "bad/choice",
+        "kind": "choice",
+        "transitions": [
+          {
+            "target": "done"
+          }
+        ]
+      },
+      {
+        "name": "done"
+      }
+    ]
+  },
+  "expect": {
+    "validation": [
+      {
+        "code": "invalid_name"
+      }
+    ]
+  }
+}

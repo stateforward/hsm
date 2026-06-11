@@ -1,0 +1,35 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_at_timer_missing_behavior",
+  "mode": "validation",
+  "description": "An at timer trigger using a behavior source must reference a declared behavior program.",
+  "features": ["timer", "at", "validation"],
+  "model": {
+    "name": "InvalidAtTimerMissingBehavior",
+    "initial": "waiting",
+    "states": [
+      {
+        "name": "waiting",
+        "transitions": [
+          {
+            "trigger": {
+              "kind": "at",
+              "behavior": "missing_deadline_behavior"
+            },
+            "target": "done"
+          }
+        ]
+      },
+      {
+        "name": "done"
+      }
+    ]
+  },
+  "expect": {
+    "validation": [
+      {
+        "code": "missing_behavior"
+      }
+    ]
+  }
+}

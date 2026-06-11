@@ -1,0 +1,58 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "config_queue_dispatch_to_duplicate_targets_enqueues_once",
+  "description": "Caller-originated dispatch_to with duplicate target ids enqueues a regular event through the matching recipient's configured queue only once.",
+  "features": ["queue", "dispatch_to", "multi_target"],
+  "model": {
+    "name": "ConfigQueueDispatchToDuplicateTargetsEnqueuesOnce",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "on": "go",
+            "target": "seen",
+            "effects": [{"behavior": "effect_once"}]
+          }
+        ]
+      },
+      {
+        "name": "seen",
+        "transitions": [
+          {
+            "on": "go",
+            "target": "duplicate",
+            "effects": [{"behavior": "effect_duplicate"}]
+          }
+        ]
+      },
+      {
+        "name": "duplicate"
+      }
+    ]
+  },
+  "instances": [
+    {"id": "one", "config": {"queue": "trace_fifo"}}
+  ],
+  "behaviors": {
+    "effect_once": [{"op": "trace", "value": "effect:once"}],
+    "effect_duplicate": [{"op": "trace", "value": "effect:duplicate"}]
+  },
+  "script": [
+    {"op": "start", "instance": "one"},
+    {"op": "dispatch_to", "targets": ["one", "one"], "event": "go"}
+  ],
+  "expect": {
+    "states": {
+      "one": "/ConfigQueueDispatchToDuplicateTargetsEnqueuesOnce/seen"
+    },
+    "trace": [
+      {"type": "dispatch", "event": "go", "target": ["one", "one"]},
+      {"type": "trace", "value": "queue:push:go"},
+      {"type": "trace", "value": "queue:pop:go"},
+      {"type": "trace", "value": "effect:once"},
+      {"type": "stable", "state": "targets:one,one"}
+    ]
+  }
+}

@@ -1,0 +1,107 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "config_queue_completion_bypasses_hook",
+  "description": "Completion events bypass the instance config queue hook while regular events still use it.",
+  "features": ["queue", "final", "completion"],
+  "model": {
+    "name": "ConfigQueueCompletionBypassesHook",
+    "initial": "work",
+    "states": [
+      {
+        "name": "work",
+        "transitions": [
+          {
+            "on": "finish",
+            "target": "done"
+          }
+        ]
+      },
+      {
+        "name": "done",
+        "kind": "final"
+      },
+      {
+        "name": "complete",
+        "entry": [
+          {
+            "behavior": "entry_complete"
+          }
+        ]
+      }
+    ],
+    "transitions": [
+      {
+        "trigger": {
+          "kind": "completion"
+        },
+        "target": "complete",
+        "effects": [
+          {
+            "behavior": "effect_completion"
+          }
+        ]
+      }
+    ]
+  },
+  "instances": [
+    {
+      "id": "default",
+      "config": {
+        "queue": "trace_fifo"
+      }
+    }
+  ],
+  "behaviors": {
+    "effect_completion": [
+      {
+        "op": "trace",
+        "value": "effect:completion"
+      }
+    ],
+    "entry_complete": [
+      {
+        "op": "trace",
+        "value": "enter:complete"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "finish"
+    }
+  ],
+  "expect": {
+    "state": "/ConfigQueueCompletionBypassesHook/complete",
+    "done": true,
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "finish"
+      },
+      {
+        "type": "trace",
+        "value": "queue:push:finish"
+      },
+      {
+        "type": "trace",
+        "value": "queue:pop:finish"
+      },
+      {
+        "type": "trace",
+        "value": "effect:completion"
+      },
+      {
+        "type": "trace",
+        "value": "enter:complete"
+      },
+      {
+        "type": "stable",
+        "state": "/ConfigQueueCompletionBypassesHook/complete"
+      }
+    ]
+  }
+}

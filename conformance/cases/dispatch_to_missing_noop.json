@@ -1,0 +1,71 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "dispatch_to_missing_noop",
+  "description": "dispatch_to for an unknown instance id is a no-op for existing instances and records the targeted dispatch.",
+  "features": [
+    "dispatch_to"
+  ],
+  "model": {
+    "name": "DispatchToMissing",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "on": "go",
+            "target": "done",
+            "effects": [
+              {
+                "behavior": "effect_go"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "done"
+      }
+    ]
+  },
+  "instances": [
+    {
+      "id": "one"
+    }
+  ],
+  "behaviors": {
+    "effect_go": [
+      {
+        "op": "trace",
+        "value": "effect:go"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start",
+      "instance": "one"
+    },
+    {
+      "op": "dispatch_to",
+      "instance": "missing",
+      "event": "go"
+    }
+  ],
+  "expect": {
+    "states": {
+      "one": "/DispatchToMissing/idle"
+    },
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "go",
+        "target": "missing"
+      },
+      {
+        "type": "stable",
+        "state": "missing"
+      }
+    ]
+  }
+}

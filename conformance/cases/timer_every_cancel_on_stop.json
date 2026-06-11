@@ -1,0 +1,30 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "timer_every_cancel_on_stop",
+  "description": "Stopping an instance cancels an active every timer so it cannot fire after a later tick while stopped.",
+  "features": ["timer", "every", "cancellation", "stop"],
+  "model": {
+    "name": "TimerEveryStopCancel",
+    "initial": "waiting",
+    "states": [
+      {
+        "name": "waiting",
+        "transitions": [
+          {"trigger": {"kind": "every", "duration_ms": 100}, "target": "timeout", "effects": [{"behavior": "effect_timeout"}]}
+        ]
+      },
+      {"name": "timeout"}
+    ]
+  },
+  "behaviors": {"effect_timeout": [{"op": "trace", "value": "effect:timeout"}]},
+  "script": [{"op": "start"}, {"op": "stop"}, {"op": "tick", "millis": 200}],
+  "expect": {
+    "state": "/TimerEveryStopCancel",
+    "trace": [
+      {"type": "timer_scheduled"},
+      {"type": "stop"},
+      {"type": "timer_cancelled"},
+      {"type": "stable", "state": "/TimerEveryStopCancel"}
+    ]
+  }
+}

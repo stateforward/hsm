@@ -1,0 +1,54 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_submachine_internal_entry_point_target",
+  "mode": "validation",
+  "features": [
+    "submachine",
+    "entry_point",
+    "validation"
+  ],
+  "model": {
+    "name": "InvalidInternalEntryPointTarget",
+    "initial": "drive",
+    "states": [
+      {
+        "name": "drive",
+        "kind": "submachine",
+        "machine": "Child"
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "Child",
+      "initial": "a",
+      "entry_points": [
+        {
+          "name": "start",
+          "target": "b"
+        }
+      ],
+      "states": [
+        {
+          "name": "a",
+          "transitions": [
+            {
+              "on": "go",
+              "target": "start"
+            }
+          ]
+        },
+        {
+          "name": "b"
+        }
+      ]
+    }
+  ],
+  "expect": {
+    "validation": [
+      {
+        "code": "invalid_entry_point_internal_target"
+      }
+    ]
+  }
+}

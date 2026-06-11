@@ -1,0 +1,10 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "choice_transition_effect_snapshot",
+  "description": "A snapshot taken from a choice transition effect observes the pre-choice source state before the final target is entered.",
+  "features": ["choice", "snapshot"],
+  "model": {"name": "ChoiceTransitionEffectSnapshot", "initial": "idle", "states": [{"name": "idle", "transitions": [{"on": "go", "target": "choice"}]}, {"name": "choice", "kind": "choice", "transitions": [{"target": "done", "effects": [{"behavior": "snapshot_choice"}]}]}, {"name": "done"}]},
+  "behaviors": {"snapshot_choice": [{"op": "snapshot"}]},
+  "script": [{"op": "start"}, {"op": "dispatch", "event": "go"}],
+  "expect": {"state": "/ChoiceTransitionEffectSnapshot/done", "trace": [{"type": "dispatch", "event": "go"}, {"type": "snapshot", "state": "/ChoiceTransitionEffectSnapshot/idle"}, {"type": "stable", "state": "/ChoiceTransitionEffectSnapshot/done"}]}
+}

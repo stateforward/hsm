@@ -1,0 +1,62 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "defer_event_source_target_field_mutation_isolation_across_group_replay",
+  "description": "A group-dispatched event object that is deferred by multiple recipients preserves route-adjacent source and target field isolation when each recipient later replays it.",
+  "features": ["defer", "event_ownership", "group"],
+  "model": {
+    "name": "DeferEventSourceTargetFieldMutationIsolationAcrossGroupReplay",
+    "initial": "hold",
+    "states": [
+      {"name": "hold", "defer": ["audit"], "transitions": [{"on": "release", "target": "ready"}]},
+      {
+        "name": "ready",
+        "transitions": [
+          {"on": "audit", "guard": {"behavior": "source_and_target_original"}, "target": "done", "effects": [{"behavior": "mutate_source_target"}]},
+          {"on": "audit", "target": "leaked", "effects": [{"behavior": "effect_leaked"}]}
+        ]
+      },
+      {"name": "done"},
+      {"name": "leaked"}
+    ]
+  },
+  "instances": [{"id": "first"}, {"id": "second"}],
+  "groups": [{"id": "both", "members": ["first", "second"]}],
+  "behaviors": {
+    "source_and_target_original": [
+      {"op": "trace", "value": "guard:source-target-original"},
+      {"op": "event_metadata_equals", "name": "source", "value": "declared-source"},
+      {"op": "event_metadata_equals", "name": "target", "value": "declared-target"}
+    ],
+    "mutate_source_target": [
+      {"op": "event_metadata_set", "name": "source", "value": "changed-source"},
+      {"op": "event_metadata_set", "name": "target", "value": "changed-target"},
+      {"op": "trace", "value": "effect:isolated"}
+    ],
+    "effect_leaked": [{"op": "trace", "value": "effect:leaked"}]
+  },
+  "script": [
+    {"op": "start", "instance": "first"},
+    {"op": "start", "instance": "second"},
+    {"op": "group_dispatch", "group": "both", "event": {"name": "audit", "id": "evt-1", "source": "declared-source", "target": "declared-target"}},
+    {"op": "dispatch_to", "targets": ["first", "second"], "event": "release"}
+  ],
+  "expect": {
+    "states": {
+      "first": "/DeferEventSourceTargetFieldMutationIsolationAcrossGroupReplay/done",
+      "second": "/DeferEventSourceTargetFieldMutationIsolationAcrossGroupReplay/done"
+    },
+    "trace": [
+      {"type": "dispatch", "event": "audit", "target": "both"},
+      {"type": "defer", "event": "audit"},
+      {"type": "defer", "event": "audit"},
+      {"type": "dispatch", "event": "release", "target": ["first", "second"]},
+      {"type": "undefer", "event": "audit"},
+      {"type": "trace", "value": "guard:source-target-original"},
+      {"type": "trace", "value": "effect:isolated"},
+      {"type": "undefer", "event": "audit"},
+      {"type": "trace", "value": "guard:source-target-original"},
+      {"type": "trace", "value": "effect:isolated"},
+      {"type": "stable", "state": "targets:first,second"}
+    ]
+  }
+}

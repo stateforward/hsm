@@ -1,0 +1,112 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "config_queue_attribute_change_event_fifo",
+  "description": "A script attribute update event is routed through the configured FIFO queue before on_set transition selection.",
+  "features": [
+    "queue",
+    "attribute",
+    "on_set"
+  ],
+  "model": {
+    "name": "ConfigQueueAttributeChangeEventFifo",
+    "initial": "idle",
+    "attributes": {
+      "flag": {
+        "type": "boolean",
+        "default": false
+      }
+    },
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "trigger": {
+              "kind": "on_set",
+              "attribute": "flag"
+            },
+            "target": "changed",
+            "effects": [
+              {
+                "behavior": "effect_changed"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "changed",
+        "entry": [
+          {
+            "behavior": "entry_changed"
+          }
+        ]
+      }
+    ]
+  },
+  "instances": [
+    {
+      "id": "default",
+      "config": {
+        "queue": "trace_fifo"
+      }
+    }
+  ],
+  "behaviors": {
+    "effect_changed": [
+      {
+        "op": "trace",
+        "value": "effect:changed"
+      }
+    ],
+    "entry_changed": [
+      {
+        "op": "trace",
+        "value": "entry:changed"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "set",
+      "attribute": "flag",
+      "value": true
+    }
+  ],
+  "expect": {
+    "state": "/ConfigQueueAttributeChangeEventFifo/changed",
+    "attributes": {
+      "flag": true
+    },
+    "trace": [
+      {
+        "type": "set",
+        "attribute": "flag",
+        "value": true
+      },
+      {
+        "type": "trace",
+        "value": "queue:push:/ConfigQueueAttributeChangeEventFifo/flag"
+      },
+      {
+        "type": "trace",
+        "value": "queue:pop:/ConfigQueueAttributeChangeEventFifo/flag"
+      },
+      {
+        "type": "trace",
+        "value": "effect:changed"
+      },
+      {
+        "type": "trace",
+        "value": "entry:changed"
+      },
+      {
+        "type": "stable",
+        "state": "/ConfigQueueAttributeChangeEventFifo/changed"
+      }
+    ]
+  }
+}

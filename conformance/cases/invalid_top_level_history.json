@@ -1,0 +1,35 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_top_level_history",
+  "mode": "validation",
+  "description": "A history pseudostate must be owned by a composite state, not declared at the model root.",
+  "features": [
+    "history",
+    "validation"
+  ],
+  "model": {
+    "name": "InvalidTopLevelHistory",
+    "initial": "h",
+    "states": [
+      {
+        "name": "h",
+        "kind": "shallow_history",
+        "transitions": [
+          {
+            "target": "idle"
+          }
+        ]
+      },
+      {
+        "name": "idle"
+      }
+    ]
+  },
+  "expect": {
+    "validation": [
+      {
+        "code": "invalid_history_owner"
+      }
+    ]
+  }
+}

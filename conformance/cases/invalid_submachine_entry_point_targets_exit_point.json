@@ -1,0 +1,51 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_submachine_entry_point_targets_exit_point",
+  "mode": "validation",
+  "features": [
+    "submachine",
+    "entry_point",
+    "exit_point",
+    "validation"
+  ],
+  "model": {
+    "name": "InvalidEntryPointTargetsExitPoint",
+    "initial": "drive",
+    "states": [
+      {
+        "name": "drive",
+        "kind": "submachine",
+        "machine": "Child"
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "Child",
+      "initial": "ready",
+      "entry_points": [
+        {
+          "name": "bad",
+          "target": "done"
+        }
+      ],
+      "exit_points": [
+        {
+          "name": "done"
+        }
+      ],
+      "states": [
+        {
+          "name": "ready"
+        }
+      ]
+    }
+  ],
+  "expect": {
+    "validation": [
+      {
+        "code": "invalid_entry_point_target_kind"
+      }
+    ]
+  }
+}

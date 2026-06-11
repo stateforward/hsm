@@ -1,0 +1,36 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_submachine_entry_point_non_submachine_target",
+  "mode": "validation",
+  "features": [
+    "submachine",
+    "entry_point",
+    "validation"
+  ],
+  "model": {
+    "name": "InvalidEntryPointNonSubmachineTarget",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "on": "go",
+            "target": "plain",
+            "entry_point": "start"
+          }
+        ]
+      },
+      {
+        "name": "plain"
+      }
+    ]
+  },
+  "expect": {
+    "validation": [
+      {
+        "code": "invalid_entry_point_usage"
+      }
+    ]
+  }
+}

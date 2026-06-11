@@ -1,0 +1,140 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "operation_call_reentrancy",
+  "description": "A behavior-side operation call that triggers an on_call transition is queued behind the currently executing transition effects.",
+  "features": [
+    "operation",
+    "on_call",
+    "queue",
+    "reentrancy"
+  ],
+  "model": {
+    "name": "OperationCallReentrancy",
+    "initial": "idle",
+    "operations": {
+      "approve": {
+        "behavior": "operation_approve"
+      }
+    },
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "on": "begin",
+            "target": "waiting",
+            "effects": [
+              {
+                "behavior": "effect_begin"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "waiting",
+        "transitions": [
+          {
+            "trigger": {
+              "kind": "on_call",
+              "operation": "approve"
+            },
+            "target": "approved",
+            "effects": [
+              {
+                "behavior": "effect_approved"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "approved",
+        "entry": [
+          {
+            "behavior": "entry_approved"
+          }
+        ]
+      }
+    ]
+  },
+  "behaviors": {
+    "operation_approve": [
+      {
+        "op": "trace",
+        "value": "operation:approve"
+      }
+    ],
+    "effect_begin": [
+      {
+        "op": "trace",
+        "value": "effect:begin-before-call"
+      },
+      {
+        "op": "call",
+        "name": "approve"
+      },
+      {
+        "op": "trace",
+        "value": "effect:begin-after-call"
+      }
+    ],
+    "effect_approved": [
+      {
+        "op": "trace",
+        "value": "effect:approved"
+      }
+    ],
+    "entry_approved": [
+      {
+        "op": "trace",
+        "value": "enter:approved"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "begin"
+    }
+  ],
+  "expect": {
+    "state": "/OperationCallReentrancy/approved",
+    "queue": {
+      "operation_call_from_behavior": "queued_after_current_effect"
+    },
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "begin"
+      },
+      {
+        "type": "trace",
+        "value": "effect:begin-before-call"
+      },
+      {
+        "type": "trace",
+        "value": "operation:approve"
+      },
+      {
+        "type": "trace",
+        "value": "effect:begin-after-call"
+      },
+      {
+        "type": "trace",
+        "value": "effect:approved"
+      },
+      {
+        "type": "trace",
+        "value": "enter:approved"
+      },
+      {
+        "type": "stable",
+        "state": "/OperationCallReentrancy/approved"
+      }
+    ]
+  }
+}

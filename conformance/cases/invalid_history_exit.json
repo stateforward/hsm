@@ -1,0 +1,51 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_history_exit",
+  "mode": "validation",
+  "description": "History pseudostates must not declare exit behaviors.",
+  "features": ["history", "exit", "validation"],
+  "model": {
+    "name": "InvalidHistoryExit",
+    "initial": "parent",
+    "states": [
+      {
+        "name": "parent",
+        "initial": "h",
+        "states": [
+          {
+            "name": "h",
+            "kind": "shallow_history",
+            "exit": [
+              {
+                "behavior": "exit_h"
+              }
+            ],
+            "transitions": [
+              {
+                "target": "idle"
+              }
+            ]
+          },
+          {
+            "name": "idle"
+          }
+        ]
+      }
+    ]
+  },
+  "behaviors": {
+    "exit_h": [
+      {
+        "op": "trace",
+        "value": "exit:h"
+      }
+    ]
+  },
+  "expect": {
+    "validation": [
+      {
+        "code": "invalid_pseudostate_contents"
+      }
+    ]
+  }
+}

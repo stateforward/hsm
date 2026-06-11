@@ -1,0 +1,29 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_group_empty_members",
+  "mode": "validation",
+  "description": "Group declarations must contain at least two member instances.",
+  "features": ["group", "validation"],
+  "model": {
+    "name": "InvalidGroupEmptyMembers",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle"
+      }
+    ]
+  },
+  "groups": [
+    {
+      "id": "empty",
+      "members": []
+    }
+  ],
+  "expect": {
+    "validation": [
+      {
+        "code": "invalid_group_cardinality"
+      }
+    ]
+  }
+}

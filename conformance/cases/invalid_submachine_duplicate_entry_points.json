@@ -1,0 +1,53 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_submachine_duplicate_entry_points",
+  "mode": "validation",
+  "description": "Entry point names must be unique within the child model so parent entry-point selection is unambiguous.",
+  "features": [
+    "submachine",
+    "entry_point",
+    "validation"
+  ],
+  "model": {
+    "name": "InvalidDuplicateEntryPoints",
+    "initial": "drive",
+    "states": [
+      {
+        "name": "drive",
+        "kind": "submachine",
+        "machine": "DuplicateEntryChild"
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "DuplicateEntryChild",
+      "initial": "idle",
+      "entry_points": [
+        {
+          "name": "resume",
+          "target": "idle"
+        },
+        {
+          "name": "resume",
+          "target": "alternate"
+        }
+      ],
+      "states": [
+        {
+          "name": "idle"
+        },
+        {
+          "name": "alternate"
+        }
+      ]
+    }
+  ],
+  "expect": {
+    "validation": [
+      {
+        "code": "duplicate_entry_point"
+      }
+    ]
+  }
+}

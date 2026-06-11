@@ -1,0 +1,91 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "nested_child_transition_precedes_parent_defer",
+  "description": "A nested child transition consumes an event before an ordinary parent defer declaration can defer it.",
+  "features": [
+    "defer",
+    "queue",
+    "nested"
+  ],
+  "model": {
+    "name": "NestedChildTransitionPrecedesParentDefer",
+    "initial": "parent",
+    "states": [
+      {
+        "name": "parent",
+        "initial": "child",
+        "defer": [
+          "work"
+        ],
+        "states": [
+          {
+            "name": "child",
+            "transitions": [
+              {
+                "on": "work",
+                "target": "../handled",
+                "effects": [
+                  {
+                    "behavior": "effect_child"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "name": "handled",
+            "entry": [
+              {
+                "behavior": "entry_handled"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "behaviors": {
+    "effect_child": [
+      {
+        "op": "trace",
+        "value": "effect:child"
+      }
+    ],
+    "entry_handled": [
+      {
+        "op": "trace",
+        "value": "enter:handled"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "work"
+    }
+  ],
+  "expect": {
+    "state": "/NestedChildTransitionPrecedesParentDefer/parent/handled",
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "work"
+      },
+      {
+        "type": "trace",
+        "value": "effect:child"
+      },
+      {
+        "type": "trace",
+        "value": "enter:handled"
+      },
+      {
+        "type": "stable",
+        "state": "/NestedChildTransitionPrecedesParentDefer/parent/handled"
+      }
+    ]
+  }
+}

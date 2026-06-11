@@ -1,0 +1,94 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "group_dispatch_mixed_started_stopped",
+  "description": "Group dispatch delivers to started members and ignores stopped members in the same group.",
+  "features": ["group", "lifecycle", "stop"],
+  "model": {
+    "name": "GroupDispatchMixedStartedStopped",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "on": "go",
+            "target": "done",
+            "effects": [
+              {
+                "behavior": "effect_go"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "done"
+      }
+    ]
+  },
+  "instances": [
+    {
+      "id": "started"
+    },
+    {
+      "id": "stopped"
+    }
+  ],
+  "groups": [
+    {
+      "id": "both",
+      "members": [
+        "stopped",
+        "started"
+      ]
+    }
+  ],
+  "behaviors": {
+    "effect_go": [
+      {
+        "op": "trace",
+        "value": "effect:go"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start",
+      "instance": "started"
+    },
+    {
+      "op": "start",
+      "instance": "stopped"
+    },
+    {
+      "op": "stop",
+      "instance": "stopped"
+    },
+    {
+      "op": "group_dispatch",
+      "group": "both",
+      "event": "go"
+    }
+  ],
+  "expect": {
+    "states": {
+      "started": "/GroupDispatchMixedStartedStopped/done",
+      "stopped": "/GroupDispatchMixedStartedStopped"
+    },
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "go",
+        "target": "both"
+      },
+      {
+        "type": "trace",
+        "value": "effect:go"
+      },
+      {
+        "type": "stable",
+        "state": "group:both"
+      }
+    ]
+  }
+}

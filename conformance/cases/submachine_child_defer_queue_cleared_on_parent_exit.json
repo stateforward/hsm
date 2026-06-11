@@ -1,0 +1,91 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "submachine_child_defer_queue_cleared_on_parent_exit",
+  "description": "Exiting a parent submachine state clears deferred events queued inside the active child submachine state.",
+  "features": ["submachine", "defer", "queue", "exit"],
+  "model": {
+    "name": "SubmachineChildDeferQueueClearedOnParentExit",
+    "initial": "drive",
+    "states": [
+      {
+        "name": "drive",
+        "kind": "submachine",
+        "machine": "ChildSubmachineDeferCleanupOnParentExit",
+        "transitions": [
+          {
+            "on": "leave",
+            "target": "outside",
+            "effects": [{"behavior": "effect_leave"}]
+          }
+        ]
+      },
+      {
+        "name": "outside",
+        "entry": [{"behavior": "entry_outside"}],
+        "transitions": [
+          {
+            "on": "work",
+            "target": "wrong",
+            "effects": [{"behavior": "effect_wrong"}]
+          }
+        ]
+      },
+      {
+        "name": "wrong"
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "ChildSubmachineDeferCleanupOnParentExit",
+      "initial": "blocked",
+      "states": [
+        {
+          "name": "blocked",
+          "defer": ["work"],
+          "transitions": [
+            {"on": "release", "target": "ready"}
+          ]
+        },
+        {
+          "name": "ready",
+          "transitions": [
+            {
+              "on": "work",
+              "target": "done",
+              "effects": [{"behavior": "effect_work"}]
+            }
+          ]
+        },
+        {
+          "name": "done"
+        }
+      ]
+    }
+  ],
+  "behaviors": {
+    "effect_leave": [{"op": "trace", "value": "effect:leave"}],
+    "entry_outside": [{"op": "trace", "value": "entry:outside"}],
+    "effect_work": [{"op": "trace", "value": "effect:work"}],
+    "effect_wrong": [{"op": "trace", "value": "effect:wrong"}]
+  },
+  "script": [
+    {"op": "start"},
+    {"op": "dispatch", "event": "work"},
+    {"op": "dispatch", "event": "leave"}
+  ],
+  "expect": {
+    "state": "/SubmachineChildDeferQueueClearedOnParentExit/outside",
+    "queue": {
+      "lifecycle_cleanup": "child_deferred_events_cleared_on_parent_exit"
+    },
+    "trace": [
+      {"type": "dispatch", "event": "work"},
+      {"type": "defer", "event": "work"},
+      {"type": "dispatch", "event": "leave"},
+      {"type": "trace", "value": "effect:leave"},
+      {"type": "trace", "value": "entry:outside"},
+      {"type": "stable", "state": "/SubmachineChildDeferQueueClearedOnParentExit/outside"}
+    ]
+  }
+}

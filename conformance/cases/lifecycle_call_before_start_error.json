@@ -1,0 +1,55 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "lifecycle_call_before_start_error",
+  "description": "Calling an operation before start produces a normalized lifecycle error.",
+  "features": ["lifecycle", "operation", "error"],
+  "model": {
+    "name": "LifecycleCallBeforeStartError",
+    "initial": "idle",
+    "operations": {
+      "ping": {
+        "behavior": "operation_ping"
+      }
+    },
+    "states": [
+      {
+        "name": "idle"
+      }
+    ]
+  },
+  "behaviors": {
+    "operation_ping": [
+      {
+        "op": "trace",
+        "value": "operation:ping"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "call",
+      "operation": "ping"
+    }
+  ],
+  "expect": {
+    "state": "",
+    "error": {
+      "code": "lifecycle_error",
+      "message_contains": "started"
+    },
+    "trace": [
+      {
+        "type": "call",
+        "operation": "ping"
+      },
+      {
+        "type": "error",
+        "code": "lifecycle_error"
+      },
+      {
+        "type": "stable",
+        "state": ""
+      }
+    ]
+  }
+}

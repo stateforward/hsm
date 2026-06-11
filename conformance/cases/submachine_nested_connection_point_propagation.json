@@ -1,0 +1,194 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "submachine_nested_connection_point_propagation",
+  "description": "A nested submachine exit point can be handled by an intermediate submachine and propagated through an outer exit point to the outer parent.",
+  "features": [
+    "submachine",
+    "exit_point",
+    "nested"
+  ],
+  "model": {
+    "name": "NestedConnectionPoint",
+    "initial": "outer",
+    "states": [
+      {
+        "name": "outer",
+        "kind": "submachine",
+        "machine": "OuterChild",
+        "transitions": [
+          {
+            "trigger": {
+              "kind": "exit_point",
+              "exit_point": "outer_done"
+            },
+            "target": "done",
+            "effects": [
+              {
+                "behavior": "effect_parent"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "done",
+        "entry": [
+          {
+            "behavior": "entry_done"
+          }
+        ]
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "InnerChild",
+      "initial": "active",
+      "exit_points": [
+        {
+          "name": "inner_done",
+          "effects": [
+            {
+              "behavior": "effect_inner_exit"
+            }
+          ]
+        }
+      ],
+      "states": [
+        {
+          "name": "active",
+          "transitions": [
+            {
+              "on": "finish",
+              "target": "inner_done",
+              "effects": [
+                {
+                  "behavior": "effect_inner_finish"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "OuterChild",
+      "initial": "inner",
+      "exit_points": [
+        {
+          "name": "outer_done",
+          "effects": [
+            {
+              "behavior": "effect_outer_exit"
+            }
+          ]
+        }
+      ],
+      "states": [
+        {
+          "name": "inner",
+          "kind": "submachine",
+          "machine": "InnerChild",
+          "transitions": [
+            {
+              "trigger": {
+                "kind": "exit_point",
+                "exit_point": "inner_done"
+              },
+              "target": "outer_done",
+              "effects": [
+                {
+                  "behavior": "effect_outer_route"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "behaviors": {
+    "effect_inner_finish": [
+      {
+        "op": "trace",
+        "value": "effect:inner-finish"
+      }
+    ],
+    "effect_inner_exit": [
+      {
+        "op": "trace",
+        "value": "effect:inner-exit"
+      }
+    ],
+    "effect_outer_route": [
+      {
+        "op": "trace",
+        "value": "effect:outer-route"
+      }
+    ],
+    "effect_outer_exit": [
+      {
+        "op": "trace",
+        "value": "effect:outer-exit"
+      }
+    ],
+    "effect_parent": [
+      {
+        "op": "trace",
+        "value": "effect:parent"
+      }
+    ],
+    "entry_done": [
+      {
+        "op": "trace",
+        "value": "enter:done"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "finish"
+    }
+  ],
+  "expect": {
+    "state": "/NestedConnectionPoint/done",
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "finish"
+      },
+      {
+        "type": "trace",
+        "value": "effect:inner-finish"
+      },
+      {
+        "type": "trace",
+        "value": "effect:inner-exit"
+      },
+      {
+        "type": "trace",
+        "value": "effect:outer-route"
+      },
+      {
+        "type": "trace",
+        "value": "effect:outer-exit"
+      },
+      {
+        "type": "trace",
+        "value": "effect:parent"
+      },
+      {
+        "type": "trace",
+        "value": "enter:done"
+      },
+      {
+        "type": "stable",
+        "state": "/NestedConnectionPoint/done"
+      }
+    ]
+  }
+}

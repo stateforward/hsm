@@ -1,0 +1,64 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "behavior_snapshot_from_guard",
+  "description": "A behavior-side snapshot taken from a guard observes the source state before selection commits.",
+  "features": ["snapshot", "guard"],
+  "model": {
+    "name": "BehaviorSnapshotFromGuard",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "on": "go",
+            "guard": {
+              "behavior": "guard_snapshot"
+            },
+            "target": "done"
+          }
+        ]
+      },
+      {
+        "name": "done"
+      }
+    ]
+  },
+  "behaviors": {
+    "guard_snapshot": [
+      {
+        "op": "snapshot"
+      },
+      {
+        "op": "return_value",
+        "value": true
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "go"
+    }
+  ],
+  "expect": {
+    "state": "/BehaviorSnapshotFromGuard/done",
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "go"
+      },
+      {
+        "type": "snapshot",
+        "state": "/BehaviorSnapshotFromGuard/idle"
+      },
+      {
+        "type": "stable",
+        "state": "/BehaviorSnapshotFromGuard/done"
+      }
+    ]
+  }
+}

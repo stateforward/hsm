@@ -1,0 +1,45 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "root_transition_guard_dispatch_reentrancy",
+  "description": "A dispatch behavior op from a root-owned transition guard is queued behind the selected global transition.",
+  "features": ["guard", "root_transition", "queue", "reentrancy"],
+  "model": {
+    "name": "RootTransitionGuardDispatchReentrancy",
+    "initial": "idle",
+    "states": [
+      {"name": "idle"},
+      {
+        "name": "waiting",
+        "entry": [{"behavior": "entry_waiting"}],
+        "transitions": [
+          {"on": "audit", "target": "done", "effects": [{"behavior": "effect_audit"}]}
+        ]
+      },
+      {"name": "done"}
+    ],
+    "transitions": [
+      {"on": "go", "guard": {"behavior": "guard_dispatch"}, "target": "waiting"}
+    ]
+  },
+  "behaviors": {
+    "guard_dispatch": [
+      {"op": "trace", "value": "guard:before-dispatch"},
+      {"op": "dispatch", "event": "audit"},
+      {"op": "return_value", "value": true}
+    ],
+    "entry_waiting": [{"op": "trace", "value": "entry:waiting"}],
+    "effect_audit": [{"op": "trace", "value": "effect:audit"}]
+  },
+  "script": [{"op": "start"}, {"op": "dispatch", "event": "go"}],
+  "expect": {
+    "state": "/RootTransitionGuardDispatchReentrancy/done",
+    "trace": [
+      {"type": "dispatch", "event": "go"},
+      {"type": "trace", "value": "guard:before-dispatch"},
+      {"type": "dispatch", "event": "audit"},
+      {"type": "trace", "value": "entry:waiting"},
+      {"type": "trace", "value": "effect:audit"},
+      {"type": "stable", "state": "/RootTransitionGuardDispatchReentrancy/done"}
+    ]
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_timer_extraneous_event",
+  "mode": "validation",
+  "description": "A timer trigger must not declare event operands from on triggers.",
+  "features": ["timer", "after", "validation"],
+  "model": {
+    "name": "InvalidTimerExtraneousEvent",
+    "initial": "waiting",
+    "states": [
+      {
+        "name": "waiting",
+        "transitions": [
+          {
+            "trigger": {
+              "kind": "after",
+              "duration_ms": 10,
+              "event": "go"
+            },
+            "target": "done"
+          }
+        ]
+      },
+      {
+        "name": "done"
+      }
+    ]
+  },
+  "expect": {
+    "validation": [
+      {
+        "code": "extraneous_trigger_operand"
+      }
+    ]
+  }
+}

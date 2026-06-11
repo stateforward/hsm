@@ -1,0 +1,101 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "error_exit_behavior",
+  "description": "An exit behavior error produces a normalized runtime error before transition effects or target entry run.",
+  "features": [
+    "error",
+    "exit"
+  ],
+  "model": {
+    "name": "ErrorExitBehavior",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle",
+        "exit": [
+          {
+            "behavior": "exit_raises"
+          }
+        ],
+        "transitions": [
+          {
+            "on": "go",
+            "target": "done",
+            "effects": [
+              {
+                "behavior": "effect_go"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "done",
+        "entry": [
+          {
+            "behavior": "entry_done"
+          }
+        ]
+      }
+    ]
+  },
+  "behaviors": {
+    "exit_raises": [
+      {
+        "op": "trace",
+        "value": "exit:raise"
+      },
+      {
+        "op": "raise",
+        "code": "exit_error",
+        "value": "exit boom"
+      }
+    ],
+    "effect_go": [
+      {
+        "op": "trace",
+        "value": "effect:go"
+      }
+    ],
+    "entry_done": [
+      {
+        "op": "trace",
+        "value": "enter:done"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "go"
+    }
+  ],
+  "expect": {
+    "state": "/ErrorExitBehavior/idle",
+    "error": {
+      "code": "exit_error",
+      "message_contains": "exit boom"
+    },
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "go"
+      },
+      {
+        "type": "trace",
+        "value": "exit:raise"
+      },
+      {
+        "type": "error",
+        "code": "exit_error"
+      },
+      {
+        "type": "stable",
+        "state": "/ErrorExitBehavior/idle"
+      }
+    ]
+  }
+}

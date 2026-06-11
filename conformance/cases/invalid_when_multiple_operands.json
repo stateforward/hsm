@@ -1,0 +1,50 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_when_multiple_operands",
+  "mode": "validation",
+  "description": "A when trigger must not declare both attribute and behavior operands.",
+  "features": ["attribute", "when", "validation"],
+  "model": {
+    "name": "InvalidWhenMultipleOperands",
+    "initial": "idle",
+    "attributes": {
+      "flag": {
+        "type": "boolean",
+        "default": false
+      }
+    },
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "trigger": {
+              "kind": "when",
+              "attribute": "flag",
+              "behavior": "when_flag"
+            },
+            "target": "done"
+          }
+        ]
+      },
+      {
+        "name": "done"
+      }
+    ]
+  },
+  "behaviors": {
+    "when_flag": [
+      {
+        "op": "return_value",
+        "value": true
+      }
+    ]
+  },
+  "expect": {
+    "validation": [
+      {
+        "code": "multiple_trigger_operands"
+      }
+    ]
+  }
+}

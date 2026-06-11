@@ -1,0 +1,43 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_submodel_final_transition",
+  "mode": "validation",
+  "description": "Final states inside child models must not declare outgoing transitions.",
+  "features": ["submachine", "final", "validation"],
+  "model": {
+    "name": "InvalidSubmodelFinalTransition",
+    "initial": "drive",
+    "states": [
+      {
+        "name": "drive",
+        "kind": "submachine",
+        "machine": "ChildInvalidFinal"
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "ChildInvalidFinal",
+      "initial": "done",
+      "states": [
+        {
+          "name": "done",
+          "kind": "final",
+          "transitions": [
+            {
+              "on": "restart",
+              "target": "done"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "expect": {
+    "validation": [
+      {
+        "code": "invalid_final_transition"
+      }
+    ]
+  }
+}

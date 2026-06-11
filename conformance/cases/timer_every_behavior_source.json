@@ -1,0 +1,99 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "timer_every_behavior_source",
+  "description": "An every timer can obtain its repeating interval from a portable behavior and reschedule while active.",
+  "features": ["timer", "every", "timer_behavior", "self"],
+  "model": {
+    "name": "TimerEveryBehavior",
+    "initial": "waiting",
+    "states": [
+      {
+        "name": "waiting",
+        "transitions": [
+          {
+            "trigger": {
+              "kind": "every",
+              "behavior": "compute_interval"
+            },
+            "kind": "self",
+            "target": "waiting",
+            "effects": [
+              {
+                "behavior": "effect_tick"
+              }
+            ]
+          },
+          {
+            "on": "stop",
+            "target": "done"
+          }
+        ]
+      },
+      {
+        "name": "done"
+      }
+    ]
+  },
+  "behaviors": {
+    "compute_interval": [
+      {
+        "op": "trace",
+        "value": "timer:compute-interval"
+      },
+      {
+        "op": "return_value",
+        "value": 10
+      }
+    ],
+    "effect_tick": [
+      {
+        "op": "trace",
+        "value": "effect:tick"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "tick",
+      "millis": 10
+    },
+    {
+      "op": "dispatch",
+      "event": "stop"
+    }
+  ],
+  "expect": {
+    "state": "/TimerEveryBehavior/done",
+    "trace": [
+      {
+        "type": "trace",
+        "value": "timer:compute-interval"
+      },
+      {
+        "type": "timer_fired"
+      },
+      {
+        "type": "trace",
+        "value": "effect:tick"
+      },
+      {
+        "type": "trace",
+        "value": "timer:compute-interval"
+      },
+      {
+        "type": "dispatch",
+        "event": "stop"
+      },
+      {
+        "type": "timer_cancelled"
+      },
+      {
+        "type": "stable",
+        "state": "/TimerEveryBehavior/done"
+      }
+    ]
+  }
+}

@@ -1,0 +1,133 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "submachine_entry_point_final_completion",
+  "description": "An entry point can target a child final state and immediately bubble completion to the containing submachine state.",
+  "features": [
+    "submachine",
+    "entry_point",
+    "final",
+    "completion"
+  ],
+  "model": {
+    "name": "SubmachineEntryFinal",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "on": "go",
+            "target": "drive",
+            "entry_point": "enter_done"
+          }
+        ]
+      },
+      {
+        "name": "drive",
+        "kind": "submachine",
+        "machine": "FinalChild",
+        "transitions": [
+          {
+            "trigger": {
+              "kind": "completion"
+            },
+            "target": "finished",
+            "effects": [
+              {
+                "behavior": "effect_complete"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "finished",
+        "entry": [
+          {
+            "behavior": "entry_finished"
+          }
+        ]
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "FinalChild",
+      "initial": "work",
+      "entry_points": [
+        {
+          "name": "enter_done",
+          "target": "done",
+          "effects": [
+            {
+              "behavior": "effect_done_entry"
+            }
+          ]
+        }
+      ],
+      "states": [
+        {
+          "name": "work"
+        },
+        {
+          "name": "done",
+          "kind": "final"
+        }
+      ]
+    }
+  ],
+  "behaviors": {
+    "effect_done_entry": [
+      {
+        "op": "trace",
+        "value": "effect:done-entry"
+      }
+    ],
+    "effect_complete": [
+      {
+        "op": "trace",
+        "value": "effect:complete"
+      }
+    ],
+    "entry_finished": [
+      {
+        "op": "trace",
+        "value": "enter:finished"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "go"
+    }
+  ],
+  "expect": {
+    "state": "/SubmachineEntryFinal/finished",
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "go"
+      },
+      {
+        "type": "trace",
+        "value": "effect:done-entry"
+      },
+      {
+        "type": "trace",
+        "value": "effect:complete"
+      },
+      {
+        "type": "trace",
+        "value": "enter:finished"
+      },
+      {
+        "type": "stable",
+        "state": "/SubmachineEntryFinal/finished"
+      }
+    ]
+  }
+}

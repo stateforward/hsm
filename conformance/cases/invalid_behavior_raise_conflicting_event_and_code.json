@@ -1,0 +1,18 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_behavior_raise_conflicting_event_and_code",
+  "mode": "validation",
+  "description": "raise behavior ops cannot declare both a normal event and an error code.",
+  "features": ["validation"],
+  "model": {
+    "name": "InvalidBehaviorRaiseConflictingEventAndCode",
+    "initial": "idle",
+    "states": [{"name": "idle"}]
+  },
+  "behaviors": {
+    "bad": [{"op": "raise", "event": "go", "code": "boom"}]
+  },
+  "expect": {
+    "validation": [{"code": "invalid_behavior_op_operand"}]
+  }
+}

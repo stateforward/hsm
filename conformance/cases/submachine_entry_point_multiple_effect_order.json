@@ -1,0 +1,135 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "submachine_entry_point_multiple_effect_order",
+  "description": "Multiple entry-point effects execute in declaration order before submachine boundary and child entry.",
+  "features": [
+    "submachine",
+    "entry_point",
+    "effect",
+    "entry",
+    "selection_order"
+  ],
+  "model": {
+    "name": "SubmachineEntryPointMultipleEffects",
+    "initial": "outside",
+    "states": [
+      {
+        "name": "outside",
+        "transitions": [
+          {
+            "on": "go",
+            "target": "drive",
+            "entry_point": "warm"
+          }
+        ]
+      },
+      {
+        "name": "drive",
+        "kind": "submachine",
+        "machine": "EntryPointEffectsChild",
+        "entry": [
+          {
+            "behavior": "entry_drive"
+          }
+        ]
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "EntryPointEffectsChild",
+      "initial": "cold",
+      "entry_points": [
+        {
+          "name": "warm",
+          "target": "running",
+          "effects": [
+            {
+              "behavior": "effect_entry_point_1"
+            },
+            {
+              "behavior": "effect_entry_point_2"
+            }
+          ]
+        }
+      ],
+      "states": [
+        {
+          "name": "cold"
+        },
+        {
+          "name": "running",
+          "entry": [
+            {
+              "behavior": "entry_running"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "behaviors": {
+    "effect_entry_point_1": [
+      {
+        "op": "trace",
+        "value": "effect:entry-point:1"
+      }
+    ],
+    "effect_entry_point_2": [
+      {
+        "op": "trace",
+        "value": "effect:entry-point:2"
+      }
+    ],
+    "entry_drive": [
+      {
+        "op": "trace",
+        "value": "entry:drive"
+      }
+    ],
+    "entry_running": [
+      {
+        "op": "trace",
+        "value": "entry:running"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "go"
+    }
+  ],
+  "expect": {
+    "state": "/SubmachineEntryPointMultipleEffects/drive/EntryPointEffectsChild/running",
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "go"
+      },
+      {
+        "type": "trace",
+        "value": "effect:entry-point:1"
+      },
+      {
+        "type": "trace",
+        "value": "effect:entry-point:2"
+      },
+      {
+        "type": "trace",
+        "value": "entry:drive"
+      },
+      {
+        "type": "trace",
+        "value": "entry:running"
+      },
+      {
+        "type": "stable",
+        "state": "/SubmachineEntryPointMultipleEffects/drive/EntryPointEffectsChild/running"
+      }
+    ]
+  }
+}

@@ -1,0 +1,78 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "behavior_raise_from_entry",
+  "description": "A normal internal event raised from entry behavior is processed after entry completes.",
+  "features": ["entry", "queue", "reentrancy"],
+  "model": {
+    "name": "BehaviorRaiseFromEntry",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle",
+        "entry": [
+          {
+            "behavior": "entry_raise"
+          }
+        ],
+        "transitions": [
+          {
+            "on": "audit",
+            "target": "done",
+            "effects": [
+              {
+                "behavior": "effect_audit"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "done"
+      }
+    ]
+  },
+  "behaviors": {
+    "entry_raise": [
+      {
+        "op": "raise",
+        "event": "audit"
+      },
+      {
+        "op": "trace",
+        "value": "entry:idle"
+      }
+    ],
+    "effect_audit": [
+      {
+        "op": "trace",
+        "value": "effect:audit"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    }
+  ],
+  "expect": {
+    "state": "/BehaviorRaiseFromEntry/done",
+    "trace": [
+      {
+        "type": "raise",
+        "event": "audit"
+      },
+      {
+        "type": "trace",
+        "value": "entry:idle"
+      },
+      {
+        "type": "trace",
+        "value": "effect:audit"
+      },
+      {
+        "type": "stable",
+        "state": "/BehaviorRaiseFromEntry/done"
+      }
+    ]
+  }
+}

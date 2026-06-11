@@ -1,0 +1,149 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "path_resolution_entry_point_target_forms",
+  "description": "Submachine entry-point targets accept ./ relative and absolute internal path forms.",
+  "features": [
+    "submachine",
+    "entry_point",
+    "path_resolution"
+  ],
+  "model": {
+    "name": "PathResolutionEntryPointTargetForms",
+    "initial": "outside",
+    "states": [
+      {
+        "name": "outside",
+        "transitions": [
+          {
+            "on": "dot",
+            "target": "dot_drive",
+            "entry_point": "dot"
+          },
+          {
+            "on": "absolute",
+            "target": "absolute_drive",
+            "entry_point": "absolute"
+          }
+        ]
+      },
+      {
+        "name": "dot_drive",
+        "kind": "submachine",
+        "machine": "EntryPointPathChild"
+      },
+      {
+        "name": "absolute_drive",
+        "kind": "submachine",
+        "machine": "EntryPointPathChild"
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "EntryPointPathChild",
+      "initial": "idle",
+      "entry_points": [
+        {
+          "name": "dot",
+          "target": "./ready",
+          "effects": [
+            {
+              "behavior": "effect_dot"
+            }
+          ]
+        },
+        {
+          "name": "absolute",
+          "target": "/EntryPointPathChild/ready",
+          "effects": [
+            {
+              "behavior": "effect_absolute"
+            }
+          ]
+        }
+      ],
+      "states": [
+        {
+          "name": "idle"
+        },
+        {
+          "name": "ready",
+          "entry": [
+            {
+              "behavior": "entry_ready"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "behaviors": {
+    "effect_dot": [
+      {
+        "op": "trace",
+        "value": "effect:dot"
+      }
+    ],
+    "effect_absolute": [
+      {
+        "op": "trace",
+        "value": "effect:absolute"
+      }
+    ],
+    "entry_ready": [
+      {
+        "op": "trace",
+        "value": "entry:ready"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "dot"
+    },
+    {
+      "op": "restart"
+    },
+    {
+      "op": "dispatch",
+      "event": "absolute"
+    }
+  ],
+  "expect": {
+    "state": "/PathResolutionEntryPointTargetForms/absolute_drive/EntryPointPathChild/ready",
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "dot"
+      },
+      {
+        "type": "trace",
+        "value": "effect:dot"
+      },
+      {
+        "type": "trace",
+        "value": "entry:ready"
+      },
+      {
+        "type": "dispatch",
+        "event": "absolute"
+      },
+      {
+        "type": "trace",
+        "value": "effect:absolute"
+      },
+      {
+        "type": "trace",
+        "value": "entry:ready"
+      },
+      {
+        "type": "stable",
+        "state": "/PathResolutionEntryPointTargetForms/absolute_drive/EntryPointPathChild/ready"
+      }
+    ]
+  }
+}

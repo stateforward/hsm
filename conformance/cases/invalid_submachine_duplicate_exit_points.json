@@ -1,0 +1,60 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_submachine_duplicate_exit_points",
+  "mode": "validation",
+  "description": "Exit point names must be unique within the child model so parent exit-point handling is unambiguous.",
+  "features": [
+    "submachine",
+    "exit_point",
+    "validation"
+  ],
+  "model": {
+    "name": "InvalidDuplicateExitPoints",
+    "initial": "drive",
+    "states": [
+      {
+        "name": "drive",
+        "kind": "submachine",
+        "machine": "DuplicateExitChild",
+        "transitions": [
+          {
+            "trigger": {
+              "kind": "exit_point",
+              "exit_point": "done"
+            },
+            "target": "outside"
+          }
+        ]
+      },
+      {
+        "name": "outside"
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "DuplicateExitChild",
+      "initial": "idle",
+      "exit_points": [
+        {
+          "name": "done"
+        },
+        {
+          "name": "done"
+        }
+      ],
+      "states": [
+        {
+          "name": "idle"
+        }
+      ]
+    }
+  ],
+  "expect": {
+    "validation": [
+      {
+        "code": "duplicate_exit_point"
+      }
+    ]
+  }
+}

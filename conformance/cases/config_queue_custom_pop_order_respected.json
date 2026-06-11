@@ -1,0 +1,145 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "config_queue_custom_pop_order_respected",
+  "description": "A configured queue controls regular-event selection order instead of the runtime forcing FIFO.",
+  "features": ["queue", "reentrancy"],
+  "model": {
+    "name": "ConfigQueueCustomPopOrderRespected",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "on": "go",
+            "target": "ready",
+            "effects": [
+              {
+                "behavior": "dispatch_work"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "ready",
+        "transitions": [
+          {
+            "on": "low",
+            "target": "low_seen",
+            "effects": [
+              {
+                "behavior": "effect_low"
+              }
+            ]
+          },
+          {
+            "on": "high",
+            "target": "high_seen",
+            "effects": [
+              {
+                "behavior": "effect_high"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "low_seen"
+      },
+      {
+        "name": "high_seen"
+      }
+    ]
+  },
+  "instances": [
+    {
+      "id": "default",
+      "config": {
+        "queue": "trace_lifo"
+      }
+    }
+  ],
+  "behaviors": {
+    "dispatch_work": [
+      {
+        "op": "dispatch",
+        "event": "low"
+      },
+      {
+        "op": "dispatch",
+        "event": "high"
+      }
+    ],
+    "effect_low": [
+      {
+        "op": "trace",
+        "value": "effect:low"
+      }
+    ],
+    "effect_high": [
+      {
+        "op": "trace",
+        "value": "effect:high"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "go"
+    }
+  ],
+  "expect": {
+    "state": "/ConfigQueueCustomPopOrderRespected/high_seen",
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "go"
+      },
+      {
+        "type": "trace",
+        "value": "queue:push:go"
+      },
+      {
+        "type": "trace",
+        "value": "queue:pop:go"
+      },
+      {
+        "type": "dispatch",
+        "event": "low"
+      },
+      {
+        "type": "trace",
+        "value": "queue:push:low"
+      },
+      {
+        "type": "dispatch",
+        "event": "high"
+      },
+      {
+        "type": "trace",
+        "value": "queue:push:high"
+      },
+      {
+        "type": "trace",
+        "value": "queue:pop:high"
+      },
+      {
+        "type": "trace",
+        "value": "effect:high"
+      },
+      {
+        "type": "trace",
+        "value": "queue:pop:low"
+      },
+      {
+        "type": "stable",
+        "state": "/ConfigQueueCustomPopOrderRespected/high_seen"
+      }
+    ]
+  }
+}

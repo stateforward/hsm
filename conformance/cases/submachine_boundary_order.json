@@ -1,0 +1,156 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "submachine_boundary_order",
+  "description": "Submachine boundary entry runs before child entry, and child exit runs before submachine-state exit when a parent transition leaves the submachine.",
+  "features": [
+    "submachine",
+    "entry",
+    "exit",
+    "effect"
+  ],
+  "model": {
+    "name": "SubmachineBoundary",
+    "initial": "drive",
+    "states": [
+      {
+        "name": "drive",
+        "kind": "submachine",
+        "machine": "BoundaryChild",
+        "entry": [
+          {
+            "behavior": "entry_drive"
+          }
+        ],
+        "exit": [
+          {
+            "behavior": "exit_drive"
+          }
+        ],
+        "transitions": [
+          {
+            "on": "leave",
+            "target": "outside",
+            "effects": [
+              {
+                "behavior": "effect_leave"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "outside",
+        "entry": [
+          {
+            "behavior": "entry_outside"
+          }
+        ]
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "BoundaryChild",
+      "initial": "inside",
+      "states": [
+        {
+          "name": "inside",
+          "entry": [
+            {
+              "behavior": "entry_inside"
+            }
+          ],
+          "exit": [
+            {
+              "behavior": "exit_inside"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "behaviors": {
+    "entry_drive": [
+      {
+        "op": "trace",
+        "value": "entry:drive"
+      }
+    ],
+    "entry_inside": [
+      {
+        "op": "trace",
+        "value": "entry:inside"
+      }
+    ],
+    "exit_inside": [
+      {
+        "op": "trace",
+        "value": "exit:inside"
+      }
+    ],
+    "exit_drive": [
+      {
+        "op": "trace",
+        "value": "exit:drive"
+      }
+    ],
+    "effect_leave": [
+      {
+        "op": "trace",
+        "value": "effect:leave"
+      }
+    ],
+    "entry_outside": [
+      {
+        "op": "trace",
+        "value": "entry:outside"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "leave"
+    }
+  ],
+  "expect": {
+    "state": "/SubmachineBoundary/outside",
+    "trace": [
+      {
+        "type": "trace",
+        "value": "entry:drive"
+      },
+      {
+        "type": "trace",
+        "value": "entry:inside"
+      },
+      {
+        "type": "dispatch",
+        "event": "leave"
+      },
+      {
+        "type": "trace",
+        "value": "exit:inside"
+      },
+      {
+        "type": "trace",
+        "value": "exit:drive"
+      },
+      {
+        "type": "trace",
+        "value": "effect:leave"
+      },
+      {
+        "type": "trace",
+        "value": "entry:outside"
+      },
+      {
+        "type": "stable",
+        "state": "/SubmachineBoundary/outside"
+      }
+    ]
+  }
+}

@@ -1,0 +1,83 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "event_object_shorthand_on",
+  "description": "The shorthand transition on field may declare an event object and still match by runtime event name.",
+  "features": ["event", "event_data", "guard"],
+  "model": {
+    "name": "EventObjectShorthandOn",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "on": {
+              "name": "submit",
+              "data": {
+                "declared": true
+              }
+            },
+            "guard": {
+              "behavior": "runtime_payload_ok"
+            },
+            "target": "accepted",
+            "effects": [
+              {
+                "behavior": "effect_accept"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "accepted"
+      }
+    ]
+  },
+  "behaviors": {
+    "runtime_payload_ok": [
+      {
+        "op": "event_data_equals",
+        "path": "runtime",
+        "value": true
+      }
+    ],
+    "effect_accept": [
+      {
+        "op": "trace",
+        "value": "effect:accept"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": {
+        "name": "submit",
+        "data": {
+          "runtime": true
+        }
+      }
+    }
+  ],
+  "expect": {
+    "state": "/EventObjectShorthandOn/accepted",
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "submit"
+      },
+      {
+        "type": "trace",
+        "value": "effect:accept"
+      },
+      {
+        "type": "stable",
+        "state": "/EventObjectShorthandOn/accepted"
+      }
+    ]
+  }
+}

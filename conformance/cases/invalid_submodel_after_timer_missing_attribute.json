@@ -1,0 +1,48 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_submodel_after_timer_missing_attribute",
+  "mode": "validation",
+  "description": "after timer attribute references inside child models must be validated recursively.",
+  "features": ["submachine", "timer", "after", "validation"],
+  "model": {
+    "name": "InvalidSubmodelAfterTimerMissingAttribute",
+    "initial": "drive",
+    "states": [
+      {
+        "name": "drive",
+        "kind": "submachine",
+        "machine": "ChildWithMissingAfterTimerAttribute"
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "ChildWithMissingAfterTimerAttribute",
+      "initial": "waiting",
+      "states": [
+        {
+          "name": "waiting",
+          "transitions": [
+            {
+              "trigger": {
+                "kind": "after",
+                "attribute": "missing_delay"
+              },
+              "target": "done"
+            }
+          ]
+        },
+        {
+          "name": "done"
+        }
+      ]
+    }
+  ],
+  "expect": {
+    "validation": [
+      {
+        "code": "missing_timer_attribute"
+      }
+    ]
+  }
+}

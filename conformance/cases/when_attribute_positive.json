@@ -1,0 +1,92 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "when_attribute_positive",
+  "description": "A when trigger using an attribute operand fires when that attribute changes to a truthy value.",
+  "features": ["attribute", "when"],
+  "model": {
+    "name": "WhenAttributePositive",
+    "initial": "idle",
+    "attributes": {
+      "ready": {
+        "type": "boolean",
+        "default": false
+      }
+    },
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "trigger": {
+              "kind": "when",
+              "attribute": "ready"
+            },
+            "target": "ready",
+            "effects": [
+              {
+                "behavior": "effect_ready"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "ready",
+        "entry": [
+          {
+            "behavior": "entry_ready"
+          }
+        ]
+      }
+    ]
+  },
+  "behaviors": {
+    "effect_ready": [
+      {
+        "op": "trace",
+        "value": "effect:ready"
+      }
+    ],
+    "entry_ready": [
+      {
+        "op": "trace",
+        "value": "enter:ready"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "set",
+      "attribute": "ready",
+      "value": true
+    }
+  ],
+  "expect": {
+    "state": "/WhenAttributePositive/ready",
+    "attributes": {
+      "ready": true
+    },
+    "trace": [
+      {
+        "type": "set",
+        "attribute": "ready",
+        "value": true
+      },
+      {
+        "type": "trace",
+        "value": "effect:ready"
+      },
+      {
+        "type": "trace",
+        "value": "enter:ready"
+      },
+      {
+        "type": "stable",
+        "state": "/WhenAttributePositive/ready"
+      }
+    ]
+  }
+}

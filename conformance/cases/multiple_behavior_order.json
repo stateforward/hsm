@@ -1,0 +1,160 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "multiple_behavior_order",
+  "description": "Multiple behavior references in entry, exit, and transition effects execute in declaration order.",
+  "features": ["core", "entry", "exit", "effect", "selection_order"],
+  "model": {
+    "name": "MultipleBehaviorOrder",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle",
+        "entry": [
+          {
+            "behavior": "entry_idle_1"
+          },
+          {
+            "behavior": "entry_idle_2"
+          }
+        ],
+        "exit": [
+          {
+            "behavior": "exit_idle_1"
+          },
+          {
+            "behavior": "exit_idle_2"
+          }
+        ],
+        "transitions": [
+          {
+            "on": "go",
+            "target": "done",
+            "effects": [
+              {
+                "behavior": "effect_go_1"
+              },
+              {
+                "behavior": "effect_go_2"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "done",
+        "entry": [
+          {
+            "behavior": "entry_done_1"
+          },
+          {
+            "behavior": "entry_done_2"
+          }
+        ]
+      }
+    ]
+  },
+  "behaviors": {
+    "entry_idle_1": [
+      {
+        "op": "trace",
+        "value": "entry:idle:1"
+      }
+    ],
+    "entry_idle_2": [
+      {
+        "op": "trace",
+        "value": "entry:idle:2"
+      }
+    ],
+    "exit_idle_1": [
+      {
+        "op": "trace",
+        "value": "exit:idle:1"
+      }
+    ],
+    "exit_idle_2": [
+      {
+        "op": "trace",
+        "value": "exit:idle:2"
+      }
+    ],
+    "effect_go_1": [
+      {
+        "op": "trace",
+        "value": "effect:go:1"
+      }
+    ],
+    "effect_go_2": [
+      {
+        "op": "trace",
+        "value": "effect:go:2"
+      }
+    ],
+    "entry_done_1": [
+      {
+        "op": "trace",
+        "value": "entry:done:1"
+      }
+    ],
+    "entry_done_2": [
+      {
+        "op": "trace",
+        "value": "entry:done:2"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "go"
+    }
+  ],
+  "expect": {
+    "state": "/MultipleBehaviorOrder/done",
+    "trace": [
+      {
+        "type": "trace",
+        "value": "entry:idle:1"
+      },
+      {
+        "type": "trace",
+        "value": "entry:idle:2"
+      },
+      {
+        "type": "dispatch",
+        "event": "go"
+      },
+      {
+        "type": "trace",
+        "value": "exit:idle:1"
+      },
+      {
+        "type": "trace",
+        "value": "exit:idle:2"
+      },
+      {
+        "type": "trace",
+        "value": "effect:go:1"
+      },
+      {
+        "type": "trace",
+        "value": "effect:go:2"
+      },
+      {
+        "type": "trace",
+        "value": "entry:done:1"
+      },
+      {
+        "type": "trace",
+        "value": "entry:done:2"
+      },
+      {
+        "type": "stable",
+        "state": "/MultipleBehaviorOrder/done"
+      }
+    ]
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_child_model_root_name_collision",
+  "mode": "validation",
+  "description": "A child model name must not collide with the root model name.",
+  "features": ["submachine", "validation"],
+  "model": {
+    "name": "RootNameCollision",
+    "initial": "drive",
+    "states": [
+      {
+        "name": "drive",
+        "kind": "submachine",
+        "machine": "RootNameCollision"
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "RootNameCollision",
+      "initial": "idle",
+      "states": [
+        {
+          "name": "idle"
+        }
+      ]
+    }
+  ],
+  "expect": {
+    "validation": [
+      {
+        "code": "duplicate_model"
+      }
+    ]
+  }
+}

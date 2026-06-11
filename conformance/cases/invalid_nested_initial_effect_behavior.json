@@ -1,0 +1,36 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_nested_initial_effect_behavior",
+  "mode": "validation",
+  "description": "Nested composite initial transition effects must resolve behavior references.",
+  "features": ["nested", "initial", "validation"],
+  "model": {
+    "name": "InvalidNestedInitialEffectBehavior",
+    "initial": "parent",
+    "states": [
+      {
+        "name": "parent",
+        "initial": {
+          "target": "child",
+          "effects": [
+            {
+              "behavior": "missing_nested_initial_effect"
+            }
+          ]
+        },
+        "states": [
+          {
+            "name": "child"
+          }
+        ]
+      }
+    ]
+  },
+  "expect": {
+    "validation": [
+      {
+        "code": "missing_behavior"
+      }
+    ]
+  }
+}

@@ -1,0 +1,110 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "timer_every_attribute_pending_capture",
+  "description": "Changing an every interval attribute while a timer is pending does not move the already scheduled firing time.",
+  "features": ["timer", "every", "attribute", "self"],
+  "model": {
+    "name": "TimerEveryAttributePendingCapture",
+    "initial": "waiting",
+    "attributes": {
+      "interval_ms": {
+        "type": "duration_ms",
+        "default": 50
+      }
+    },
+    "states": [
+      {
+        "name": "waiting",
+        "transitions": [
+          {
+            "trigger": {
+              "kind": "every",
+              "attribute": "interval_ms"
+            },
+            "kind": "self",
+            "target": "waiting",
+            "effects": [
+              {
+                "behavior": "effect_tick"
+              }
+            ]
+          },
+          {
+            "on": "stop",
+            "target": "done"
+          }
+        ]
+      },
+      {
+        "name": "done"
+      }
+    ]
+  },
+  "behaviors": {
+    "effect_tick": [
+      {
+        "op": "trace",
+        "value": "effect:tick"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "set",
+      "attribute": "interval_ms",
+      "value": 10
+    },
+    {
+      "op": "tick",
+      "millis": 40
+    },
+    {
+      "op": "tick",
+      "millis": 10
+    },
+    {
+      "op": "dispatch",
+      "event": "stop"
+    }
+  ],
+  "expect": {
+    "state": "/TimerEveryAttributePendingCapture/done",
+    "attributes": {
+      "interval_ms": 10
+    },
+    "trace": [
+      {
+        "type": "timer_scheduled"
+      },
+      {
+        "type": "set",
+        "attribute": "interval_ms",
+        "value": 10
+      },
+      {
+        "type": "timer_fired"
+      },
+      {
+        "type": "trace",
+        "value": "effect:tick"
+      },
+      {
+        "type": "timer_scheduled"
+      },
+      {
+        "type": "dispatch",
+        "event": "stop"
+      },
+      {
+        "type": "timer_cancelled"
+      },
+      {
+        "type": "stable",
+        "state": "/TimerEveryAttributePendingCapture/done"
+      }
+    ]
+  }
+}

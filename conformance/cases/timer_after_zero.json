@@ -1,0 +1,68 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "timer_after_zero",
+  "description": "An after timer with a zero duration fires immediately after state entry scheduling.",
+  "features": ["timer", "after"],
+  "model": {
+    "name": "TimerAfterZero",
+    "initial": "waiting",
+    "states": [
+      {
+        "name": "waiting",
+        "transitions": [
+          {
+            "trigger": {
+              "kind": "after",
+              "duration_ms": 0
+            },
+            "target": "fired",
+            "effects": [
+              {
+                "behavior": "effect_timer"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "fired"
+      }
+    ]
+  },
+  "behaviors": {
+    "effect_timer": [
+      {
+        "op": "trace",
+        "value": "effect:timer"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "tick",
+      "millis": 0
+    }
+  ],
+  "expect": {
+    "state": "/TimerAfterZero/fired",
+    "trace": [
+      {
+        "type": "timer_scheduled"
+      },
+      {
+        "type": "timer_fired"
+      },
+      {
+        "type": "trace",
+        "value": "effect:timer"
+      },
+      {
+        "type": "stable",
+        "state": "/TimerAfterZero/fired"
+      }
+    ]
+  }
+}

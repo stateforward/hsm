@@ -51,6 +51,12 @@
     "model": {
       "$ref": "#/$defs/model"
     },
+    "models": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/model"
+      }
+    },
     "behaviors": {
       "type": "object",
       "additionalProperties": {
@@ -113,6 +119,18 @@
             "$ref": "#/$defs/behaviorRef"
           }
         },
+        "entry_points": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/entryPoint"
+          }
+        },
+        "exit_points": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/exitPoint"
+          }
+        },
         "states": {
           "type": "array",
           "items": {
@@ -124,6 +142,12 @@
           "items": {
             "$ref": "#/$defs/transition"
           }
+        },
+        "observations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/observation"
+          }
         }
       }
     },
@@ -131,6 +155,49 @@
       "type": "object",
       "additionalProperties": false,
       "required": ["name"],
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "submachine"
+              }
+            },
+            "required": ["kind"]
+          },
+          "then": {
+            "required": ["machine"]
+          }
+        },
+        {
+          "if": {
+            "required": ["machine"]
+          },
+          "then": {
+            "properties": {
+              "kind": {
+                "const": "submachine"
+              }
+            },
+            "required": ["kind"]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "enum": ["final", "choice", "shallow_history", "deep_history"]
+              }
+            },
+            "required": ["kind"]
+          },
+          "then": {
+            "not": {
+              "required": ["machine"]
+            }
+          }
+        }
+      ],
       "properties": {
         "id": {
           "$ref": "#/$defs/nonEmptyString"
@@ -139,8 +206,11 @@
           "$ref": "#/$defs/name"
         },
         "kind": {
-          "enum": ["state", "final", "choice", "shallow_history", "deep_history"],
+          "enum": ["state", "final", "choice", "shallow_history", "deep_history", "submachine"],
           "default": "state"
+        },
+        "machine": {
+          "$ref": "#/$defs/name"
         },
         "initial": {
           "$ref": "#/$defs/initial"
@@ -214,6 +284,9 @@
         "target": {
           "$ref": "#/$defs/path"
         },
+        "entry_point": {
+          "$ref": "#/$defs/name"
+        },
         "on": {
           "$ref": "#/$defs/eventRef"
         },
@@ -228,13 +301,42 @@
         }
       }
     },
+    "entryPoint": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "target"],
+      "properties": {
+        "name": {
+          "$ref": "#/$defs/name"
+        },
+        "target": {
+          "$ref": "#/$defs/path"
+        },
+        "effects": {
+          "$ref": "#/$defs/behaviorRefs"
+        }
+      }
+    },
+    "exitPoint": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name"],
+      "properties": {
+        "name": {
+          "$ref": "#/$defs/name"
+        },
+        "effects": {
+          "$ref": "#/$defs/behaviorRefs"
+        }
+      }
+    },
     "trigger": {
       "type": "object",
       "additionalProperties": false,
       "required": ["kind"],
       "properties": {
         "kind": {
-          "enum": ["on", "on_set", "on_call", "after", "every", "at", "when", "completion"]
+          "enum": ["on", "on_set", "on_call", "after", "every", "at", "when", "completion", "exit_point"]
         },
         "event": {
           "$ref": "#/$defs/eventRef"
@@ -250,6 +352,9 @@
         },
         "operation": {
           "$ref": "#/$defs/nonEmptyString"
+        },
+        "exit_point": {
+          "$ref": "#/$defs/name"
         },
         "behavior": {
           "$ref": "#/$defs/nonEmptyString"
@@ -308,6 +413,49 @@
         }
       }
     },
+    "observation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["behavior"],
+      "properties": {
+        "behavior": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "targets": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/observationTarget"
+          }
+        }
+      }
+    },
+    "observationTarget": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["event"],
+          "properties": {
+            "event": {
+              "$ref": "#/$defs/eventRef"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["path"],
+          "properties": {
+            "path": {
+              "$ref": "#/$defs/path"
+            }
+          }
+        }
+      ]
+    },
     "behaviorRef": {
       "type": "object",
       "additionalProperties": false,
@@ -340,6 +488,7 @@
           "enum": [
             "trace",
             "set_attr",
+            "set_attr_from_event_data",
             "get_attr",
             "return_attr",
             "return_value",
@@ -349,6 +498,7 @@
             "event_data_get",
             "event_metadata_set",
             "event_metadata_get",
+            "event_metadata_equals",
             "raise",
             "dispatch",
             "call",
@@ -358,6 +508,12 @@
           ]
         },
         "name": {
+          "type": "string"
+        },
+        "group": {
+          "type": "string"
+        },
+        "target": {
           "type": "string"
         },
         "attribute": {
@@ -437,8 +593,21 @@
         "instance": {
           "$ref": "#/$defs/nonEmptyString"
         },
+        "id": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
         "group": {
           "$ref": "#/$defs/nonEmptyString"
+        },
+        "target": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "targets": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/nonEmptyString"
+          },
+          "minItems": 1
         },
         "event": {
           "$ref": "#/$defs/eventRef"
@@ -465,12 +634,12 @@
       "additionalProperties": false,
       "properties": {
         "state": {
-          "$ref": "#/$defs/path"
+          "type": "string"
         },
         "states": {
           "type": "object",
           "additionalProperties": {
-            "$ref": "#/$defs/path"
+            "type": "string"
           }
         },
         "trace": {
@@ -489,7 +658,17 @@
           }
         },
         "snapshots": {
-          "type": "object"
+          "type": "object",
+          "additionalProperties": {
+            "oneOf": [
+              {
+                "$ref": "#/$defs/snapshotExpectation"
+              },
+              {
+                "$ref": "#/$defs/groupSnapshotExpectation"
+              }
+            ]
+          }
         },
         "queue": {
           "type": "object"
@@ -504,6 +683,75 @@
           "type": "array",
           "items": {
             "$ref": "#/$defs/errorExpectation"
+          }
+        }
+      }
+    },
+    "snapshotExpectation": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "qualified_name": {
+          "type": "string"
+        },
+        "state": {
+          "type": "string"
+        },
+        "attributes": {
+          "type": "object"
+        },
+        "queue_len": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "transitions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/transitionSnapshot"
+          }
+        }
+      }
+    },
+    "transitionSnapshot": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "kind", "source", "target", "events", "guard"],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "kind": {
+          "type": "integer"
+        },
+        "source": {
+          "type": "string"
+        },
+        "target": {
+          "type": ["string", "null"]
+        },
+        "events": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "guard": {
+          "type": "boolean"
+        }
+      }
+    },
+    "groupSnapshotExpectation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["members"],
+      "properties": {
+        "members": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
           }
         }
       }

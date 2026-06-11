@@ -1,0 +1,41 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_every_timer_time_attribute",
+  "mode": "validation",
+  "description": "An every timer attribute source must have duration_ms type, not time_ms.",
+  "features": ["timer", "every", "validation"],
+  "model": {
+    "name": "InvalidEveryTimerTimeAttribute",
+    "initial": "waiting",
+    "attributes": {
+      "deadline_ms": {
+        "type": "time_ms",
+        "default": 10
+      }
+    },
+    "states": [
+      {
+        "name": "waiting",
+        "transitions": [
+          {
+            "trigger": {
+              "kind": "every",
+              "attribute": "deadline_ms"
+            },
+            "target": "done"
+          }
+        ]
+      },
+      {
+        "name": "done"
+      }
+    ]
+  },
+  "expect": {
+    "validation": [
+      {
+        "code": "invalid_timer_attribute_type"
+      }
+    ]
+  }
+}

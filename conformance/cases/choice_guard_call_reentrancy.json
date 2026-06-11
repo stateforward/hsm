@@ -1,0 +1,10 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "choice_guard_call_reentrancy",
+  "description": "A behavior-side operation call from a choice guard queues its on_call event until choice routing reaches the selected target.",
+  "features": ["choice", "guard", "operation", "on_call", "queue", "reentrancy"],
+  "model": {"name": "ChoiceGuardCallReentrancy", "initial": "idle", "operations": {"audit": {"behavior": "operation_audit"}}, "states": [{"name": "idle", "transitions": [{"on": "go", "target": "choice"}]}, {"name": "choice", "kind": "choice", "transitions": [{"guard": {"behavior": "guard_call"}, "target": "waiting"}, {"target": "fallback"}]}, {"name": "waiting", "entry": [{"behavior": "entry_waiting"}], "transitions": [{"trigger": {"kind": "on_call", "operation": "audit"}, "target": "done", "effects": [{"behavior": "effect_audit"}]}]}, {"name": "fallback"}, {"name": "done"}]},
+  "behaviors": {"operation_audit": [{"op": "trace", "value": "operation:audit"}], "guard_call": [{"op": "trace", "value": "guard:choice"}, {"op": "call", "name": "audit"}, {"op": "return_value", "value": true}], "entry_waiting": [{"op": "trace", "value": "entry:waiting"}], "effect_audit": [{"op": "trace", "value": "effect:audit"}]},
+  "script": [{"op": "start"}, {"op": "dispatch", "event": "go"}],
+  "expect": {"state": "/ChoiceGuardCallReentrancy/done", "trace": [{"type": "dispatch", "event": "go"}, {"type": "trace", "value": "guard:choice"}, {"type": "trace", "value": "operation:audit"}, {"type": "trace", "value": "entry:waiting"}, {"type": "trace", "value": "effect:audit"}, {"type": "stable", "state": "/ChoiceGuardCallReentrancy/done"}]}
+}

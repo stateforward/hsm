@@ -1,0 +1,93 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "error_nested_initial_effect",
+  "description": "A nested composite initial effect error aborts startup and prevents parent and child entry from committing.",
+  "features": ["error", "initial", "nested"],
+  "model": {
+    "name": "ErrorNestedInitialEffect",
+    "initial": "parent",
+    "states": [
+      {
+        "name": "parent",
+        "initial": {
+          "target": "child",
+          "effects": [
+            {
+              "behavior": "nested_initial_raises"
+            }
+          ]
+        },
+        "entry": [
+          {
+            "behavior": "entry_parent"
+          }
+        ],
+        "states": [
+          {
+            "name": "child",
+            "entry": [
+              {
+                "behavior": "entry_child"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "behaviors": {
+    "entry_parent": [
+      {
+        "op": "trace",
+        "value": "enter:parent"
+      }
+    ],
+    "nested_initial_raises": [
+      {
+        "op": "trace",
+        "value": "nested-initial:raise"
+      },
+      {
+        "op": "raise",
+        "code": "nested_initial_error",
+        "value": "nested initial boom"
+      }
+    ],
+    "entry_child": [
+      {
+        "op": "trace",
+        "value": "enter:child"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    }
+  ],
+  "expect": {
+    "state": "/ErrorNestedInitialEffect",
+    "error": {
+      "code": "nested_initial_error",
+      "message_contains": "nested initial boom"
+    },
+    "trace": [
+      {
+        "type": "trace",
+        "value": "enter:parent"
+      },
+      {
+        "type": "trace",
+        "value": "nested-initial:raise"
+      },
+      {
+        "type": "error",
+        "code": "nested_initial_error"
+      },
+      {
+        "type": "stable",
+        "state": "/ErrorNestedInitialEffect"
+      }
+    ]
+  }
+}

@@ -1,0 +1,204 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "submodel_operation_body_all_ops_reentrancy",
+  "description": "A child-model operation body can snapshot, dispatch, raise, and call in child scope, with queued events replaying before the caller continues.",
+  "features": [
+    "submachine",
+    "operation",
+    "snapshot",
+    "on_call",
+    "queue",
+    "reentrancy"
+  ],
+  "model": {
+    "name": "SubmodelOperationBodyAllOpsReentrancy",
+    "initial": "drive",
+    "states": [
+      {
+        "name": "drive",
+        "kind": "submachine",
+        "machine": "ChildOperationBodyAllOpsReentrancy"
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "ChildOperationBodyAllOpsReentrancy",
+      "initial": "idle",
+      "operations": {
+        "outer": {
+          "behavior": "operation_outer"
+        },
+        "audit_call": {
+          "behavior": "operation_audit"
+        }
+      },
+      "states": [
+        {
+          "name": "idle",
+          "entry": [
+            {
+              "behavior": "entry_call_outer"
+            }
+          ],
+          "transitions": [
+            {
+              "on": "audit_dispatch",
+              "target": "dispatch_seen",
+              "effects": [
+                {
+                  "behavior": "effect_dispatch"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "dispatch_seen",
+          "transitions": [
+            {
+              "on": "audit_raise",
+              "target": "raise_seen",
+              "effects": [
+                {
+                  "behavior": "effect_raise"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "raise_seen",
+          "transitions": [
+            {
+              "trigger": {
+                "kind": "on_call",
+                "operation": "audit_call"
+              },
+              "target": "all_seen",
+              "effects": [
+                {
+                  "behavior": "effect_call"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "all_seen"
+        }
+      ]
+    }
+  ],
+  "behaviors": {
+    "entry_call_outer": [
+      {
+        "op": "call",
+        "name": "outer"
+      },
+      {
+        "op": "trace",
+        "value": "entry:after-call"
+      }
+    ],
+    "operation_audit": [
+      {
+        "op": "trace",
+        "value": "operation:audit"
+      }
+    ],
+    "operation_outer": [
+      {
+        "op": "snapshot"
+      },
+      {
+        "op": "dispatch",
+        "event": "audit_dispatch"
+      },
+      {
+        "op": "raise",
+        "event": "audit_raise"
+      },
+      {
+        "op": "call",
+        "name": "audit_call"
+      },
+      {
+        "op": "trace",
+        "value": "operation:after-all"
+      }
+    ],
+    "effect_dispatch": [
+      {
+        "op": "trace",
+        "value": "effect:dispatch"
+      }
+    ],
+    "effect_raise": [
+      {
+        "op": "trace",
+        "value": "effect:raise"
+      }
+    ],
+    "effect_call": [
+      {
+        "op": "trace",
+        "value": "effect:call"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    }
+  ],
+  "expect": {
+    "state": "/SubmodelOperationBodyAllOpsReentrancy/drive/ChildOperationBodyAllOpsReentrancy/all_seen",
+    "trace": [
+      {
+        "type": "snapshot",
+        "state": "/SubmodelOperationBodyAllOpsReentrancy/drive/ChildOperationBodyAllOpsReentrancy/idle"
+      },
+      {
+        "type": "dispatch",
+        "event": "audit_dispatch"
+      },
+      {
+        "type": "raise",
+        "event": "audit_raise"
+      },
+      {
+        "type": "trace",
+        "value": "operation:audit"
+      },
+      {
+        "type": "trace",
+        "value": "operation:after-all"
+      },
+      {
+        "type": "call",
+        "operation": "outer"
+      },
+      {
+        "type": "trace",
+        "value": "entry:after-call"
+      },
+      {
+        "type": "trace",
+        "value": "effect:dispatch"
+      },
+      {
+        "type": "trace",
+        "value": "effect:raise"
+      },
+      {
+        "type": "trace",
+        "value": "effect:call"
+      },
+      {
+        "type": "stable",
+        "state": "/SubmodelOperationBodyAllOpsReentrancy/drive/ChildOperationBodyAllOpsReentrancy/all_seen"
+      }
+    ]
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_submachine_nested_state",
+  "mode": "validation",
+  "features": [
+    "validation",
+    "submachine"
+  ],
+  "model": {
+    "name": "InvalidSubmachineNestedState",
+    "initial": "drive",
+    "states": [
+      {
+        "name": "drive",
+        "kind": "submachine",
+        "machine": "Child",
+        "states": [
+          {
+            "name": "illegal"
+          }
+        ]
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "Child",
+      "initial": "ready",
+      "states": [
+        {
+          "name": "ready"
+        }
+      ]
+    }
+  ],
+  "expect": {
+    "validation": [
+      {
+        "code": "invalid_submachine_contents"
+      }
+    ]
+  }
+}

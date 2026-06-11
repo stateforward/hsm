@@ -1,0 +1,28 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_duplicate_state_names",
+  "mode": "validation",
+  "description": "Sibling states must not declare the same name because state paths must be unique.",
+  "features": [
+    "validation"
+  ],
+  "model": {
+    "name": "InvalidDuplicateStateNames",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle"
+      },
+      {
+        "name": "idle"
+      }
+    ]
+  },
+  "expect": {
+    "validation": [
+      {
+        "code": "duplicate_state"
+      }
+    ]
+  }
+}

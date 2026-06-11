@@ -1,0 +1,84 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "state_entry_set_attr_generated_trigger_after_compound_target_resolution",
+  "description": "Attribute work generated from compound target entry replays only after that target reaches its nested leaf.",
+  "features": ["entry", "attribute", "on_set", "when", "nested", "queue", "reentrancy"],
+  "model": {
+    "name": "StateEntrySetAttrGeneratedTriggerAfterCompoundTargetResolution",
+    "initial": "idle",
+    "attributes": {
+      "flag": {"type": "boolean", "default": false},
+      "ready": {"type": "boolean", "default": false}
+    },
+    "states": [
+      {"name": "idle", "transitions": [{"on": "go", "target": "parent"}]},
+      {
+        "name": "parent",
+        "initial": "child",
+        "entry": [{"behavior": "entry_parent_set"}],
+        "transitions": [
+          {
+            "trigger": {"kind": "on_set", "attribute": "flag"},
+            "target": "wrong",
+            "effects": [{"behavior": "effect_wrong"}]
+          }
+        ],
+        "states": [
+          {
+            "name": "child",
+            "entry": [{"behavior": "entry_child"}],
+            "transitions": [
+              {
+                "trigger": {"kind": "on_set", "attribute": "flag"},
+                "target": "../flag_seen",
+                "effects": [{"behavior": "effect_flag"}]
+              }
+            ]
+          },
+          {
+            "name": "flag_seen",
+            "entry": [{"behavior": "entry_flag"}],
+            "transitions": [
+              {
+                "trigger": {"kind": "when", "behavior": "ready_when"},
+                "target": "../all_seen",
+                "effects": [{"behavior": "effect_ready"}]
+              }
+            ]
+          },
+          {"name": "all_seen", "entry": [{"behavior": "entry_all"}]}
+        ]
+      },
+      {"name": "wrong"}
+    ]
+  },
+  "behaviors": {
+    "entry_parent_set": [
+      {"op": "set_attr", "name": "flag", "value": true},
+      {"op": "set_attr", "name": "ready", "value": true},
+      {"op": "trace", "value": "entry:parent"}
+    ],
+    "ready_when": [{"op": "return_equals", "name": "ready", "value": true}],
+    "entry_child": [{"op": "trace", "value": "entry:child"}],
+    "effect_flag": [{"op": "trace", "value": "effect:flag"}],
+    "entry_flag": [{"op": "trace", "value": "entry:flag"}],
+    "effect_ready": [{"op": "trace", "value": "effect:ready"}],
+    "entry_all": [{"op": "trace", "value": "entry:all"}],
+    "effect_wrong": [{"op": "trace", "value": "effect:wrong"}]
+  },
+  "script": [{"op": "start"}, {"op": "dispatch", "event": "go"}],
+  "expect": {
+    "state": "/StateEntrySetAttrGeneratedTriggerAfterCompoundTargetResolution/parent/all_seen",
+    "attributes": {"flag": true, "ready": true},
+    "trace": [
+      {"type": "dispatch", "event": "go"},
+      {"type": "trace", "value": "entry:parent"},
+      {"type": "trace", "value": "entry:child"},
+      {"type": "trace", "value": "effect:flag"},
+      {"type": "trace", "value": "entry:flag"},
+      {"type": "trace", "value": "effect:ready"},
+      {"type": "trace", "value": "entry:all"},
+      {"type": "stable", "state": "/StateEntrySetAttrGeneratedTriggerAfterCompoundTargetResolution/parent/all_seen"}
+    ]
+  }
+}

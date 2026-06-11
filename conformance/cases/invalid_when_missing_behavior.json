@@ -1,0 +1,38 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_when_missing_behavior",
+  "mode": "validation",
+  "description": "A when trigger behavior source must resolve to a declared portable behavior program.",
+  "features": [
+    "when",
+    "validation"
+  ],
+  "model": {
+    "name": "InvalidWhenMissingBehavior",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "trigger": {
+              "kind": "when",
+              "behavior": "missing_when"
+            },
+            "target": "done"
+          }
+        ]
+      },
+      {
+        "name": "done"
+      }
+    ]
+  },
+  "expect": {
+    "validation": [
+      {
+        "code": "missing_behavior"
+      }
+    ]
+  }
+}

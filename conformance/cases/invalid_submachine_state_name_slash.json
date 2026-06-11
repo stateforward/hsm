@@ -1,0 +1,36 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_submachine_state_name_slash",
+  "mode": "validation",
+  "description": "Submachine state names must not contain path separators.",
+  "features": ["submachine", "validation"],
+  "model": {
+    "name": "InvalidSubmachineStateNameSlash",
+    "initial": "bad/drive",
+    "states": [
+      {
+        "name": "bad/drive",
+        "kind": "submachine",
+        "machine": "Child"
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "Child",
+      "initial": "idle",
+      "states": [
+        {
+          "name": "idle"
+        }
+      ]
+    }
+  ],
+  "expect": {
+    "validation": [
+      {
+        "code": "invalid_name"
+      }
+    ]
+  }
+}

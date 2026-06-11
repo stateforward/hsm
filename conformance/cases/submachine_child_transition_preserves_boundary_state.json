@@ -1,0 +1,151 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "submachine_child_transition_preserves_boundary_state",
+  "description": "An ordinary selected child transition does not exit or re-enter the containing submachine state boundary.",
+  "features": [
+    "submachine",
+    "entry",
+    "exit"
+  ],
+  "model": {
+    "name": "SubmachineChildTransitionPreservesBoundaryState",
+    "initial": "drive",
+    "states": [
+      {
+        "name": "drive",
+        "kind": "submachine",
+        "machine": "BoundaryPreservingChild",
+        "entry": [
+          {
+            "behavior": "entry_drive"
+          }
+        ],
+        "exit": [
+          {
+            "behavior": "exit_drive"
+          }
+        ]
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "BoundaryPreservingChild",
+      "initial": "active",
+      "states": [
+        {
+          "name": "active",
+          "entry": [
+            {
+              "behavior": "entry_active"
+            }
+          ],
+          "exit": [
+            {
+              "behavior": "exit_active"
+            }
+          ],
+          "transitions": [
+            {
+              "on": "go",
+              "target": "next",
+              "effects": [
+                {
+                  "behavior": "effect_go"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "next",
+          "entry": [
+            {
+              "behavior": "entry_next"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "behaviors": {
+    "entry_drive": [
+      {
+        "op": "trace",
+        "value": "entry:drive"
+      }
+    ],
+    "exit_drive": [
+      {
+        "op": "trace",
+        "value": "exit:drive"
+      }
+    ],
+    "entry_active": [
+      {
+        "op": "trace",
+        "value": "entry:active"
+      }
+    ],
+    "exit_active": [
+      {
+        "op": "trace",
+        "value": "exit:active"
+      }
+    ],
+    "effect_go": [
+      {
+        "op": "trace",
+        "value": "effect:go"
+      }
+    ],
+    "entry_next": [
+      {
+        "op": "trace",
+        "value": "entry:next"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "go"
+    }
+  ],
+  "expect": {
+    "state": "/SubmachineChildTransitionPreservesBoundaryState/drive/BoundaryPreservingChild/next",
+    "trace": [
+      {
+        "type": "trace",
+        "value": "entry:drive"
+      },
+      {
+        "type": "trace",
+        "value": "entry:active"
+      },
+      {
+        "type": "dispatch",
+        "event": "go"
+      },
+      {
+        "type": "trace",
+        "value": "exit:active"
+      },
+      {
+        "type": "trace",
+        "value": "effect:go"
+      },
+      {
+        "type": "trace",
+        "value": "entry:next"
+      },
+      {
+        "type": "stable",
+        "state": "/SubmachineChildTransitionPreservesBoundaryState/drive/BoundaryPreservingChild/next"
+      }
+    ]
+  }
+}

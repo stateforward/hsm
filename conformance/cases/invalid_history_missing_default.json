@@ -1,0 +1,33 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_history_missing_default",
+  "mode": "validation",
+  "description": "History pseudostates must declare a default transition partial.",
+  "features": ["history", "validation"],
+  "model": {
+    "name": "InvalidHistoryMissingDefault",
+    "initial": "parent",
+    "states": [
+      {
+        "name": "parent",
+        "initial": "h",
+        "states": [
+          {
+            "name": "h",
+            "kind": "shallow_history"
+          },
+          {
+            "name": "idle"
+          }
+        ]
+      }
+    ]
+  },
+  "expect": {
+    "validation": [
+      {
+        "code": "history_missing_default"
+      }
+    ]
+  }
+}

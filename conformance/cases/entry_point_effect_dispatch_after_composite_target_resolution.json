@@ -1,0 +1,195 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "entry_point_effect_dispatch_after_composite_target_resolution",
+  "description": "A dispatch from a submachine entry-point effect targeting a composite state is replayed only after the composite target reaches its nested leaf.",
+  "features": [
+    "submachine",
+    "entry_point",
+    "nested",
+    "queue",
+    "reentrancy"
+  ],
+  "model": {
+    "name": "EntryPointEffectDispatchAfterCompositeTargetResolution",
+    "initial": "outside",
+    "states": [
+      {
+        "name": "outside",
+        "transitions": [
+          {
+            "on": "enter",
+            "target": "drive",
+            "entry_point": "warm"
+          }
+        ]
+      },
+      {
+        "name": "drive",
+        "kind": "submachine",
+        "machine": "EntryPointDispatchCompositeChild"
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "EntryPointDispatchCompositeChild",
+      "initial": "idle",
+      "entry_points": [
+        {
+          "name": "warm",
+          "target": "comp",
+          "effects": [
+            {
+              "behavior": "entry_point_dispatch"
+            }
+          ]
+        }
+      ],
+      "states": [
+        {
+          "name": "idle"
+        },
+        {
+          "name": "comp",
+          "initial": "leaf",
+          "entry": [
+            {
+              "behavior": "entry_comp"
+            }
+          ],
+          "transitions": [
+            {
+              "on": "audit",
+              "target": "wrong",
+              "effects": [
+                {
+                  "behavior": "effect_wrong"
+                }
+              ]
+            }
+          ],
+          "states": [
+            {
+              "name": "leaf",
+              "entry": [
+                {
+                  "behavior": "entry_leaf"
+                }
+              ],
+              "transitions": [
+                {
+                  "on": "audit",
+                  "target": "../done",
+                  "effects": [
+                    {
+                      "behavior": "effect_audit"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "done",
+              "entry": [
+                {
+                  "behavior": "entry_done"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "wrong"
+        }
+      ]
+    }
+  ],
+  "behaviors": {
+    "entry_point_dispatch": [
+      {
+        "op": "dispatch",
+        "event": "audit"
+      },
+      {
+        "op": "trace",
+        "value": "effect:entry-point"
+      }
+    ],
+    "entry_comp": [
+      {
+        "op": "trace",
+        "value": "entry:comp"
+      }
+    ],
+    "entry_leaf": [
+      {
+        "op": "trace",
+        "value": "entry:leaf"
+      }
+    ],
+    "effect_audit": [
+      {
+        "op": "trace",
+        "value": "effect:audit"
+      }
+    ],
+    "entry_done": [
+      {
+        "op": "trace",
+        "value": "entry:done"
+      }
+    ],
+    "effect_wrong": [
+      {
+        "op": "trace",
+        "value": "effect:wrong"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "enter"
+    }
+  ],
+  "expect": {
+    "state": "/EntryPointEffectDispatchAfterCompositeTargetResolution/drive/EntryPointDispatchCompositeChild/comp/done",
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "enter"
+      },
+      {
+        "type": "dispatch",
+        "event": "audit"
+      },
+      {
+        "type": "trace",
+        "value": "effect:entry-point"
+      },
+      {
+        "type": "trace",
+        "value": "entry:comp"
+      },
+      {
+        "type": "trace",
+        "value": "entry:leaf"
+      },
+      {
+        "type": "trace",
+        "value": "effect:audit"
+      },
+      {
+        "type": "trace",
+        "value": "entry:done"
+      },
+      {
+        "type": "stable",
+        "state": "/EntryPointEffectDispatchAfterCompositeTargetResolution/drive/EntryPointDispatchCompositeChild/comp/done"
+      }
+    ]
+  }
+}

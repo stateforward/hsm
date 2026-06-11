@@ -1,0 +1,38 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_timer_missing_attribute",
+  "mode": "validation",
+  "description": "A timer trigger using an attribute source must reference a declared model attribute.",
+  "features": [
+    "timer",
+    "validation"
+  ],
+  "model": {
+    "name": "InvalidTimerMissingAttribute",
+    "initial": "waiting",
+    "states": [
+      {
+        "name": "waiting",
+        "transitions": [
+          {
+            "trigger": {
+              "kind": "after",
+              "attribute": "missing_delay"
+            },
+            "target": "done"
+          }
+        ]
+      },
+      {
+        "name": "done"
+      }
+    ]
+  },
+  "expect": {
+    "validation": [
+      {
+        "code": "missing_timer_attribute"
+      }
+    ]
+  }
+}

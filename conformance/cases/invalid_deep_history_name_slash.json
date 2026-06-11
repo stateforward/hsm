@@ -1,0 +1,38 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_deep_history_name_slash",
+  "mode": "validation",
+  "description": "Deep history pseudostate names must not contain path separators.",
+  "features": ["history", "deep_history", "validation"],
+  "model": {
+    "name": "InvalidDeepHistoryNameSlash",
+    "initial": "parent",
+    "states": [
+      {
+        "name": "parent",
+        "initial": "bad/history",
+        "states": [
+          {
+            "name": "bad/history",
+            "kind": "deep_history",
+            "transitions": [
+              {
+                "target": "idle"
+              }
+            ]
+          },
+          {
+            "name": "idle"
+          }
+        ]
+      }
+    ]
+  },
+  "expect": {
+    "validation": [
+      {
+        "code": "invalid_name"
+      }
+    ]
+  }
+}

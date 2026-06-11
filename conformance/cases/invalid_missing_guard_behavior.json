@@ -1,0 +1,38 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_missing_guard_behavior",
+  "mode": "validation",
+  "description": "Transition guard behavior references must resolve to declared portable behavior programs.",
+  "features": [
+    "guard",
+    "validation"
+  ],
+  "model": {
+    "name": "InvalidMissingGuardBehavior",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "on": "go",
+            "guard": {
+              "behavior": "missing_guard"
+            },
+            "target": "done"
+          }
+        ]
+      },
+      {
+        "name": "done"
+      }
+    ]
+  },
+  "expect": {
+    "validation": [
+      {
+        "code": "missing_behavior"
+      }
+    ]
+  }
+}

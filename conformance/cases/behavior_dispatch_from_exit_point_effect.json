@@ -1,0 +1,122 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "behavior_dispatch_from_exit_point_effect",
+  "description": "A behavior dispatch op from an exit-point effect is processed after the parent exit-point transition completes.",
+  "features": ["submachine", "exit_point", "queue", "reentrancy"],
+  "model": {
+    "name": "BehaviorDispatchFromExitPointEffect",
+    "initial": "drive",
+    "states": [
+      {
+        "name": "drive",
+        "kind": "submachine",
+        "machine": "DispatchFromExitPointChild",
+        "transitions": [
+          {
+            "trigger": {
+              "kind": "exit_point",
+              "exit_point": "done"
+            },
+            "target": "waiting"
+          }
+        ]
+      },
+      {
+        "name": "waiting",
+        "transitions": [
+          {
+            "on": "audit",
+            "target": "done",
+            "effects": [
+              {
+                "behavior": "effect_audit"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "done"
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "DispatchFromExitPointChild",
+      "initial": "active",
+      "exit_points": [
+        {
+          "name": "done",
+          "effects": [
+            {
+              "behavior": "exit_point_dispatch"
+            }
+          ]
+        }
+      ],
+      "states": [
+        {
+          "name": "active",
+          "transitions": [
+            {
+              "on": "finish",
+              "target": "done"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "behaviors": {
+    "exit_point_dispatch": [
+      {
+        "op": "dispatch",
+        "event": "audit"
+      },
+      {
+        "op": "trace",
+        "value": "effect:exit-point"
+      }
+    ],
+    "effect_audit": [
+      {
+        "op": "trace",
+        "value": "effect:audit"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "finish"
+    }
+  ],
+  "expect": {
+    "state": "/BehaviorDispatchFromExitPointEffect/done",
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "finish"
+      },
+      {
+        "type": "dispatch",
+        "event": "audit"
+      },
+      {
+        "type": "trace",
+        "value": "effect:exit-point"
+      },
+      {
+        "type": "trace",
+        "value": "effect:audit"
+      },
+      {
+        "type": "stable",
+        "state": "/BehaviorDispatchFromExitPointEffect/done"
+      }
+    ]
+  }
+}

@@ -1,0 +1,119 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "behavior_effect_set_attr_triggers_when",
+  "description": "A transition effect set_attr change evaluates when after the current transition reaches its target.",
+  "features": ["attribute", "when", "behavior_attr", "queue", "reentrancy"],
+  "model": {
+    "name": "EffectSetAttrWhen",
+    "initial": "idle",
+    "attributes": {
+      "ready": {
+        "type": "boolean",
+        "default": false
+      }
+    },
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "on": "go",
+            "target": "waiting",
+            "effects": [
+              {
+                "behavior": "effect_set_ready"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "waiting",
+        "transitions": [
+          {
+            "trigger": {
+              "kind": "when",
+              "behavior": "when_ready"
+            },
+            "target": "ready"
+          }
+        ]
+      },
+      {
+        "name": "ready",
+        "entry": [
+          {
+            "behavior": "entry_ready"
+          }
+        ]
+      }
+    ]
+  },
+  "behaviors": {
+    "effect_set_ready": [
+      {
+        "op": "trace",
+        "value": "effect:set-ready"
+      },
+      {
+        "op": "set_attr",
+        "name": "ready",
+        "value": true
+      }
+    ],
+    "when_ready": [
+      {
+        "op": "trace",
+        "value": "when:ready"
+      },
+      {
+        "op": "return_equals",
+        "name": "ready",
+        "value": true
+      }
+    ],
+    "entry_ready": [
+      {
+        "op": "trace",
+        "value": "enter:ready"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "go"
+    }
+  ],
+  "expect": {
+    "state": "/EffectSetAttrWhen/ready",
+    "attributes": {
+      "ready": true
+    },
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "go"
+      },
+      {
+        "type": "trace",
+        "value": "effect:set-ready"
+      },
+      {
+        "type": "trace",
+        "value": "when:ready"
+      },
+      {
+        "type": "trace",
+        "value": "enter:ready"
+      },
+      {
+        "type": "stable",
+        "state": "/EffectSetAttrWhen/ready"
+      }
+    ]
+  }
+}

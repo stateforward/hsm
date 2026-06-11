@@ -1,0 +1,50 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_missing_exit_point_effect_behavior",
+  "mode": "validation",
+  "description": "Exit-point effect behavior references must resolve to declared portable behavior programs.",
+  "features": [
+    "submachine",
+    "exit_point",
+    "validation"
+  ],
+  "model": {
+    "name": "InvalidMissingExitPointEffectBehavior",
+    "initial": "drive",
+    "states": [
+      {
+        "name": "drive",
+        "kind": "submachine",
+        "machine": "ExitPointEffectChild"
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "ExitPointEffectChild",
+      "initial": "idle",
+      "exit_points": [
+        {
+          "name": "done",
+          "effects": [
+            {
+              "behavior": "missing_exit_point_effect"
+            }
+          ]
+        }
+      ],
+      "states": [
+        {
+          "name": "idle"
+        }
+      ]
+    }
+  ],
+  "expect": {
+    "validation": [
+      {
+        "code": "missing_behavior"
+      }
+    ]
+  }
+}

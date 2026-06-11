@@ -1,0 +1,43 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_timer_behavior_return_type",
+  "mode": "validation",
+  "description": "A timer source behavior must produce a numeric duration or timepoint value.",
+  "features": ["timer", "timer_behavior", "validation"],
+  "model": {
+    "name": "InvalidTimerBehaviorReturnType",
+    "initial": "waiting",
+    "states": [
+      {
+        "name": "waiting",
+        "transitions": [
+          {
+            "trigger": {
+              "kind": "after",
+              "behavior": "compute_bad_delay"
+            },
+            "target": "done"
+          }
+        ]
+      },
+      {
+        "name": "done"
+      }
+    ]
+  },
+  "behaviors": {
+    "compute_bad_delay": [
+      {
+        "op": "return_value",
+        "value": "not-a-duration"
+      }
+    ]
+  },
+  "expect": {
+    "validation": [
+      {
+        "code": "invalid_timer_behavior_return"
+      }
+    ]
+  }
+}

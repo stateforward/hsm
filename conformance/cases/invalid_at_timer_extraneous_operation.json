@@ -1,0 +1,36 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_at_timer_extraneous_operation",
+  "mode": "validation",
+  "description": "An at timer trigger must not declare operation operands.",
+  "features": ["timer", "at", "operation", "validation"],
+  "model": {
+    "name": "InvalidAtTimerExtraneousOperation",
+    "initial": "waiting",
+    "states": [
+      {
+        "name": "waiting",
+        "transitions": [
+          {
+            "trigger": {
+              "kind": "at",
+              "time_ms": 10,
+              "operation": "deadline"
+            },
+            "target": "done"
+          }
+        ]
+      },
+      {
+        "name": "done"
+      }
+    ]
+  },
+  "expect": {
+    "validation": [
+      {
+        "code": "extraneous_trigger_operand"
+      }
+    ]
+  }
+}

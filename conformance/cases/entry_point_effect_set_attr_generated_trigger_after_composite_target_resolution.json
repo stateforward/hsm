@@ -1,0 +1,269 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "entry_point_effect_set_attr_generated_trigger_after_composite_target_resolution",
+  "description": "Attribute generated work from submachine entry-point effects replays only after a composite entry-point target reaches its nested leaf.",
+  "features": [
+    "submachine",
+    "entry_point",
+    "attribute",
+    "on_set",
+    "when",
+    "nested",
+    "queue",
+    "reentrancy"
+  ],
+  "model": {
+    "name": "EntryPointEffectSetAttrGeneratedTriggerAfterCompositeTargetResolution",
+    "initial": "outside",
+    "attributes": {
+      "flag": {
+        "type": "boolean",
+        "default": false
+      },
+      "ready": {
+        "type": "boolean",
+        "default": false
+      }
+    },
+    "states": [
+      {
+        "name": "outside",
+        "transitions": [
+          {
+            "on": "enter",
+            "target": "drive",
+            "entry_point": "warm"
+          }
+        ]
+      },
+      {
+        "name": "drive",
+        "kind": "submachine",
+        "machine": "EntryPointSetAttrCompositeChild"
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "EntryPointSetAttrCompositeChild",
+      "initial": "idle",
+      "entry_points": [
+        {
+          "name": "warm",
+          "target": "comp",
+          "effects": [
+            {
+              "behavior": "entry_point_set"
+            }
+          ]
+        }
+      ],
+      "states": [
+        {
+          "name": "idle"
+        },
+        {
+          "name": "comp",
+          "initial": "leaf",
+          "entry": [
+            {
+              "behavior": "entry_comp"
+            }
+          ],
+          "transitions": [
+            {
+              "trigger": {
+                "kind": "on_set",
+                "attribute": "flag"
+              },
+              "target": "wrong",
+              "effects": [
+                {
+                  "behavior": "effect_wrong"
+                }
+              ]
+            }
+          ],
+          "states": [
+            {
+              "name": "leaf",
+              "entry": [
+                {
+                  "behavior": "entry_leaf"
+                }
+              ],
+              "transitions": [
+                {
+                  "trigger": {
+                    "kind": "on_set",
+                    "attribute": "flag"
+                  },
+                  "target": "../flag_seen",
+                  "effects": [
+                    {
+                      "behavior": "effect_flag"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "flag_seen",
+              "entry": [
+                {
+                  "behavior": "entry_flag"
+                }
+              ],
+              "transitions": [
+                {
+                  "trigger": {
+                    "kind": "when",
+                    "behavior": "ready_when"
+                  },
+                  "target": "../all_seen",
+                  "effects": [
+                    {
+                      "behavior": "effect_ready"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "all_seen",
+              "entry": [
+                {
+                  "behavior": "entry_all"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "wrong"
+        }
+      ]
+    }
+  ],
+  "behaviors": {
+    "entry_point_set": [
+      {
+        "op": "set_attr",
+        "name": "flag",
+        "value": true
+      },
+      {
+        "op": "set_attr",
+        "name": "ready",
+        "value": true
+      },
+      {
+        "op": "trace",
+        "value": "effect:entry-point"
+      }
+    ],
+    "ready_when": [
+      {
+        "op": "return_equals",
+        "name": "ready",
+        "value": true
+      }
+    ],
+    "entry_comp": [
+      {
+        "op": "trace",
+        "value": "entry:comp"
+      }
+    ],
+    "entry_leaf": [
+      {
+        "op": "trace",
+        "value": "entry:leaf"
+      }
+    ],
+    "effect_flag": [
+      {
+        "op": "trace",
+        "value": "effect:flag"
+      }
+    ],
+    "entry_flag": [
+      {
+        "op": "trace",
+        "value": "entry:flag"
+      }
+    ],
+    "effect_ready": [
+      {
+        "op": "trace",
+        "value": "effect:ready"
+      }
+    ],
+    "entry_all": [
+      {
+        "op": "trace",
+        "value": "entry:all"
+      }
+    ],
+    "effect_wrong": [
+      {
+        "op": "trace",
+        "value": "effect:wrong"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "enter"
+    }
+  ],
+  "expect": {
+    "state": "/EntryPointEffectSetAttrGeneratedTriggerAfterCompositeTargetResolution/drive/EntryPointSetAttrCompositeChild/comp/all_seen",
+    "attributes": {
+      "flag": true,
+      "ready": true
+    },
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "enter"
+      },
+      {
+        "type": "trace",
+        "value": "effect:entry-point"
+      },
+      {
+        "type": "trace",
+        "value": "entry:comp"
+      },
+      {
+        "type": "trace",
+        "value": "entry:leaf"
+      },
+      {
+        "type": "trace",
+        "value": "effect:flag"
+      },
+      {
+        "type": "trace",
+        "value": "entry:flag"
+      },
+      {
+        "type": "trace",
+        "value": "effect:ready"
+      },
+      {
+        "type": "trace",
+        "value": "entry:all"
+      },
+      {
+        "type": "stable",
+        "state": "/EntryPointEffectSetAttrGeneratedTriggerAfterCompositeTargetResolution/drive/EntryPointSetAttrCompositeChild/comp/all_seen"
+      }
+    ]
+  }
+}

@@ -1,0 +1,59 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "instance_attribute_isolation",
+  "description": "Multiple instances of one model keep independent attribute storage and can be asserted with instance_attributes.",
+  "features": ["attribute", "dispatch_to"],
+  "model": {
+    "name": "InstanceAttributeIsolation",
+    "initial": "idle",
+    "attributes": {
+      "count": {
+        "type": "number",
+        "default": 0
+      }
+    },
+    "states": [
+      {
+        "name": "idle"
+      }
+    ]
+  },
+  "instances": [
+    {
+      "id": "one"
+    },
+    {
+      "id": "two"
+    }
+  ],
+  "script": [
+    {
+      "op": "start",
+      "instance": "one"
+    },
+    {
+      "op": "start",
+      "instance": "two"
+    },
+    {
+      "op": "set",
+      "instance": "one",
+      "attribute": "count",
+      "value": 7
+    }
+  ],
+  "expect": {
+    "states": {
+      "one": "/InstanceAttributeIsolation/idle",
+      "two": "/InstanceAttributeIsolation/idle"
+    },
+    "instance_attributes": {
+      "one": {
+        "count": 7
+      },
+      "two": {
+        "count": 0
+      }
+    }
+  }
+}

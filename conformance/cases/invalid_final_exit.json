@@ -1,0 +1,37 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_final_exit",
+  "mode": "validation",
+  "description": "Final states must not declare exit behaviors.",
+  "features": ["final", "exit", "validation"],
+  "model": {
+    "name": "InvalidFinalExit",
+    "initial": "done",
+    "states": [
+      {
+        "name": "done",
+        "kind": "final",
+        "exit": [
+          {
+            "behavior": "exit_done"
+          }
+        ]
+      }
+    ]
+  },
+  "behaviors": {
+    "exit_done": [
+      {
+        "op": "trace",
+        "value": "exit:done"
+      }
+    ]
+  },
+  "expect": {
+    "validation": [
+      {
+        "code": "invalid_final_transition"
+      }
+    ]
+  }
+}

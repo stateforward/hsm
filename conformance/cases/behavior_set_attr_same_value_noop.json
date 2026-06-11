@@ -1,0 +1,87 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "behavior_set_attr_same_value_noop",
+  "description": "A behavior-side set_attr to the current value does not emit an on_set transition.",
+  "features": [
+    "attribute",
+    "on_set",
+    "behavior_attr"
+  ],
+  "model": {
+    "name": "BehaviorSetAttrSameValue",
+    "initial": "idle",
+    "attributes": {
+      "flag": {
+        "type": "boolean",
+        "default": false
+      }
+    },
+    "states": [
+      {
+        "name": "idle",
+        "entry": [
+          {
+            "behavior": "entry_set_same"
+          }
+        ],
+        "transitions": [
+          {
+            "trigger": {
+              "kind": "on_set",
+              "attribute": "flag"
+            },
+            "target": "changed",
+            "effects": [
+              {
+                "behavior": "effect_changed"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "changed"
+      }
+    ]
+  },
+  "behaviors": {
+    "entry_set_same": [
+      {
+        "op": "trace",
+        "value": "entry:set-same"
+      },
+      {
+        "op": "set_attr",
+        "name": "flag",
+        "value": false
+      }
+    ],
+    "effect_changed": [
+      {
+        "op": "trace",
+        "value": "effect:changed"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    }
+  ],
+  "expect": {
+    "state": "/BehaviorSetAttrSameValue/idle",
+    "attributes": {
+      "flag": false
+    },
+    "trace": [
+      {
+        "type": "trace",
+        "value": "entry:set-same"
+      },
+      {
+        "type": "stable",
+        "state": "/BehaviorSetAttrSameValue/idle"
+      }
+    ]
+  }
+}

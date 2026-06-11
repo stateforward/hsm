@@ -1,0 +1,83 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "config_queue_group_dispatch_all_stopped_noop_bypasses_queue_hooks",
+  "description": "Caller-originated group dispatch to all-stopped members completes as a no-op before invoking stopped members' configured queue hooks.",
+  "features": [
+    "queue",
+    "group",
+    "lifecycle",
+    "stop"
+  ],
+  "model": {
+    "name": "ConfigQueueGroupDispatchAllStoppedNoopBypassesQueueHooks",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle"
+      }
+    ]
+  },
+  "instances": [
+    {
+      "id": "stopped_a",
+      "config": {
+        "queue": "push_error"
+      }
+    },
+    {
+      "id": "stopped_b",
+      "config": {
+        "queue": "push_error"
+      }
+    }
+  ],
+  "groups": [
+    {
+      "id": "stopped_workers",
+      "members": [
+        "stopped_a",
+        "stopped_b"
+      ]
+    }
+  ],
+  "script": [
+    {
+      "op": "start",
+      "instance": "stopped_a"
+    },
+    {
+      "op": "start",
+      "instance": "stopped_b"
+    },
+    {
+      "op": "stop",
+      "instance": "stopped_a"
+    },
+    {
+      "op": "stop",
+      "instance": "stopped_b"
+    },
+    {
+      "op": "group_dispatch",
+      "group": "stopped_workers",
+      "event": "audit"
+    }
+  ],
+  "expect": {
+    "states": {
+      "stopped_a": "/ConfigQueueGroupDispatchAllStoppedNoopBypassesQueueHooks",
+      "stopped_b": "/ConfigQueueGroupDispatchAllStoppedNoopBypassesQueueHooks"
+    },
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "audit",
+        "target": "stopped_workers"
+      },
+      {
+        "type": "stable",
+        "state": "group:stopped_workers"
+      }
+    ]
+  }
+}

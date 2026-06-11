@@ -1,0 +1,132 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "event_metadata_set_false_guard_visible_to_fallback_guard",
+  "description": "Metadata written by a false guard remains visible to later guards during the same event selection pass.",
+  "features": [
+    "event_ownership",
+    "guard",
+    "selection_order"
+  ],
+  "model": {
+    "name": "EventMetadataSetFalseGuardVisibleToFallbackGuard",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "on": "go",
+            "guard": {
+              "behavior": "mark_then_false"
+            },
+            "target": "wrong"
+          },
+          {
+            "on": "go",
+            "guard": {
+              "behavior": "marked_by_prior_guard"
+            },
+            "target": "done",
+            "effects": [
+              {
+                "behavior": "effect_done"
+              }
+            ]
+          },
+          {
+            "on": "go",
+            "target": "fallback",
+            "effects": [
+              {
+                "behavior": "effect_fallback"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "wrong"
+      },
+      {
+        "name": "done"
+      },
+      {
+        "name": "fallback"
+      }
+    ]
+  },
+  "behaviors": {
+    "mark_then_false": [
+      {
+        "op": "event_metadata_set",
+        "name": "phase",
+        "value": "marked"
+      },
+      {
+        "op": "trace",
+        "value": "guard:mark"
+      },
+      {
+        "op": "return_value",
+        "value": false
+      }
+    ],
+    "marked_by_prior_guard": [
+      {
+        "op": "trace",
+        "value": "guard:marked"
+      },
+      {
+        "op": "event_metadata_equals",
+        "name": "phase",
+        "value": "marked"
+      }
+    ],
+    "effect_done": [
+      {
+        "op": "trace",
+        "value": "effect:done"
+      }
+    ],
+    "effect_fallback": [
+      {
+        "op": "trace",
+        "value": "effect:fallback"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "go"
+    }
+  ],
+  "expect": {
+    "state": "/EventMetadataSetFalseGuardVisibleToFallbackGuard/done",
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "go"
+      },
+      {
+        "type": "trace",
+        "value": "guard:mark"
+      },
+      {
+        "type": "trace",
+        "value": "guard:marked"
+      },
+      {
+        "type": "trace",
+        "value": "effect:done"
+      },
+      {
+        "type": "stable",
+        "state": "/EventMetadataSetFalseGuardVisibleToFallbackGuard/done"
+      }
+    ]
+  }
+}

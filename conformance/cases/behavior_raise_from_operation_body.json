@@ -1,0 +1,86 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "behavior_raise_from_operation_body",
+  "description": "A normal internal event raised from an operation body is processed by normal transition selection.",
+  "features": ["operation", "queue", "reentrancy"],
+  "model": {
+    "name": "BehaviorRaiseFromOperationBody",
+    "initial": "idle",
+    "operations": {
+      "kick": {
+        "behavior": "operation_kick"
+      }
+    },
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "on": "audit",
+            "target": "done",
+            "effects": [
+              {
+                "behavior": "effect_audit"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "done"
+      }
+    ]
+  },
+  "behaviors": {
+    "operation_kick": [
+      {
+        "op": "raise",
+        "event": "audit"
+      },
+      {
+        "op": "trace",
+        "value": "operation:kick"
+      }
+    ],
+    "effect_audit": [
+      {
+        "op": "trace",
+        "value": "effect:audit"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "call",
+      "operation": "kick"
+    }
+  ],
+  "expect": {
+    "state": "/BehaviorRaiseFromOperationBody/done",
+    "trace": [
+      {
+        "type": "call",
+        "operation": "kick"
+      },
+      {
+        "type": "raise",
+        "event": "audit"
+      },
+      {
+        "type": "trace",
+        "value": "effect:audit"
+      },
+      {
+        "type": "trace",
+        "value": "operation:kick"
+      },
+      {
+        "type": "stable",
+        "state": "/BehaviorRaiseFromOperationBody/done"
+      }
+    ]
+  }
+}

@@ -1,0 +1,69 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "behavior_snapshot_from_activity",
+  "description": "A behavior-side snapshot taken from an activity observes the active state while the activity is running.",
+  "features": ["snapshot", "activity", "async"],
+  "model": {
+    "name": "BehaviorSnapshotFromActivity",
+    "initial": "active",
+    "states": [
+      {
+        "name": "active",
+        "activity": [
+          {
+            "behavior": "activity_snapshot"
+          }
+        ],
+        "transitions": [
+          {
+            "on": "stop",
+            "target": "done"
+          }
+        ]
+      },
+      {
+        "name": "done"
+      }
+    ]
+  },
+  "behaviors": {
+    "activity_snapshot": [
+      {
+        "op": "yield"
+      },
+      {
+        "op": "snapshot"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "sleep",
+      "millis": 0
+    },
+    {
+      "op": "dispatch",
+      "event": "stop"
+    }
+  ],
+  "expect": {
+    "state": "/BehaviorSnapshotFromActivity/done",
+    "trace": [
+      {
+        "type": "snapshot",
+        "state": "/BehaviorSnapshotFromActivity/active"
+      },
+      {
+        "type": "dispatch",
+        "event": "stop"
+      },
+      {
+        "type": "stable",
+        "state": "/BehaviorSnapshotFromActivity/done"
+      }
+    ]
+  }
+}

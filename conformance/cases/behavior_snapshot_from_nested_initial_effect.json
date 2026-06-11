@@ -1,0 +1,41 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "behavior_snapshot_from_nested_initial_effect",
+  "description": "A behavior-side snapshot taken from a nested composite initial effect observes the active parent before child entry.",
+  "features": ["nested", "initial", "snapshot"],
+  "model": {
+    "name": "BehaviorSnapshotFromNestedInitialEffect",
+    "initial": "parent",
+    "states": [
+      {
+        "name": "parent",
+        "entry": [{"behavior": "entry_parent"}],
+        "initial": {
+          "target": "child",
+          "effects": [{"behavior": "snapshot_nested_initial"}]
+        },
+        "states": [
+          {
+            "name": "child",
+            "entry": [{"behavior": "entry_child"}]
+          }
+        ]
+      }
+    ]
+  },
+  "behaviors": {
+    "entry_parent": [{"op": "trace", "value": "entry:parent"}],
+    "snapshot_nested_initial": [{"op": "snapshot"}],
+    "entry_child": [{"op": "trace", "value": "entry:child"}]
+  },
+  "script": [{"op": "start"}],
+  "expect": {
+    "state": "/BehaviorSnapshotFromNestedInitialEffect/parent/child",
+    "trace": [
+      {"type": "trace", "value": "entry:parent"},
+      {"type": "snapshot", "state": "/BehaviorSnapshotFromNestedInitialEffect"},
+      {"type": "trace", "value": "entry:child"},
+      {"type": "stable", "state": "/BehaviorSnapshotFromNestedInitialEffect/parent/child"}
+    ]
+  }
+}

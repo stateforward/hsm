@@ -1,0 +1,111 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "defer_event_object_ref",
+  "description": "A defer declaration may use an event object and defers by that object's event name.",
+  "features": ["defer", "queue", "event_data"],
+  "model": {
+    "name": "DeferEventObjectRef",
+    "initial": "blocked",
+    "states": [
+      {
+        "name": "blocked",
+        "defer": [
+          {
+            "name": "work",
+            "data": {
+              "declared": true
+            }
+          }
+        ],
+        "transitions": [
+          {
+            "on": "release",
+            "target": "ready"
+          }
+        ]
+      },
+      {
+        "name": "ready",
+        "transitions": [
+          {
+            "on": "work",
+            "guard": {
+              "behavior": "payload_ok"
+            },
+            "target": "done",
+            "effects": [
+              {
+                "behavior": "effect_work"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "done"
+      }
+    ]
+  },
+  "behaviors": {
+    "payload_ok": [
+      {
+        "op": "event_data_equals",
+        "path": "runtime",
+        "value": true
+      }
+    ],
+    "effect_work": [
+      {
+        "op": "trace",
+        "value": "effect:work"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": {
+        "name": "work",
+        "data": {
+          "runtime": true
+        }
+      }
+    },
+    {
+      "op": "dispatch",
+      "event": "release"
+    }
+  ],
+  "expect": {
+    "state": "/DeferEventObjectRef/done",
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "work"
+      },
+      {
+        "type": "defer",
+        "event": "work"
+      },
+      {
+        "type": "dispatch",
+        "event": "release"
+      },
+      {
+        "type": "undefer",
+        "event": "work"
+      },
+      {
+        "type": "trace",
+        "value": "effect:work"
+      },
+      {
+        "type": "stable",
+        "state": "/DeferEventObjectRef/done"
+      }
+    ]
+  }
+}

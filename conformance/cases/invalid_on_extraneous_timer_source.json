@@ -1,0 +1,36 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_on_extraneous_timer_source",
+  "mode": "validation",
+  "description": "An on trigger must not declare timer source operands.",
+  "features": ["timer", "validation"],
+  "model": {
+    "name": "InvalidOnExtraneousTimerSource",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "trigger": {
+              "kind": "on",
+              "event": "go",
+              "duration_ms": 10
+            },
+            "target": "done"
+          }
+        ]
+      },
+      {
+        "name": "done"
+      }
+    ]
+  },
+  "expect": {
+    "validation": [
+      {
+        "code": "extraneous_trigger_operand"
+      }
+    ]
+  }
+}

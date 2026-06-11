@@ -1,0 +1,59 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "behavior_dispatch_from_guard_false_replays",
+  "description": "A dispatch behavior op from a false guard is replayed after selection settles on a later transition that leaves the source active.",
+  "features": ["guard", "queue", "reentrancy", "selection_order"],
+  "model": {
+    "name": "BehaviorDispatchFromGuardFalseReplays",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "on": "go",
+            "guard": {"behavior": "guard_dispatch_false"},
+            "target": "done"
+          },
+          {
+            "on": "go",
+            "kind": "internal",
+            "effects": [{"behavior": "effect_fallback"}]
+          },
+          {
+            "on": "audit",
+            "target": "audit_handled",
+            "effects": [{"behavior": "effect_audit"}]
+          }
+        ]
+      },
+      {"name": "done"},
+      {"name": "audit_handled", "entry": [{"behavior": "entry_audit_handled"}]}
+    ]
+  },
+  "behaviors": {
+    "guard_dispatch_false": [
+      {"op": "trace", "value": "guard:before-dispatch"},
+      {"op": "dispatch", "event": "audit"},
+      {"op": "trace", "value": "guard:after-dispatch"},
+      {"op": "return_value", "value": false}
+    ],
+    "effect_fallback": [{"op": "trace", "value": "effect:fallback"}],
+    "effect_audit": [{"op": "trace", "value": "effect:audit"}],
+    "entry_audit_handled": [{"op": "trace", "value": "entry:audit-handled"}]
+  },
+  "script": [{"op": "start"}, {"op": "dispatch", "event": "go"}],
+  "expect": {
+    "state": "/BehaviorDispatchFromGuardFalseReplays/audit_handled",
+    "trace": [
+      {"type": "dispatch", "event": "go"},
+      {"type": "trace", "value": "guard:before-dispatch"},
+      {"type": "dispatch", "event": "audit"},
+      {"type": "trace", "value": "guard:after-dispatch"},
+      {"type": "trace", "value": "effect:fallback"},
+      {"type": "trace", "value": "effect:audit"},
+      {"type": "trace", "value": "entry:audit-handled"},
+      {"type": "stable", "state": "/BehaviorDispatchFromGuardFalseReplays/audit_handled"}
+    ]
+  }
+}

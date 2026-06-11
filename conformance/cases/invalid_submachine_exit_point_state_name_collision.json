@@ -1,0 +1,45 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_submachine_exit_point_state_name_collision",
+  "mode": "validation",
+  "description": "A child model must not reuse the same public name for an exit point and a state.",
+  "features": [
+    "submachine",
+    "exit_point",
+    "validation"
+  ],
+  "model": {
+    "name": "InvalidExitPointStateCollision",
+    "initial": "drive",
+    "states": [
+      {
+        "name": "drive",
+        "kind": "submachine",
+        "machine": "ExitPointCollisionChild"
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "ExitPointCollisionChild",
+      "initial": "done",
+      "exit_points": [
+        {
+          "name": "done"
+        }
+      ],
+      "states": [
+        {
+          "name": "done"
+        }
+      ]
+    }
+  ],
+  "expect": {
+    "validation": [
+      {
+        "code": "connection_point_name_collision"
+      }
+    ]
+  }
+}

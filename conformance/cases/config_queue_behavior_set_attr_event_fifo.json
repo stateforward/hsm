@@ -1,0 +1,67 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "config_queue_behavior_set_attr_event_fifo",
+  "description": "A behavior-side set_attr generated attribute-change event is routed through the configured FIFO queue before on_set transition selection.",
+  "features": ["queue", "attribute", "on_set", "behavior_attr", "reentrancy"],
+  "model": {
+    "name": "ConfigQueueBehaviorSetAttrEventFifo",
+    "initial": "idle",
+    "attributes": {
+      "flag": {"type": "boolean", "default": false}
+    },
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "on": "go",
+            "target": "ready",
+            "effects": [{"behavior": "set_flag"}]
+          }
+        ]
+      },
+      {
+        "name": "ready",
+        "entry": [{"behavior": "entry_ready"}],
+        "transitions": [
+          {
+            "trigger": {"kind": "on_set", "attribute": "flag"},
+            "target": "changed",
+            "effects": [{"behavior": "effect_changed"}]
+          }
+        ]
+      },
+      {"name": "changed", "entry": [{"behavior": "entry_changed"}]}
+    ]
+  },
+  "instances": [{"id": "default", "config": {"queue": "trace_fifo"}}],
+  "behaviors": {
+    "set_flag": [
+      {"op": "set_attr", "name": "flag", "value": true},
+      {"op": "trace", "value": "effect:set-flag"}
+    ],
+    "entry_ready": [{"op": "trace", "value": "entry:ready"}],
+    "effect_changed": [{"op": "trace", "value": "effect:changed"}],
+    "entry_changed": [{"op": "trace", "value": "entry:changed"}]
+  },
+  "script": [
+    {"op": "start"},
+    {"op": "dispatch", "event": "go"}
+  ],
+  "expect": {
+    "state": "/ConfigQueueBehaviorSetAttrEventFifo/changed",
+    "attributes": {"flag": true},
+    "trace": [
+      {"type": "dispatch", "event": "go"},
+      {"type": "trace", "value": "queue:push:go"},
+      {"type": "trace", "value": "queue:pop:go"},
+      {"type": "trace", "value": "queue:push:/ConfigQueueBehaviorSetAttrEventFifo/flag"},
+      {"type": "trace", "value": "effect:set-flag"},
+      {"type": "trace", "value": "entry:ready"},
+      {"type": "trace", "value": "queue:pop:/ConfigQueueBehaviorSetAttrEventFifo/flag"},
+      {"type": "trace", "value": "effect:changed"},
+      {"type": "trace", "value": "entry:changed"},
+      {"type": "stable", "state": "/ConfigQueueBehaviorSetAttrEventFifo/changed"}
+    ]
+  }
+}

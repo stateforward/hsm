@@ -1,0 +1,158 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "submachine_entry_point_choice",
+  "description": "An entry point can target a child choice pseudostate and follow normal choice guard ordering.",
+  "features": [
+    "submachine",
+    "entry_point",
+    "choice",
+    "guard"
+  ],
+  "model": {
+    "name": "SubmachineEntryChoice",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "on": "go",
+            "target": "drive",
+            "entry_point": "select"
+          }
+        ]
+      },
+      {
+        "name": "drive",
+        "kind": "submachine",
+        "machine": "ChoiceChild"
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "ChoiceChild",
+      "initial": "a",
+      "entry_points": [
+        {
+          "name": "select",
+          "target": "pick",
+          "effects": [
+            {
+              "behavior": "effect_select"
+            }
+          ]
+        }
+      ],
+      "states": [
+        {
+          "name": "a"
+        },
+        {
+          "name": "pick",
+          "kind": "choice",
+          "transitions": [
+            {
+              "guard": {
+                "behavior": "guard_a"
+              },
+              "target": "a"
+            },
+            {
+              "guard": {
+                "behavior": "guard_b"
+              },
+              "target": "b"
+            },
+            {
+              "target": "fallback"
+            }
+          ]
+        },
+        {
+          "name": "b",
+          "entry": [
+            {
+              "behavior": "entry_b"
+            }
+          ]
+        },
+        {
+          "name": "fallback"
+        }
+      ]
+    }
+  ],
+  "behaviors": {
+    "effect_select": [
+      {
+        "op": "trace",
+        "value": "effect:select"
+      }
+    ],
+    "guard_a": [
+      {
+        "op": "trace",
+        "value": "guard:a"
+      },
+      {
+        "op": "return_value",
+        "value": false
+      }
+    ],
+    "guard_b": [
+      {
+        "op": "trace",
+        "value": "guard:b"
+      },
+      {
+        "op": "return_value",
+        "value": true
+      }
+    ],
+    "entry_b": [
+      {
+        "op": "trace",
+        "value": "enter:b"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "go"
+    }
+  ],
+  "expect": {
+    "state": "/SubmachineEntryChoice/drive/ChoiceChild/b",
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "go"
+      },
+      {
+        "type": "trace",
+        "value": "effect:select"
+      },
+      {
+        "type": "trace",
+        "value": "guard:a"
+      },
+      {
+        "type": "trace",
+        "value": "guard:b"
+      },
+      {
+        "type": "trace",
+        "value": "enter:b"
+      },
+      {
+        "type": "stable",
+        "state": "/SubmachineEntryChoice/drive/ChoiceChild/b"
+      }
+    ]
+  }
+}

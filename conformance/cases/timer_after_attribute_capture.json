@@ -1,0 +1,106 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "timer_after_attribute_capture",
+  "description": "An after timer using an attribute duration captures its delay on state entry and is not rescheduled by later attribute changes.",
+  "features": [
+    "timer",
+    "after",
+    "attribute"
+  ],
+  "model": {
+    "name": "TimerAfterAttribute",
+    "initial": "waiting",
+    "attributes": {
+      "delay_ms": {
+        "type": "duration_ms",
+        "default": 50
+      }
+    },
+    "states": [
+      {
+        "name": "waiting",
+        "transitions": [
+          {
+            "trigger": {
+              "kind": "after",
+              "attribute": "delay_ms"
+            },
+            "target": "fired",
+            "effects": [
+              {
+                "behavior": "effect_timer"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "fired",
+        "entry": [
+          {
+            "behavior": "entry_fired"
+          }
+        ]
+      }
+    ]
+  },
+  "behaviors": {
+    "effect_timer": [
+      {
+        "op": "trace",
+        "value": "effect:timer"
+      }
+    ],
+    "entry_fired": [
+      {
+        "op": "trace",
+        "value": "enter:fired"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "set",
+      "attribute": "delay_ms",
+      "value": 1000
+    },
+    {
+      "op": "tick",
+      "millis": 50
+    }
+  ],
+  "expect": {
+    "state": "/TimerAfterAttribute/fired",
+    "attributes": {
+      "delay_ms": 1000
+    },
+    "trace": [
+      {
+        "type": "timer_scheduled"
+      },
+      {
+        "type": "set",
+        "attribute": "delay_ms",
+        "value": 1000
+      },
+      {
+        "type": "timer_fired"
+      },
+      {
+        "type": "trace",
+        "value": "effect:timer"
+      },
+      {
+        "type": "trace",
+        "value": "enter:fired"
+      },
+      {
+        "type": "stable",
+        "state": "/TimerAfterAttribute/fired"
+      }
+    ]
+  }
+}

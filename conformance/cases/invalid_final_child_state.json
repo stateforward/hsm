@@ -1,0 +1,29 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_final_child_state",
+  "mode": "validation",
+  "description": "Final states must not declare nested child states.",
+  "features": ["final", "validation"],
+  "model": {
+    "name": "InvalidFinalChildState",
+    "initial": "done",
+    "states": [
+      {
+        "name": "done",
+        "kind": "final",
+        "states": [
+          {
+            "name": "child"
+          }
+        ]
+      }
+    ]
+  },
+  "expect": {
+    "validation": [
+      {
+        "code": "invalid_final_transition"
+      }
+    ]
+  }
+}

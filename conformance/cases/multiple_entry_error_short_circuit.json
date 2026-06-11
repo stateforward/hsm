@@ -1,0 +1,81 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "multiple_entry_error_short_circuit",
+  "description": "A failing entry behavior prevents later entry behaviors in the same ordered entry array from running.",
+  "features": ["entry", "error", "selection_order"],
+  "model": {
+    "name": "MultipleEntryErrorShortCircuit",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle",
+        "entry": [
+          {
+            "behavior": "entry_before"
+          },
+          {
+            "behavior": "entry_fail"
+          },
+          {
+            "behavior": "entry_after"
+          }
+        ]
+      }
+    ]
+  },
+  "behaviors": {
+    "entry_before": [
+      {
+        "op": "trace",
+        "value": "entry:before"
+      }
+    ],
+    "entry_fail": [
+      {
+        "op": "trace",
+        "value": "entry:fail"
+      },
+      {
+        "op": "raise",
+        "code": "entry_error",
+        "value": "entry boom"
+      }
+    ],
+    "entry_after": [
+      {
+        "op": "trace",
+        "value": "entry:after"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    }
+  ],
+  "expect": {
+    "state": "/MultipleEntryErrorShortCircuit",
+    "error": {
+      "code": "entry_error",
+      "message_contains": "entry boom"
+    },
+    "trace": [
+      {
+        "type": "trace",
+        "value": "entry:before"
+      },
+      {
+        "type": "trace",
+        "value": "entry:fail"
+      },
+      {
+        "type": "error",
+        "code": "entry_error"
+      },
+      {
+        "type": "stable",
+        "state": "/MultipleEntryErrorShortCircuit"
+      }
+    ]
+  }
+}

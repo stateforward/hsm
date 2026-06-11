@@ -1,0 +1,30 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_choice_empty",
+  "mode": "validation",
+  "description": "A choice pseudostate must declare at least one outgoing transition.",
+  "features": [
+    "choice",
+    "validation"
+  ],
+  "model": {
+    "name": "InvalidChoiceEmpty",
+    "initial": "choice",
+    "states": [
+      {
+        "name": "choice",
+        "kind": "choice"
+      },
+      {
+        "name": "done"
+      }
+    ]
+  },
+  "expect": {
+    "validation": [
+      {
+        "code": "choice_missing_transition"
+      }
+    ]
+  }
+}

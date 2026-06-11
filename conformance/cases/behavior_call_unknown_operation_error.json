@@ -1,0 +1,76 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "behavior_call_unknown_operation_error",
+  "description": "A behavior-side call of an unknown operation produces a normalized runtime error and stops later effects.",
+  "features": ["operation", "error"],
+  "model": {
+    "name": "BehaviorCallUnknownOperationError",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "on": "go",
+            "target": "done",
+            "effects": [
+              {
+                "behavior": "call_missing"
+              },
+              {
+                "behavior": "effect_after"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "done"
+      }
+    ]
+  },
+  "behaviors": {
+    "call_missing": [
+      {
+        "op": "call",
+        "name": "missing"
+      }
+    ],
+    "effect_after": [
+      {
+        "op": "trace",
+        "value": "effect:after"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "go"
+    }
+  ],
+  "expect": {
+    "state": "/BehaviorCallUnknownOperationError/idle",
+    "error": {
+      "code": "operation_error",
+      "message_contains": "missing"
+    },
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "go"
+      },
+      {
+        "type": "error",
+        "code": "operation_error"
+      },
+      {
+        "type": "stable",
+        "state": "/BehaviorCallUnknownOperationError/idle"
+      }
+    ]
+  }
+}

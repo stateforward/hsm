@@ -1,0 +1,240 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "submachine_child_attribute_cleared_on_parent_lifecycle_reset",
+  "description": "Restart and stop/start of a parent instance clear mutated child-model attribute storage under an active submachine.",
+  "features": [
+    "submachine",
+    "attribute",
+    "lifecycle",
+    "restart",
+    "stop"
+  ],
+  "model": {
+    "name": "SubmachineChildAttributeClearedOnParentLifecycleReset",
+    "initial": "drive",
+    "states": [
+      {
+        "name": "drive",
+        "kind": "submachine",
+        "machine": "LifecycleResetChildAttribute"
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "LifecycleResetChildAttribute",
+      "initial": "idle",
+      "attributes": {
+        "child_flag": {
+          "type": "boolean",
+          "default": false
+        }
+      },
+      "states": [
+        {
+          "name": "idle",
+          "transitions": [
+            {
+              "on": "mark",
+              "target": "marked",
+              "effects": [
+                {
+                  "behavior": "mark_child"
+                }
+              ]
+            },
+            {
+              "on": "verify_restart_reset",
+              "guard": {
+                "behavior": "child_flag_is_false"
+              },
+              "target": "restart_verified",
+              "effects": [
+                {
+                  "behavior": "effect_restart_verified"
+                }
+              ]
+            },
+            {
+              "on": "verify_stop_start_reset",
+              "guard": {
+                "behavior": "child_flag_is_false"
+              },
+              "target": "stop_start_verified",
+              "effects": [
+                {
+                  "behavior": "effect_stop_start_verified"
+                }
+              ]
+            },
+            {
+              "on": "verify_restart_reset",
+              "target": "stale",
+              "effects": [
+                {
+                  "behavior": "effect_stale"
+                }
+              ]
+            },
+            {
+              "on": "verify_stop_start_reset",
+              "target": "stale",
+              "effects": [
+                {
+                  "behavior": "effect_stale"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "marked"
+        },
+        {
+          "name": "restart_verified",
+          "transitions": [
+            {
+              "on": "again",
+              "target": "idle"
+            }
+          ]
+        },
+        {
+          "name": "stop_start_verified"
+        },
+        {
+          "name": "stale"
+        }
+      ]
+    }
+  ],
+  "behaviors": {
+    "mark_child": [
+      {
+        "op": "set_attr",
+        "name": "child_flag",
+        "value": true
+      },
+      {
+        "op": "trace",
+        "value": "effect:mark-child"
+      }
+    ],
+    "child_flag_is_false": [
+      {
+        "op": "trace",
+        "value": "guard:child-flag-false"
+      },
+      {
+        "op": "return_equals",
+        "name": "child_flag",
+        "value": false
+      }
+    ],
+    "effect_restart_verified": [
+      {
+        "op": "trace",
+        "value": "effect:restart-reset"
+      }
+    ],
+    "effect_stop_start_verified": [
+      {
+        "op": "trace",
+        "value": "effect:stop-start-reset"
+      }
+    ],
+    "effect_stale": [
+      {
+        "op": "trace",
+        "value": "effect:stale-child-attribute"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "mark"
+    },
+    {
+      "op": "restart"
+    },
+    {
+      "op": "dispatch",
+      "event": "verify_restart_reset"
+    },
+    {
+      "op": "dispatch",
+      "event": "again"
+    },
+    {
+      "op": "dispatch",
+      "event": "mark"
+    },
+    {
+      "op": "stop"
+    },
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "verify_stop_start_reset"
+    }
+  ],
+  "expect": {
+    "state": "/SubmachineChildAttributeClearedOnParentLifecycleReset/drive/LifecycleResetChildAttribute/stop_start_verified",
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "mark"
+      },
+      {
+        "type": "trace",
+        "value": "effect:mark-child"
+      },
+      {
+        "type": "dispatch",
+        "event": "verify_restart_reset"
+      },
+      {
+        "type": "trace",
+        "value": "guard:child-flag-false"
+      },
+      {
+        "type": "trace",
+        "value": "effect:restart-reset"
+      },
+      {
+        "type": "dispatch",
+        "event": "again"
+      },
+      {
+        "type": "dispatch",
+        "event": "mark"
+      },
+      {
+        "type": "trace",
+        "value": "effect:mark-child"
+      },
+      {
+        "type": "dispatch",
+        "event": "verify_stop_start_reset"
+      },
+      {
+        "type": "trace",
+        "value": "guard:child-flag-false"
+      },
+      {
+        "type": "trace",
+        "value": "effect:stop-start-reset"
+      },
+      {
+        "type": "stable",
+        "state": "/SubmachineChildAttributeClearedOnParentLifecycleReset/drive/LifecycleResetChildAttribute/stop_start_verified"
+      }
+    ]
+  }
+}

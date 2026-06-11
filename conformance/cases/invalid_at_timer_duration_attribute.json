@@ -1,0 +1,41 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_at_timer_duration_attribute",
+  "mode": "validation",
+  "description": "An at timer attribute source must have time_ms type, not duration_ms.",
+  "features": ["timer", "at", "validation"],
+  "model": {
+    "name": "InvalidAtTimerDurationAttribute",
+    "initial": "waiting",
+    "attributes": {
+      "delay_ms": {
+        "type": "duration_ms",
+        "default": 10
+      }
+    },
+    "states": [
+      {
+        "name": "waiting",
+        "transitions": [
+          {
+            "trigger": {
+              "kind": "at",
+              "attribute": "delay_ms"
+            },
+            "target": "done"
+          }
+        ]
+      },
+      {
+        "name": "done"
+      }
+    ]
+  },
+  "expect": {
+    "validation": [
+      {
+        "code": "invalid_timer_attribute_type"
+      }
+    ]
+  }
+}

@@ -1,0 +1,170 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "submachine_entry_point_order",
+  "description": "Entry-point effects compose with parent transition effects after source exits and before submachine boundary and child entry.",
+  "features": [
+    "submachine",
+    "entry_point",
+    "nested",
+    "entry",
+    "exit",
+    "effect"
+  ],
+  "model": {
+    "name": "SubmachineEntryOrder",
+    "initial": "outer",
+    "states": [
+      {
+        "name": "outer",
+        "initial": "wait",
+        "exit": [
+          {
+            "behavior": "exit_outer"
+          }
+        ],
+        "states": [
+          {
+            "name": "wait",
+            "exit": [
+              {
+                "behavior": "exit_wait"
+              }
+            ],
+            "transitions": [
+              {
+                "on": "go",
+                "target": "../drive",
+                "entry_point": "warm",
+                "effects": [
+                  {
+                    "behavior": "effect_parent"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "name": "drive",
+            "kind": "submachine",
+            "machine": "OrderChild",
+            "entry": [
+              {
+                "behavior": "entry_drive"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "OrderChild",
+      "initial": "cold",
+      "entry_points": [
+        {
+          "name": "warm",
+          "target": "running",
+          "effects": [
+            {
+              "behavior": "effect_entry_point"
+            }
+          ]
+        }
+      ],
+      "states": [
+        {
+          "name": "cold"
+        },
+        {
+          "name": "running",
+          "entry": [
+            {
+              "behavior": "entry_running"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "behaviors": {
+    "exit_wait": [
+      {
+        "op": "trace",
+        "value": "exit:wait"
+      }
+    ],
+    "exit_outer": [
+      {
+        "op": "trace",
+        "value": "exit:outer"
+      }
+    ],
+    "effect_parent": [
+      {
+        "op": "trace",
+        "value": "effect:parent"
+      }
+    ],
+    "effect_entry_point": [
+      {
+        "op": "trace",
+        "value": "effect:entry-point"
+      }
+    ],
+    "entry_drive": [
+      {
+        "op": "trace",
+        "value": "enter:drive"
+      }
+    ],
+    "entry_running": [
+      {
+        "op": "trace",
+        "value": "enter:running"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "go"
+    }
+  ],
+  "expect": {
+    "state": "/SubmachineEntryOrder/outer/drive/OrderChild/running",
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "go"
+      },
+      {
+        "type": "trace",
+        "value": "exit:wait"
+      },
+      {
+        "type": "trace",
+        "value": "effect:parent"
+      },
+      {
+        "type": "trace",
+        "value": "effect:entry-point"
+      },
+      {
+        "type": "trace",
+        "value": "enter:drive"
+      },
+      {
+        "type": "trace",
+        "value": "enter:running"
+      },
+      {
+        "type": "stable",
+        "state": "/SubmachineEntryOrder/outer/drive/OrderChild/running"
+      }
+    ]
+  }
+}

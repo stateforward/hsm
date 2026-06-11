@@ -1,0 +1,141 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "behavior_dispatch_group_all_stopped_noop",
+  "description": "A behavior-originated dispatch to a group whose members are all stopped completes as a no-op and the sender transition continues.",
+  "features": [
+    "group",
+    "lifecycle",
+    "stop",
+    "queue"
+  ],
+  "model": {
+    "name": "BehaviorDispatchGroupAllStoppedNoop",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "on": "go",
+            "target": "done",
+            "effects": [
+              {
+                "behavior": "dispatch_group"
+              },
+              {
+                "behavior": "effect_after"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "done",
+        "entry": [
+          {
+            "behavior": "entry_done"
+          }
+        ]
+      }
+    ]
+  },
+  "instances": [
+    {
+      "id": "producer"
+    },
+    {
+      "id": "one"
+    },
+    {
+      "id": "two"
+    }
+  ],
+  "groups": [
+    {
+      "id": "both",
+      "members": [
+        "one",
+        "two"
+      ]
+    }
+  ],
+  "behaviors": {
+    "dispatch_group": [
+      {
+        "op": "dispatch",
+        "event": "audit",
+        "group": "both"
+      }
+    ],
+    "effect_after": [
+      {
+        "op": "trace",
+        "value": "effect:after"
+      }
+    ],
+    "entry_done": [
+      {
+        "op": "trace",
+        "value": "entry:done"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start",
+      "instance": "producer"
+    },
+    {
+      "op": "start",
+      "instance": "one"
+    },
+    {
+      "op": "start",
+      "instance": "two"
+    },
+    {
+      "op": "stop",
+      "instance": "one"
+    },
+    {
+      "op": "stop",
+      "instance": "two"
+    },
+    {
+      "op": "dispatch_to",
+      "target": "producer",
+      "event": "go"
+    }
+  ],
+  "expect": {
+    "states": {
+      "producer": "/BehaviorDispatchGroupAllStoppedNoop/done",
+      "one": "/BehaviorDispatchGroupAllStoppedNoop",
+      "two": "/BehaviorDispatchGroupAllStoppedNoop"
+    },
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "go",
+        "target": "producer"
+      },
+      {
+        "type": "dispatch",
+        "event": "audit",
+        "target": "both"
+      },
+      {
+        "type": "trace",
+        "value": "effect:after"
+      },
+      {
+        "type": "trace",
+        "value": "entry:done"
+      },
+      {
+        "type": "stable",
+        "state": "producer"
+      }
+    ]
+  }
+}

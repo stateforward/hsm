@@ -1,0 +1,24 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_empty_exit_array",
+  "mode": "validation",
+  "description": "State exit behavior arrays must not be empty when present.",
+  "features": ["exit", "validation"],
+  "model": {
+    "name": "InvalidEmptyExitArray",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle",
+        "exit": []
+      }
+    ]
+  },
+  "expect": {
+    "validation": [
+      {
+        "code": "empty_behavior_array"
+      }
+    ]
+  }
+}

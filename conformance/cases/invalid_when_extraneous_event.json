@@ -1,0 +1,42 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_when_extraneous_event",
+  "mode": "validation",
+  "description": "A when trigger must not declare event operands.",
+  "features": ["attribute", "when", "validation"],
+  "model": {
+    "name": "InvalidWhenExtraneousEvent",
+    "initial": "idle",
+    "attributes": {
+      "flag": {
+        "type": "boolean",
+        "default": false
+      }
+    },
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "trigger": {
+              "kind": "when",
+              "attribute": "flag",
+              "event": "go"
+            },
+            "target": "done"
+          }
+        ]
+      },
+      {
+        "name": "done"
+      }
+    ]
+  },
+  "expect": {
+    "validation": [
+      {
+        "code": "extraneous_trigger_operand"
+      }
+    ]
+  }
+}

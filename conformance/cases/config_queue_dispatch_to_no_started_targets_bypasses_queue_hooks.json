@@ -1,0 +1,47 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "config_queue_dispatch_to_no_started_targets_bypasses_queue_hooks",
+  "description": "Caller-originated dispatch_to with only stopped and never-started targets completes as a no-op before invoking any configured queue hooks.",
+  "features": ["queue", "dispatch_to", "multi_target", "lifecycle", "stop"],
+  "model": {
+    "name": "ConfigQueueDispatchToNoStartedTargetsBypassesQueueHooks",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "on": "go",
+            "target": "wrong",
+            "effects": [{"behavior": "effect_wrong"}]
+          }
+        ]
+      },
+      {
+        "name": "wrong"
+      }
+    ]
+  },
+  "instances": [
+    {"id": "stopped", "config": {"queue": "push_error"}},
+    {"id": "never", "config": {"queue": "push_error"}}
+  ],
+  "behaviors": {
+    "effect_wrong": [{"op": "trace", "value": "effect:wrong"}]
+  },
+  "script": [
+    {"op": "start", "instance": "stopped"},
+    {"op": "stop", "instance": "stopped"},
+    {"op": "dispatch_to", "targets": ["stopped", "never"], "event": "go"}
+  ],
+  "expect": {
+    "states": {
+      "stopped": "/ConfigQueueDispatchToNoStartedTargetsBypassesQueueHooks",
+      "never": ""
+    },
+    "trace": [
+      {"type": "dispatch", "event": "go", "target": ["stopped", "never"]},
+      {"type": "stable", "state": "targets:stopped,never"}
+    ]
+  }
+}

@@ -1,0 +1,46 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "root_transition_effect_dispatch_reentrancy",
+  "description": "A dispatch behavior op from a root-owned transition effect is queued behind the global transition.",
+  "features": ["root_transition", "queue", "reentrancy"],
+  "model": {
+    "name": "RootTransitionEffectDispatchReentrancy",
+    "initial": "idle",
+    "states": [
+      {"name": "idle", "exit": [{"behavior": "exit_idle"}]},
+      {
+        "name": "waiting",
+        "entry": [{"behavior": "entry_waiting"}],
+        "transitions": [
+          {"on": "audit", "target": "done", "effects": [{"behavior": "effect_audit"}]}
+        ]
+      },
+      {"name": "done"}
+    ],
+    "transitions": [
+      {"on": "go", "target": "waiting", "effects": [{"behavior": "effect_dispatch"}]}
+    ]
+  },
+  "behaviors": {
+    "exit_idle": [{"op": "trace", "value": "exit:idle"}],
+    "effect_dispatch": [
+      {"op": "dispatch", "event": "audit"},
+      {"op": "trace", "value": "effect:go"}
+    ],
+    "entry_waiting": [{"op": "trace", "value": "entry:waiting"}],
+    "effect_audit": [{"op": "trace", "value": "effect:audit"}]
+  },
+  "script": [{"op": "start"}, {"op": "dispatch", "event": "go"}],
+  "expect": {
+    "state": "/RootTransitionEffectDispatchReentrancy/done",
+    "trace": [
+      {"type": "dispatch", "event": "go"},
+      {"type": "trace", "value": "exit:idle"},
+      {"type": "dispatch", "event": "audit"},
+      {"type": "trace", "value": "effect:go"},
+      {"type": "trace", "value": "entry:waiting"},
+      {"type": "trace", "value": "effect:audit"},
+      {"type": "stable", "state": "/RootTransitionEffectDispatchReentrancy/done"}
+    ]
+  }
+}

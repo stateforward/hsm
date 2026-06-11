@@ -1,0 +1,113 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "submachine_timer_cancel_on_parent_exit",
+  "description": "Timers scheduled by an active child submachine state are cancelled when a parent transition exits the containing submachine state.",
+  "features": [
+    "submachine",
+    "timer",
+    "cancellation"
+  ],
+  "model": {
+    "name": "SubmachineTimerCancel",
+    "initial": "drive",
+    "states": [
+      {
+        "name": "drive",
+        "kind": "submachine",
+        "machine": "TimerChild",
+        "transitions": [
+          {
+            "on": "abort",
+            "target": "aborted"
+          }
+        ]
+      },
+      {
+        "name": "aborted",
+        "entry": [
+          {
+            "behavior": "entry_aborted"
+          }
+        ]
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "TimerChild",
+      "initial": "waiting",
+      "states": [
+        {
+          "name": "waiting",
+          "transitions": [
+            {
+              "trigger": {
+                "kind": "after",
+                "duration_ms": 100
+              },
+              "target": "timeout"
+            }
+          ]
+        },
+        {
+          "name": "timeout",
+          "entry": [
+            {
+              "behavior": "entry_timeout"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "behaviors": {
+    "entry_timeout": [
+      {
+        "op": "trace",
+        "value": "enter:timeout"
+      }
+    ],
+    "entry_aborted": [
+      {
+        "op": "trace",
+        "value": "enter:aborted"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "abort"
+    },
+    {
+      "op": "tick",
+      "millis": 200
+    }
+  ],
+  "expect": {
+    "state": "/SubmachineTimerCancel/aborted",
+    "trace": [
+      {
+        "type": "timer_scheduled"
+      },
+      {
+        "type": "dispatch",
+        "event": "abort"
+      },
+      {
+        "type": "timer_cancelled"
+      },
+      {
+        "type": "trace",
+        "value": "enter:aborted"
+      },
+      {
+        "type": "stable",
+        "state": "/SubmachineTimerCancel/aborted"
+      }
+    ]
+  }
+}

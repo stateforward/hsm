@@ -1,0 +1,18 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_behavior_event_metadata_equals_missing_value",
+  "mode": "validation",
+  "description": "event_metadata_equals behavior ops must declare the expected metadata value.",
+  "features": ["validation"],
+  "model": {
+    "name": "InvalidBehaviorEventMetadataEqualsMissingValue",
+    "initial": "idle",
+    "states": [{"name": "idle"}]
+  },
+  "behaviors": {
+    "bad": [{"op": "event_metadata_equals", "name": "owner"}]
+  },
+  "expect": {
+    "validation": [{"code": "invalid_behavior_op_operand"}]
+  }
+}

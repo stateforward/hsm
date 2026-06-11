@@ -1,0 +1,34 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "root_transition_guard_snapshot",
+  "description": "A behavior-side snapshot from a root-owned transition guard observes the source state before selection commits.",
+  "features": ["guard", "root_transition", "snapshot"],
+  "model": {
+    "name": "RootTransitionGuardSnapshot",
+    "initial": "idle",
+    "states": [
+      {"name": "idle"},
+      {"name": "done", "entry": [{"behavior": "entry_done"}]}
+    ],
+    "transitions": [
+      {"on": "go", "guard": {"behavior": "guard_snapshot"}, "target": "done"}
+    ]
+  },
+  "behaviors": {
+    "guard_snapshot": [
+      {"op": "snapshot"},
+      {"op": "return_value", "value": true}
+    ],
+    "entry_done": [{"op": "trace", "value": "entry:done"}]
+  },
+  "script": [{"op": "start"}, {"op": "dispatch", "event": "go"}],
+  "expect": {
+    "state": "/RootTransitionGuardSnapshot/done",
+    "trace": [
+      {"type": "dispatch", "event": "go"},
+      {"type": "snapshot", "state": "/RootTransitionGuardSnapshot/idle"},
+      {"type": "trace", "value": "entry:done"},
+      {"type": "stable", "state": "/RootTransitionGuardSnapshot/done"}
+    ]
+  }
+}

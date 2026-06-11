@@ -1,0 +1,47 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "path_resolution_dot_relative_target",
+  "description": "A transition target using ./ resolves relative to the transition owner path.",
+  "features": ["path_resolution", "nested"],
+  "model": {
+    "name": "PathResolutionDotRelativeTarget",
+    "initial": "parent",
+    "states": [
+      {
+        "name": "parent",
+        "initial": "a",
+        "transitions": [
+          {
+            "source": "parent/a",
+            "on": "go",
+            "target": "./b",
+            "effects": [{"behavior": "effect_go"}]
+          }
+        ],
+        "states": [
+          {
+            "name": "a"
+          },
+          {
+            "name": "b",
+            "entry": [{"behavior": "entry_b"}]
+          }
+        ]
+      }
+    ]
+  },
+  "behaviors": {
+    "effect_go": [{"op": "trace", "value": "effect:go"}],
+    "entry_b": [{"op": "trace", "value": "entry:b"}]
+  },
+  "script": [{"op": "start"}, {"op": "dispatch", "event": "go"}],
+  "expect": {
+    "state": "/PathResolutionDotRelativeTarget/parent/b",
+    "trace": [
+      {"type": "dispatch", "event": "go"},
+      {"type": "trace", "value": "effect:go"},
+      {"type": "trace", "value": "entry:b"},
+      {"type": "stable", "state": "/PathResolutionDotRelativeTarget/parent/b"}
+    ]
+  }
+}

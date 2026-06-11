@@ -1,0 +1,112 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "source_qualified_targetless_transition",
+  "description": "A parent-owned source-qualified targetless transition runs only when its source child is active and preserves the active child state.",
+  "features": [
+    "source",
+    "nested",
+    "internal",
+    "transition_kind"
+  ],
+  "model": {
+    "name": "SourceQualifiedTargetlessTransition",
+    "initial": "parent",
+    "states": [
+      {
+        "name": "parent",
+        "initial": "a",
+        "states": [
+          {
+            "name": "a",
+            "transitions": [
+              {
+                "on": "switch",
+                "target": "../b",
+                "effects": [
+                  {
+                    "behavior": "effect_switch"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "name": "b"
+          }
+        ],
+        "transitions": [
+          {
+            "source": "parent/a",
+            "on": "mark",
+            "kind": "internal",
+            "effects": [
+              {
+                "behavior": "effect_mark_a"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "behaviors": {
+    "effect_mark_a": [
+      {
+        "op": "trace",
+        "value": "effect:mark-a"
+      }
+    ],
+    "effect_switch": [
+      {
+        "op": "trace",
+        "value": "effect:switch"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "mark"
+    },
+    {
+      "op": "dispatch",
+      "event": "switch"
+    },
+    {
+      "op": "dispatch",
+      "event": "mark"
+    }
+  ],
+  "expect": {
+    "state": "/SourceQualifiedTargetlessTransition/parent/b",
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "mark"
+      },
+      {
+        "type": "trace",
+        "value": "effect:mark-a"
+      },
+      {
+        "type": "dispatch",
+        "event": "switch"
+      },
+      {
+        "type": "trace",
+        "value": "effect:switch"
+      },
+      {
+        "type": "dispatch",
+        "event": "mark"
+      },
+      {
+        "type": "stable",
+        "state": "/SourceQualifiedTargetlessTransition/parent/b"
+      }
+    ]
+  }
+}

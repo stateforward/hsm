@@ -1,0 +1,18 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_nested_missing_initial",
+  "mode": "validation",
+  "description": "Nested composite states in the root model must declare an initial target when they have multiple ordinary children.",
+  "features": ["nested", "validation"],
+  "model": {
+    "name": "InvalidNestedMissingInitial",
+    "initial": "parent",
+    "states": [
+      {
+        "name": "parent",
+        "states": [{"name": "a"}, {"name": "b"}]
+      }
+    ]
+  },
+  "expect": {"validation": [{"code": "missing_initial"}]}
+}

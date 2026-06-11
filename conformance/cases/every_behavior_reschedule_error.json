@@ -1,0 +1,103 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "every_behavior_reschedule_error",
+  "description": "An every timer behavior source error during reschedule is reported after the first interval transition completes.",
+  "features": ["timer", "every", "timer_behavior", "error", "self"],
+  "model": {
+    "name": "EveryBehaviorRescheduleError",
+    "initial": "waiting",
+    "attributes": {
+      "interval_value": {
+        "type": "any",
+        "default": 10
+      }
+    },
+    "states": [
+      {
+        "name": "waiting",
+        "transitions": [
+          {
+            "trigger": {
+              "kind": "every",
+              "behavior": "compute_interval"
+            },
+            "kind": "self",
+            "target": "waiting",
+            "effects": [
+              {
+                "behavior": "effect_tick"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "behaviors": {
+    "compute_interval": [
+      {
+        "op": "trace",
+        "value": "timer:compute-interval"
+      },
+      {
+        "op": "return_attr",
+        "name": "interval_value"
+      }
+    ],
+    "effect_tick": [
+      {
+        "op": "trace",
+        "value": "effect:tick"
+      },
+      {
+        "op": "set_attr",
+        "name": "interval_value",
+        "value": "bad"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "tick",
+      "millis": 10
+    }
+  ],
+  "expect": {
+    "state": "/EveryBehaviorRescheduleError/waiting",
+    "attributes": {
+      "interval_value": "bad"
+    },
+    "error": {
+      "code": "timer_error",
+      "message_contains": "invalid interval"
+    },
+    "trace": [
+      {
+        "type": "trace",
+        "value": "timer:compute-interval"
+      },
+      {
+        "type": "timer_fired"
+      },
+      {
+        "type": "trace",
+        "value": "effect:tick"
+      },
+      {
+        "type": "trace",
+        "value": "timer:compute-interval"
+      },
+      {
+        "type": "error",
+        "code": "timer_error"
+      },
+      {
+        "type": "stable",
+        "state": "/EveryBehaviorRescheduleError/waiting"
+      }
+    ]
+  }
+}

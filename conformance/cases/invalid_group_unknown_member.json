@@ -1,0 +1,40 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_group_unknown_member",
+  "mode": "validation",
+  "description": "A group member id must reference a declared runtime instance.",
+  "features": [
+    "group",
+    "validation"
+  ],
+  "model": {
+    "name": "InvalidGroupUnknownMember",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle"
+      }
+    ]
+  },
+  "instances": [
+    {
+      "id": "known"
+    }
+  ],
+  "groups": [
+    {
+      "id": "bad",
+      "members": [
+        "known",
+        "missing"
+      ]
+    }
+  ],
+  "expect": {
+    "validation": [
+      {
+        "code": "unknown_group_member"
+      }
+    ]
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_at_timer_duration_source",
+  "mode": "validation",
+  "description": "An at timer must use a timepoint source, not a duration source.",
+  "features": ["timer", "at", "validation"],
+  "model": {
+    "name": "InvalidAtTimerDurationSource",
+    "initial": "waiting",
+    "states": [
+      {
+        "name": "waiting",
+        "transitions": [
+          {
+            "trigger": {
+              "kind": "at",
+              "duration_ms": 10
+            },
+            "target": "done"
+          }
+        ]
+      },
+      {
+        "name": "done"
+      }
+    ]
+  },
+  "expect": {
+    "validation": [
+      {
+        "code": "invalid_timer_source"
+      }
+    ]
+  }
+}

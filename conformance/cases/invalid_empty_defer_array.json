@@ -1,0 +1,24 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_empty_defer_array",
+  "mode": "validation",
+  "description": "State defer arrays must not be empty when present.",
+  "features": ["defer", "validation"],
+  "model": {
+    "name": "InvalidEmptyDeferArray",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle",
+        "defer": []
+      }
+    ]
+  },
+  "expect": {
+    "validation": [
+      {
+        "code": "empty_event_array"
+      }
+    ]
+  }
+}

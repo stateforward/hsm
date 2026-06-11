@@ -1,0 +1,86 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "behavior_set_attr_type_mismatch_error",
+  "description": "A behavior-side set_attr with a wrong value type produces a normalized runtime error and preserves the old attribute value.",
+  "features": ["attribute", "error", "behavior_attr"],
+  "model": {
+    "name": "BehaviorSetAttrTypeMismatchError",
+    "initial": "idle",
+    "attributes": {
+      "enabled": {
+        "type": "boolean",
+        "default": false
+      }
+    },
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "on": "go",
+            "target": "done",
+            "effects": [
+              {
+                "behavior": "set_wrong_type"
+              },
+              {
+                "behavior": "effect_after"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "done"
+      }
+    ]
+  },
+  "behaviors": {
+    "set_wrong_type": [
+      {
+        "op": "set_attr",
+        "name": "enabled",
+        "value": "yes"
+      }
+    ],
+    "effect_after": [
+      {
+        "op": "trace",
+        "value": "effect:after"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "go"
+    }
+  ],
+  "expect": {
+    "state": "/BehaviorSetAttrTypeMismatchError/idle",
+    "attributes": {
+      "enabled": false
+    },
+    "error": {
+      "code": "attribute_error",
+      "message_contains": "enabled"
+    },
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "go"
+      },
+      {
+        "type": "error",
+        "code": "attribute_error"
+      },
+      {
+        "type": "stable",
+        "state": "/BehaviorSetAttrTypeMismatchError/idle"
+      }
+    ]
+  }
+}

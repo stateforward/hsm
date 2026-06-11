@@ -1,0 +1,52 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "model_ir_ids_ignored_runtime",
+  "description": "Model IR id fields on initial transitions, states, and transitions do not alter runtime path semantics.",
+  "features": ["core", "initial"],
+  "model": {
+    "name": "ModelIrIdsIgnoredRuntime",
+    "initial": {
+      "id": "initial-id",
+      "target": "idle"
+    },
+    "states": [
+      {
+        "id": "state-id",
+        "name": "idle",
+        "transitions": [
+          {
+            "id": "transition-id",
+            "on": "go",
+            "target": "done"
+          }
+        ]
+      },
+      {
+        "id": "done-id",
+        "name": "done"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "go"
+    }
+  ],
+  "expect": {
+    "state": "/ModelIrIdsIgnoredRuntime/done",
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "go"
+      },
+      {
+        "type": "stable",
+        "state": "/ModelIrIdsIgnoredRuntime/done"
+      }
+    ]
+  }
+}

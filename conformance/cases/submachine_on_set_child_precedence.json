@@ -1,0 +1,133 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "submachine_on_set_child_precedence",
+  "description": "An on_set transition in the active child submachine is selected before a containing submachine-state on_set transition for the same attribute.",
+  "features": [
+    "submachine",
+    "attribute",
+    "on_set",
+    "selection_order"
+  ],
+  "model": {
+    "name": "SubmachineOnSetPrecedence",
+    "initial": "drive",
+    "attributes": {
+      "flag": {
+        "type": "boolean",
+        "default": false
+      }
+    },
+    "states": [
+      {
+        "name": "drive",
+        "kind": "submachine",
+        "machine": "OnSetChild",
+        "transitions": [
+          {
+            "trigger": {
+              "kind": "on_set",
+              "attribute": "flag"
+            },
+            "target": "parent_handled",
+            "effects": [
+              {
+                "behavior": "effect_parent_handled"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "parent_handled"
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "OnSetChild",
+      "initial": "waiting",
+      "states": [
+        {
+          "name": "waiting",
+          "transitions": [
+            {
+              "trigger": {
+                "kind": "on_set",
+                "attribute": "flag"
+              },
+              "target": "changed",
+              "effects": [
+                {
+                  "behavior": "effect_child_handled"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "changed",
+          "entry": [
+            {
+              "behavior": "entry_child_changed"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "behaviors": {
+    "effect_child_handled": [
+      {
+        "op": "trace",
+        "value": "effect:child-on-set"
+      }
+    ],
+    "entry_child_changed": [
+      {
+        "op": "trace",
+        "value": "enter:child-changed"
+      }
+    ],
+    "effect_parent_handled": [
+      {
+        "op": "trace",
+        "value": "effect:parent-on-set"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "set",
+      "attribute": "flag",
+      "value": true
+    }
+  ],
+  "expect": {
+    "state": "/SubmachineOnSetPrecedence/drive/OnSetChild/changed",
+    "attributes": {
+      "flag": true
+    },
+    "trace": [
+      {
+        "type": "set",
+        "attribute": "flag",
+        "value": true
+      },
+      {
+        "type": "trace",
+        "value": "effect:child-on-set"
+      },
+      {
+        "type": "trace",
+        "value": "enter:child-changed"
+      },
+      {
+        "type": "stable",
+        "state": "/SubmachineOnSetPrecedence/drive/OnSetChild/changed"
+      }
+    ]
+  }
+}

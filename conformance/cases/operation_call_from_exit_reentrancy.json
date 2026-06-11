@@ -1,0 +1,171 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "operation_call_from_exit_reentrancy",
+  "description": "An operation called from exit behavior queues its on_call event behind the current transition and selects from the target state after entry completes.",
+  "features": [
+    "operation",
+    "on_call",
+    "exit",
+    "queue",
+    "reentrancy"
+  ],
+  "model": {
+    "name": "OperationCallFromExitReentrancy",
+    "initial": "idle",
+    "operations": {
+      "audit": {
+        "behavior": "operation_audit"
+      }
+    },
+    "states": [
+      {
+        "name": "idle",
+        "exit": [
+          {
+            "behavior": "exit_calls_audit"
+          }
+        ],
+        "transitions": [
+          {
+            "on": "go",
+            "target": "waiting",
+            "effects": [
+              {
+                "behavior": "effect_go"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "waiting",
+        "entry": [
+          {
+            "behavior": "entry_waiting"
+          }
+        ],
+        "transitions": [
+          {
+            "trigger": {
+              "kind": "on_call",
+              "operation": "audit"
+            },
+            "target": "handled",
+            "effects": [
+              {
+                "behavior": "effect_audit"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "handled",
+        "entry": [
+          {
+            "behavior": "entry_handled"
+          }
+        ]
+      }
+    ]
+  },
+  "behaviors": {
+    "operation_audit": [
+      {
+        "op": "trace",
+        "value": "operation:audit"
+      }
+    ],
+    "exit_calls_audit": [
+      {
+        "op": "trace",
+        "value": "exit:before-call"
+      },
+      {
+        "op": "call",
+        "name": "audit"
+      },
+      {
+        "op": "trace",
+        "value": "exit:after-call"
+      }
+    ],
+    "effect_go": [
+      {
+        "op": "trace",
+        "value": "effect:go"
+      }
+    ],
+    "entry_waiting": [
+      {
+        "op": "trace",
+        "value": "entry:waiting"
+      }
+    ],
+    "effect_audit": [
+      {
+        "op": "trace",
+        "value": "effect:audit"
+      }
+    ],
+    "entry_handled": [
+      {
+        "op": "trace",
+        "value": "entry:handled"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "go"
+    }
+  ],
+  "expect": {
+    "state": "/OperationCallFromExitReentrancy/handled",
+    "queue": {
+      "operation_call_from_exit": "queued_after_current_transition"
+    },
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "go"
+      },
+      {
+        "type": "trace",
+        "value": "exit:before-call"
+      },
+      {
+        "type": "trace",
+        "value": "operation:audit"
+      },
+      {
+        "type": "trace",
+        "value": "exit:after-call"
+      },
+      {
+        "type": "trace",
+        "value": "effect:go"
+      },
+      {
+        "type": "trace",
+        "value": "entry:waiting"
+      },
+      {
+        "type": "trace",
+        "value": "effect:audit"
+      },
+      {
+        "type": "trace",
+        "value": "entry:handled"
+      },
+      {
+        "type": "stable",
+        "state": "/OperationCallFromExitReentrancy/handled"
+      }
+    ]
+  }
+}

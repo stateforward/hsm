@@ -1,0 +1,175 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "submachine_exit_to_entry_point_handoff",
+  "description": "A parent exit-point transition can target another submachine through an entry point in the same run-to-completion step.",
+  "features": [
+    "submachine",
+    "entry_point",
+    "exit_point"
+  ],
+  "model": {
+    "name": "SubmachineExitToEntry",
+    "initial": "left",
+    "states": [
+      {
+        "name": "left",
+        "kind": "submachine",
+        "machine": "LeftChild",
+        "transitions": [
+          {
+            "trigger": {
+              "kind": "exit_point",
+              "exit_point": "done"
+            },
+            "target": "right",
+            "entry_point": "warm",
+            "effects": [
+              {
+                "behavior": "effect_parent_route"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "right",
+        "kind": "submachine",
+        "machine": "RightChild"
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "LeftChild",
+      "initial": "active",
+      "exit_points": [
+        {
+          "name": "done",
+          "effects": [
+            {
+              "behavior": "effect_left_exit"
+            }
+          ]
+        }
+      ],
+      "states": [
+        {
+          "name": "active",
+          "transitions": [
+            {
+              "on": "finish",
+              "target": "done",
+              "effects": [
+                {
+                  "behavior": "effect_left_finish"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "RightChild",
+      "initial": "cold",
+      "entry_points": [
+        {
+          "name": "warm",
+          "target": "ready",
+          "effects": [
+            {
+              "behavior": "effect_right_entry"
+            }
+          ]
+        }
+      ],
+      "states": [
+        {
+          "name": "cold"
+        },
+        {
+          "name": "ready",
+          "entry": [
+            {
+              "behavior": "entry_ready"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "behaviors": {
+    "effect_left_finish": [
+      {
+        "op": "trace",
+        "value": "effect:left-finish"
+      }
+    ],
+    "effect_left_exit": [
+      {
+        "op": "trace",
+        "value": "effect:left-exit"
+      }
+    ],
+    "effect_parent_route": [
+      {
+        "op": "trace",
+        "value": "effect:parent-route"
+      }
+    ],
+    "effect_right_entry": [
+      {
+        "op": "trace",
+        "value": "effect:right-entry"
+      }
+    ],
+    "entry_ready": [
+      {
+        "op": "trace",
+        "value": "enter:ready"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "finish"
+    }
+  ],
+  "expect": {
+    "state": "/SubmachineExitToEntry/right/RightChild/ready",
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "finish"
+      },
+      {
+        "type": "trace",
+        "value": "effect:left-finish"
+      },
+      {
+        "type": "trace",
+        "value": "effect:left-exit"
+      },
+      {
+        "type": "trace",
+        "value": "effect:parent-route"
+      },
+      {
+        "type": "trace",
+        "value": "effect:right-entry"
+      },
+      {
+        "type": "trace",
+        "value": "enter:ready"
+      },
+      {
+        "type": "stable",
+        "state": "/SubmachineExitToEntry/right/RightChild/ready"
+      }
+    ]
+  }
+}

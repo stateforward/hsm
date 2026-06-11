@@ -1,0 +1,163 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "submachine_reused_exit_point_source_disambiguation",
+  "description": "Source-qualified exit-point handlers distinguish sibling submachine states that reuse the same child model and exit-point name.",
+  "features": [
+    "submachine",
+    "exit_point",
+    "source"
+  ],
+  "model": {
+    "name": "SubmachineExitDisambiguation",
+    "initial": "first",
+    "states": [
+      {
+        "name": "first",
+        "kind": "submachine",
+        "machine": "ReusableExitChild"
+      },
+      {
+        "name": "second",
+        "kind": "submachine",
+        "machine": "ReusableExitChild"
+      },
+      {
+        "name": "first_done",
+        "entry": [
+          {
+            "behavior": "entry_first_done"
+          }
+        ]
+      },
+      {
+        "name": "second_done",
+        "entry": [
+          {
+            "behavior": "entry_second_done"
+          }
+        ]
+      }
+    ],
+    "transitions": [
+      {
+        "source": "first",
+        "trigger": {
+          "kind": "exit_point",
+          "exit_point": "done"
+        },
+        "target": "first_done",
+        "effects": [
+          {
+            "behavior": "effect_first"
+          }
+        ]
+      },
+      {
+        "source": "second",
+        "trigger": {
+          "kind": "exit_point",
+          "exit_point": "done"
+        },
+        "target": "second_done",
+        "effects": [
+          {
+            "behavior": "effect_second"
+          }
+        ]
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "ReusableExitChild",
+      "initial": "active",
+      "exit_points": [
+        {
+          "name": "done"
+        }
+      ],
+      "states": [
+        {
+          "name": "active",
+          "transitions": [
+            {
+              "on": "finish",
+              "target": "done",
+              "effects": [
+                {
+                  "behavior": "effect_child"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "behaviors": {
+    "effect_child": [
+      {
+        "op": "trace",
+        "value": "effect:child"
+      }
+    ],
+    "effect_first": [
+      {
+        "op": "trace",
+        "value": "effect:first"
+      }
+    ],
+    "effect_second": [
+      {
+        "op": "trace",
+        "value": "effect:second"
+      }
+    ],
+    "entry_first_done": [
+      {
+        "op": "trace",
+        "value": "enter:first-done"
+      }
+    ],
+    "entry_second_done": [
+      {
+        "op": "trace",
+        "value": "enter:second-done"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "finish"
+    }
+  ],
+  "expect": {
+    "state": "/SubmachineExitDisambiguation/first_done",
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "finish"
+      },
+      {
+        "type": "trace",
+        "value": "effect:child"
+      },
+      {
+        "type": "trace",
+        "value": "effect:first"
+      },
+      {
+        "type": "trace",
+        "value": "enter:first-done"
+      },
+      {
+        "type": "stable",
+        "state": "/SubmachineExitDisambiguation/first_done"
+      }
+    ]
+  }
+}

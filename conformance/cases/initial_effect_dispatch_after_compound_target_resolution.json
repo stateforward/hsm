@@ -1,0 +1,63 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "initial_effect_dispatch_after_compound_target_resolution",
+  "description": "A dispatch from a root initial effect targeting a compound state is replayed only after the compound target reaches its nested leaf.",
+  "features": ["initial", "nested", "queue", "reentrancy"],
+  "model": {
+    "name": "InitialEffectDispatchAfterCompoundTargetResolution",
+    "initial": {
+      "target": "parent",
+      "effects": [{"behavior": "initial_dispatch"}]
+    },
+    "states": [
+      {
+        "name": "parent",
+        "initial": "child",
+        "entry": [{"behavior": "entry_parent"}],
+        "transitions": [
+          {
+            "on": "audit",
+            "target": "wrong",
+            "effects": [{"behavior": "effect_wrong"}]
+          }
+        ],
+        "states": [
+          {
+            "name": "child",
+            "entry": [{"behavior": "entry_child"}],
+            "transitions": [
+              {
+                "on": "audit",
+                "target": "../done",
+                "effects": [{"behavior": "effect_audit"}]
+              }
+            ]
+          },
+          {"name": "done", "entry": [{"behavior": "entry_done"}]}
+        ]
+      },
+      {"name": "wrong"}
+    ]
+  },
+  "behaviors": {
+    "initial_dispatch": [{"op": "dispatch", "event": "audit"}, {"op": "trace", "value": "effect:initial"}],
+    "entry_parent": [{"op": "trace", "value": "entry:parent"}],
+    "entry_child": [{"op": "trace", "value": "entry:child"}],
+    "effect_audit": [{"op": "trace", "value": "effect:audit"}],
+    "entry_done": [{"op": "trace", "value": "entry:done"}],
+    "effect_wrong": [{"op": "trace", "value": "effect:wrong"}]
+  },
+  "script": [{"op": "start"}],
+  "expect": {
+    "state": "/InitialEffectDispatchAfterCompoundTargetResolution/parent/done",
+    "trace": [
+      {"type": "dispatch", "event": "audit"},
+      {"type": "trace", "value": "effect:initial"},
+      {"type": "trace", "value": "entry:parent"},
+      {"type": "trace", "value": "entry:child"},
+      {"type": "trace", "value": "effect:audit"},
+      {"type": "trace", "value": "entry:done"},
+      {"type": "stable", "state": "/InitialEffectDispatchAfterCompoundTargetResolution/parent/done"}
+    ]
+  }
+}

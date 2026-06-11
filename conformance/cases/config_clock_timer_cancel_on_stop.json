@@ -1,0 +1,32 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "config_clock_timer_cancel_on_stop",
+  "description": "Stopping an instance cancels an active timer scheduled through a configured clock.",
+  "features": ["timer", "after", "cancellation", "stop"],
+  "model": {
+    "name": "ConfigClockTimerStopCancel",
+    "initial": "waiting",
+    "states": [
+      {
+        "name": "waiting",
+        "transitions": [
+          {"trigger": {"kind": "after", "duration_ms": 100}, "target": "timeout", "effects": [{"behavior": "effect_timeout"}]}
+        ]
+      },
+      {"name": "timeout"}
+    ]
+  },
+  "instances": [{"id": "default", "config": {"clock": "trace_nonzero_sleep"}}],
+  "behaviors": {"effect_timeout": [{"op": "trace", "value": "effect:timeout"}]},
+  "script": [{"op": "start"}, {"op": "stop"}, {"op": "tick", "millis": 200}],
+  "expect": {
+    "state": "/ConfigClockTimerStopCancel",
+    "trace": [
+      {"type": "timer_scheduled"},
+      {"type": "trace", "value": "clock:sleep:nonzero"},
+      {"type": "stop"},
+      {"type": "timer_cancelled"},
+      {"type": "stable", "state": "/ConfigClockTimerStopCancel"}
+    ]
+  }
+}

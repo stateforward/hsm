@@ -1,0 +1,102 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "behavior_dispatch_event_object_metadata",
+  "description": "A behavior dispatch op can emit an event object whose metadata fields are visible to the dispatched-event handler.",
+  "features": ["queue", "reentrancy", "event_ownership"],
+  "model": {
+    "name": "BehaviorDispatchEventObjectMetadata",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "on": "go",
+            "target": "waiting",
+            "effects": [
+              {
+                "behavior": "dispatch_audit"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "waiting",
+        "transitions": [
+          {
+            "on": "audit",
+            "guard": {
+              "behavior": "owner_ok"
+            },
+            "target": "done",
+            "effects": [
+              {
+                "behavior": "effect_audit"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "done"
+      }
+    ]
+  },
+  "behaviors": {
+    "dispatch_audit": [
+      {
+        "op": "dispatch",
+        "event": {
+          "name": "audit",
+          "metadata": {
+            "owner": "behavior"
+          }
+        }
+      }
+    ],
+    "owner_ok": [
+      {
+        "op": "event_metadata_equals",
+        "name": "owner",
+        "value": "behavior"
+      }
+    ],
+    "effect_audit": [
+      {
+        "op": "trace",
+        "value": "effect:audit"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "go"
+    }
+  ],
+  "expect": {
+    "state": "/BehaviorDispatchEventObjectMetadata/done",
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "go"
+      },
+      {
+        "type": "dispatch",
+        "event": "audit"
+      },
+      {
+        "type": "trace",
+        "value": "effect:audit"
+      },
+      {
+        "type": "stable",
+        "state": "/BehaviorDispatchEventObjectMetadata/done"
+      }
+    ]
+  }
+}

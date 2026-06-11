@@ -1,0 +1,159 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "submachine_parent_defer_replay",
+  "description": "A containing submachine state's defer applies after the child declines an event and replays after the parent exits the submachine.",
+  "features": [
+    "submachine",
+    "defer",
+    "queue"
+  ],
+  "model": {
+    "name": "SubmachineParentDefer",
+    "initial": "drive",
+    "states": [
+      {
+        "name": "drive",
+        "kind": "submachine",
+        "machine": "ParentDeferChild",
+        "defer": [
+          "work"
+        ],
+        "transitions": [
+          {
+            "on": "leave",
+            "target": "outside",
+            "effects": [
+              {
+                "behavior": "effect_leave"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "outside",
+        "entry": [
+          {
+            "behavior": "entry_outside"
+          }
+        ],
+        "transitions": [
+          {
+            "on": "work",
+            "target": "done",
+            "effects": [
+              {
+                "behavior": "effect_work"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "done",
+        "entry": [
+          {
+            "behavior": "entry_done"
+          }
+        ]
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "ParentDeferChild",
+      "initial": "idle",
+      "states": [
+        {
+          "name": "idle"
+        }
+      ]
+    }
+  ],
+  "behaviors": {
+    "effect_leave": [
+      {
+        "op": "trace",
+        "value": "effect:leave"
+      }
+    ],
+    "effect_work": [
+      {
+        "op": "trace",
+        "value": "effect:work"
+      }
+    ],
+    "entry_outside": [
+      {
+        "op": "trace",
+        "value": "enter:outside"
+      }
+    ],
+    "entry_done": [
+      {
+        "op": "trace",
+        "value": "enter:done"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "work"
+    },
+    {
+      "op": "dispatch",
+      "event": "leave"
+    }
+  ],
+  "expect": {
+    "state": "/SubmachineParentDefer/done",
+    "queue": {
+      "deferred": [
+        "work"
+      ],
+      "replay": "fifo"
+    },
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "work"
+      },
+      {
+        "type": "defer",
+        "event": "work"
+      },
+      {
+        "type": "dispatch",
+        "event": "leave"
+      },
+      {
+        "type": "undefer",
+        "event": "work"
+      },
+      {
+        "type": "trace",
+        "value": "effect:leave"
+      },
+      {
+        "type": "trace",
+        "value": "enter:outside"
+      },
+      {
+        "type": "trace",
+        "value": "effect:work"
+      },
+      {
+        "type": "trace",
+        "value": "enter:done"
+      },
+      {
+        "type": "stable",
+        "state": "/SubmachineParentDefer/done"
+      }
+    ]
+  }
+}

@@ -1,0 +1,108 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "event_data_get_guard",
+  "description": "A guard can return a nested event payload value read with event_data_get.",
+  "features": [
+    "event_data",
+    "guard"
+  ],
+  "model": {
+    "name": "EventDataGetGuard",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "trigger": {
+              "kind": "on",
+              "event": "submit"
+            },
+            "guard": {
+              "behavior": "payload_flag"
+            },
+            "target": "accepted",
+            "effects": [
+              {
+                "behavior": "effect_accept"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "accepted",
+        "entry": [
+          {
+            "behavior": "entry_accepted"
+          }
+        ]
+      }
+    ]
+  },
+  "behaviors": {
+    "payload_flag": [
+      {
+        "op": "trace",
+        "value": "guard:data-get"
+      },
+      {
+        "op": "event_data_get",
+        "path": "nested.ok"
+      }
+    ],
+    "effect_accept": [
+      {
+        "op": "trace",
+        "value": "effect:accept"
+      }
+    ],
+    "entry_accepted": [
+      {
+        "op": "trace",
+        "value": "enter:accepted"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": {
+        "name": "submit",
+        "data": {
+          "nested": {
+            "ok": true
+          }
+        }
+      }
+    }
+  ],
+  "expect": {
+    "state": "/EventDataGetGuard/accepted",
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "submit"
+      },
+      {
+        "type": "trace",
+        "value": "guard:data-get"
+      },
+      {
+        "type": "trace",
+        "value": "effect:accept"
+      },
+      {
+        "type": "trace",
+        "value": "enter:accepted"
+      },
+      {
+        "type": "stable",
+        "state": "/EventDataGetGuard/accepted"
+      }
+    ]
+  }
+}

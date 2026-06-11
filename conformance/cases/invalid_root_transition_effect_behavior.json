@@ -1,0 +1,38 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_root_transition_effect_behavior",
+  "mode": "validation",
+  "description": "Root-owned transition effect behavior references must be validated.",
+  "features": ["validation"],
+  "model": {
+    "name": "InvalidRootTransitionEffectBehavior",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle"
+      },
+      {
+        "name": "done"
+      }
+    ],
+    "transitions": [
+      {
+        "source": "idle",
+        "on": "go",
+        "target": "done",
+        "effects": [
+          {
+            "behavior": "missing_root_effect"
+          }
+        ]
+      }
+    ]
+  },
+  "expect": {
+    "validation": [
+      {
+        "code": "missing_behavior"
+      }
+    ]
+  }
+}

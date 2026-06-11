@@ -1,0 +1,45 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_duplicate_child_model_names",
+  "mode": "validation",
+  "description": "Additional child model names must be unique in the conformance model registry.",
+  "features": ["submachine", "validation"],
+  "model": {
+    "name": "InvalidDuplicateChildModelNames",
+    "initial": "drive",
+    "states": [
+      {
+        "name": "drive",
+        "kind": "submachine",
+        "machine": "DuplicateChild"
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "DuplicateChild",
+      "initial": "idle",
+      "states": [
+        {
+          "name": "idle"
+        }
+      ]
+    },
+    {
+      "name": "DuplicateChild",
+      "initial": "other",
+      "states": [
+        {
+          "name": "other"
+        }
+      ]
+    }
+  ],
+  "expect": {
+    "validation": [
+      {
+        "code": "duplicate_model"
+      }
+    ]
+  }
+}

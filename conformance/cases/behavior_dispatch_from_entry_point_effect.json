@@ -1,0 +1,138 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "behavior_dispatch_from_entry_point_effect",
+  "description": "A behavior dispatch op from an entry-point effect is processed after the submachine target is entered.",
+  "features": [
+    "submachine",
+    "entry_point",
+    "queue",
+    "reentrancy"
+  ],
+  "model": {
+    "name": "BehaviorDispatchFromEntryPointEffect",
+    "initial": "outside",
+    "states": [
+      {
+        "name": "outside",
+        "transitions": [
+          {
+            "on": "go",
+            "target": "drive",
+            "entry_point": "warm"
+          }
+        ]
+      },
+      {
+        "name": "drive",
+        "kind": "submachine",
+        "machine": "DispatchFromEntryPointChild"
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "DispatchFromEntryPointChild",
+      "initial": "cold",
+      "entry_points": [
+        {
+          "name": "warm",
+          "target": "running",
+          "effects": [
+            {
+              "behavior": "entry_point_dispatch"
+            }
+          ]
+        }
+      ],
+      "states": [
+        {
+          "name": "cold"
+        },
+        {
+          "name": "running",
+          "entry": [
+            {
+              "behavior": "entry_running"
+            }
+          ],
+          "transitions": [
+            {
+              "on": "audit",
+              "target": "done",
+              "effects": [
+                {
+                  "behavior": "effect_audit"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "done"
+        }
+      ]
+    }
+  ],
+  "behaviors": {
+    "entry_point_dispatch": [
+      {
+        "op": "dispatch",
+        "event": "audit"
+      },
+      {
+        "op": "trace",
+        "value": "effect:entry-point"
+      }
+    ],
+    "entry_running": [
+      {
+        "op": "trace",
+        "value": "entry:running"
+      }
+    ],
+    "effect_audit": [
+      {
+        "op": "trace",
+        "value": "effect:audit"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "go"
+    }
+  ],
+  "expect": {
+    "state": "/BehaviorDispatchFromEntryPointEffect/drive/DispatchFromEntryPointChild/done",
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "go"
+      },
+      {
+        "type": "dispatch",
+        "event": "audit"
+      },
+      {
+        "type": "trace",
+        "value": "effect:entry-point"
+      },
+      {
+        "type": "trace",
+        "value": "entry:running"
+      },
+      {
+        "type": "trace",
+        "value": "effect:audit"
+      },
+      {
+        "type": "stable",
+        "state": "/BehaviorDispatchFromEntryPointEffect/drive/DispatchFromEntryPointChild/done"
+      }
+    ]
+  }
+}

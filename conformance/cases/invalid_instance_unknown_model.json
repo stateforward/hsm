@@ -1,0 +1,43 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_instance_unknown_model",
+  "description": "Starting an instance that names an unknown model produces a normalized runtime error.",
+  "features": ["error"],
+  "model": {
+    "name": "InvalidInstanceUnknownModel",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle"
+      }
+    ]
+  },
+  "instances": [
+    {
+      "id": "bad",
+      "model": "MissingModel"
+    }
+  ],
+  "script": [
+    {
+      "op": "start",
+      "instance": "bad"
+    }
+  ],
+  "expect": {
+    "error": {
+      "code": "model_error",
+      "message_contains": "MissingModel"
+    },
+    "trace": [
+      {
+        "type": "error",
+        "code": "model_error"
+      },
+      {
+        "type": "stable",
+        "state": ""
+      }
+    ]
+  }
+}

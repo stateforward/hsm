@@ -1,0 +1,18 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_behavior_call_extraneous_event",
+  "mode": "validation",
+  "description": "call behavior ops do not accept event operands.",
+  "features": ["validation"],
+  "model": {
+    "name": "InvalidBehaviorCallExtraneousEvent",
+    "initial": "idle",
+    "states": [{"name": "idle"}]
+  },
+  "behaviors": {
+    "bad": [{"op": "call", "name": "ping", "event": "go"}]
+  },
+  "expect": {
+    "validation": [{"code": "invalid_behavior_op_operand"}]
+  }
+}

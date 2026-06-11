@@ -1,0 +1,36 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_submodel_missing_initial_target",
+  "mode": "validation",
+  "description": "Child model initial targets must resolve inside the child model.",
+  "features": ["submachine", "validation"],
+  "model": {
+    "name": "InvalidSubmodelMissingInitialTarget",
+    "initial": "drive",
+    "states": [
+      {
+        "name": "drive",
+        "kind": "submachine",
+        "machine": "ChildMissingInitialTarget"
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "ChildMissingInitialTarget",
+      "initial": "missing",
+      "states": [
+        {
+          "name": "idle"
+        }
+      ]
+    }
+  ],
+  "expect": {
+    "validation": [
+      {
+        "code": "missing_target"
+      }
+    ]
+  }
+}

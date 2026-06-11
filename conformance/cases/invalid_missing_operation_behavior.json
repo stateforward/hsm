@@ -1,0 +1,31 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_missing_operation_behavior",
+  "mode": "validation",
+  "description": "Model operation behavior references must resolve to declared portable behavior programs.",
+  "features": [
+    "operation",
+    "validation"
+  ],
+  "model": {
+    "name": "InvalidMissingOperationBehavior",
+    "initial": "idle",
+    "operations": {
+      "audit": {
+        "behavior": "missing_operation_body"
+      }
+    },
+    "states": [
+      {
+        "name": "idle"
+      }
+    ]
+  },
+  "expect": {
+    "validation": [
+      {
+        "code": "missing_behavior"
+      }
+    ]
+  }
+}

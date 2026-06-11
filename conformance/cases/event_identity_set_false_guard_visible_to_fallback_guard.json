@@ -1,0 +1,118 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "event_identity_set_false_guard_visible_to_fallback_guard",
+  "description": "Reserved event identity fields written by false guards do not change the immutable event envelope during the same event selection pass.",
+  "features": ["event_ownership", "guard", "selection_order"],
+  "model": {
+    "name": "EventIdentitySetFalseGuardVisibleToFallbackGuard",
+    "initial": "check_id",
+    "states": [
+      {
+        "name": "check_id",
+        "transitions": [
+          {
+            "on": "go",
+            "guard": {"behavior": "set_id_then_false"},
+            "target": "wrong"
+          },
+          {
+            "on": "go",
+            "guard": {"behavior": "id_changed"},
+            "target": "check_source",
+            "effects": [{"behavior": "effect_id"}]
+          }
+        ]
+      },
+      {
+        "name": "check_source",
+        "transitions": [
+          {
+            "on": "go",
+            "guard": {"behavior": "set_source_then_false"},
+            "target": "wrong"
+          },
+          {
+            "on": "go",
+            "guard": {"behavior": "source_changed"},
+            "target": "check_target",
+            "effects": [{"behavior": "effect_source"}]
+          }
+        ]
+      },
+      {
+        "name": "check_target",
+        "transitions": [
+          {
+            "on": "go",
+            "guard": {"behavior": "set_target_then_false"},
+            "target": "wrong"
+          },
+          {
+            "on": "go",
+            "guard": {"behavior": "target_changed"},
+            "target": "done",
+            "effects": [{"behavior": "effect_target"}]
+          }
+        ]
+      },
+      {"name": "wrong"},
+      {"name": "done"}
+    ]
+  },
+  "behaviors": {
+    "set_id_then_false": [
+      {"op": "event_metadata_set", "name": "id", "value": "changed-id"},
+      {"op": "trace", "value": "guard:set-id"},
+      {"op": "return_value", "value": false}
+    ],
+    "id_changed": [
+      {"op": "trace", "value": "guard:id-changed"},
+      {"op": "event_metadata_equals", "name": "id", "value": "original-id"}
+    ],
+    "set_source_then_false": [
+      {"op": "event_metadata_set", "name": "source", "value": "changed-source"},
+      {"op": "trace", "value": "guard:set-source"},
+      {"op": "return_value", "value": false}
+    ],
+    "source_changed": [
+      {"op": "trace", "value": "guard:source-changed"},
+      {"op": "event_metadata_equals", "name": "source", "value": "original-source"}
+    ],
+    "set_target_then_false": [
+      {"op": "event_metadata_set", "name": "target", "value": "changed-target"},
+      {"op": "trace", "value": "guard:set-target"},
+      {"op": "return_value", "value": false}
+    ],
+    "target_changed": [
+      {"op": "trace", "value": "guard:target-changed"},
+      {"op": "event_metadata_equals", "name": "target", "value": "original-target"}
+    ],
+    "effect_id": [{"op": "trace", "value": "effect:id"}],
+    "effect_source": [{"op": "trace", "value": "effect:source"}],
+    "effect_target": [{"op": "trace", "value": "effect:target"}]
+  },
+  "script": [
+    {"op": "start"},
+    {"op": "dispatch", "event": {"name": "go", "id": "original-id", "source": "original-source", "target": "original-target"}},
+    {"op": "dispatch", "event": {"name": "go", "id": "original-id", "source": "original-source", "target": "original-target"}},
+    {"op": "dispatch", "event": {"name": "go", "id": "original-id", "source": "original-source", "target": "original-target"}}
+  ],
+  "expect": {
+    "state": "/EventIdentitySetFalseGuardVisibleToFallbackGuard/done",
+    "trace": [
+      {"type": "dispatch", "event": "go"},
+      {"type": "trace", "value": "guard:set-id"},
+      {"type": "trace", "value": "guard:id-changed"},
+      {"type": "trace", "value": "effect:id"},
+      {"type": "dispatch", "event": "go"},
+      {"type": "trace", "value": "guard:set-source"},
+      {"type": "trace", "value": "guard:source-changed"},
+      {"type": "trace", "value": "effect:source"},
+      {"type": "dispatch", "event": "go"},
+      {"type": "trace", "value": "guard:set-target"},
+      {"type": "trace", "value": "guard:target-changed"},
+      {"type": "trace", "value": "effect:target"},
+      {"type": "stable", "state": "/EventIdentitySetFalseGuardVisibleToFallbackGuard/done"}
+    ]
+  }
+}

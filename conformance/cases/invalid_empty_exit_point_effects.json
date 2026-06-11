@@ -1,0 +1,42 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_empty_exit_point_effects",
+  "mode": "validation",
+  "description": "Exit-point effects arrays must not be empty when present.",
+  "features": ["submachine", "exit_point", "validation"],
+  "model": {
+    "name": "InvalidEmptyExitPointEffects",
+    "initial": "drive",
+    "states": [
+      {
+        "name": "drive",
+        "kind": "submachine",
+        "machine": "Child"
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "Child",
+      "initial": "idle",
+      "exit_points": [
+        {
+          "name": "done",
+          "effects": []
+        }
+      ],
+      "states": [
+        {
+          "name": "idle"
+        }
+      ]
+    }
+  ],
+  "expect": {
+    "validation": [
+      {
+        "code": "empty_behavior_array"
+      }
+    ]
+  }
+}

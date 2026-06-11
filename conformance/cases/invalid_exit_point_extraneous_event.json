@@ -1,0 +1,54 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_exit_point_extraneous_event",
+  "mode": "validation",
+  "description": "An exit_point trigger must not declare event operands.",
+  "features": ["submachine", "exit_point", "validation"],
+  "model": {
+    "name": "InvalidExitPointExtraneousEvent",
+    "initial": "drive",
+    "states": [
+      {
+        "name": "drive",
+        "kind": "submachine",
+        "machine": "ExitPointExtraneousChild",
+        "transitions": [
+          {
+            "trigger": {
+              "kind": "exit_point",
+              "exit_point": "done",
+              "event": "done"
+            },
+            "target": "outside"
+          }
+        ]
+      },
+      {
+        "name": "outside"
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "ExitPointExtraneousChild",
+      "initial": "idle",
+      "exit_points": [
+        {
+          "name": "done"
+        }
+      ],
+      "states": [
+        {
+          "name": "idle"
+        }
+      ]
+    }
+  ],
+  "expect": {
+    "validation": [
+      {
+        "code": "extraneous_trigger_operand"
+      }
+    ]
+  }
+}

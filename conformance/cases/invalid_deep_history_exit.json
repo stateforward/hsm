@@ -1,0 +1,51 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_deep_history_exit",
+  "mode": "validation",
+  "description": "Deep history pseudostates must not declare exit behaviors.",
+  "features": ["history", "deep_history", "exit", "validation"],
+  "model": {
+    "name": "InvalidDeepHistoryExit",
+    "initial": "parent",
+    "states": [
+      {
+        "name": "parent",
+        "initial": "h",
+        "states": [
+          {
+            "name": "h",
+            "kind": "deep_history",
+            "exit": [
+              {
+                "behavior": "exit_h"
+              }
+            ],
+            "transitions": [
+              {
+                "target": "idle"
+              }
+            ]
+          },
+          {
+            "name": "idle"
+          }
+        ]
+      }
+    ]
+  },
+  "behaviors": {
+    "exit_h": [
+      {
+        "op": "trace",
+        "value": "exit:h"
+      }
+    ]
+  },
+  "expect": {
+    "validation": [
+      {
+        "code": "invalid_pseudostate_contents"
+      }
+    ]
+  }
+}

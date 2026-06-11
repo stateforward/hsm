@@ -1,0 +1,18 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_behavior_return_value_missing_value",
+  "mode": "validation",
+  "description": "return_value behavior ops must declare the returned value.",
+  "features": ["validation"],
+  "model": {
+    "name": "InvalidBehaviorReturnValueMissingValue",
+    "initial": "idle",
+    "states": [{"name": "idle"}]
+  },
+  "behaviors": {
+    "bad": [{"op": "return_value"}]
+  },
+  "expect": {
+    "validation": [{"code": "invalid_behavior_op_operand"}]
+  }
+}

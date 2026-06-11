@@ -1,0 +1,45 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "lifecycle_set_before_start_error",
+  "description": "Setting an attribute before start produces a normalized lifecycle error.",
+  "features": ["lifecycle", "attribute", "error"],
+  "model": {
+    "name": "LifecycleSetBeforeStartError",
+    "initial": "idle",
+    "attributes": {
+      "flag": {
+        "type": "boolean",
+        "default": false
+      }
+    },
+    "states": [
+      {
+        "name": "idle"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "set",
+      "attribute": "flag",
+      "value": true
+    }
+  ],
+  "expect": {
+    "state": "",
+    "error": {
+      "code": "lifecycle_error",
+      "message_contains": "started"
+    },
+    "trace": [
+      {
+        "type": "error",
+        "code": "lifecycle_error"
+      },
+      {
+        "type": "stable",
+        "state": ""
+      }
+    ]
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_attribute_default_type_mismatch",
+  "mode": "validation",
+  "description": "An attribute default value must match its explicit declared type.",
+  "features": [
+    "attribute",
+    "validation"
+  ],
+  "model": {
+    "name": "InvalidAttributeDefaultTypeMismatch",
+    "initial": "idle",
+    "attributes": {
+      "enabled": {
+        "type": "boolean",
+        "default": "yes"
+      }
+    },
+    "states": [
+      {
+        "name": "idle"
+      }
+    ]
+  },
+  "expect": {
+    "validation": [
+      {
+        "code": "invalid_attribute",
+        "message_contains": "default does not match declared type"
+      }
+    ]
+  }
+}

@@ -1,0 +1,137 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "submachine_on_call_child_precedence",
+  "description": "An on_call transition in the active child submachine is selected before a containing submachine-state on_call transition for the same operation.",
+  "features": [
+    "submachine",
+    "operation",
+    "on_call",
+    "selection_order"
+  ],
+  "model": {
+    "name": "SubmachineOnCallPrecedence",
+    "initial": "drive",
+    "operations": {
+      "approve": {
+        "behavior": "operation_approve"
+      }
+    },
+    "states": [
+      {
+        "name": "drive",
+        "kind": "submachine",
+        "machine": "OnCallChild",
+        "transitions": [
+          {
+            "trigger": {
+              "kind": "on_call",
+              "operation": "approve"
+            },
+            "target": "parent_handled",
+            "effects": [
+              {
+                "behavior": "effect_parent_handled"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "parent_handled"
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "OnCallChild",
+      "initial": "waiting",
+      "states": [
+        {
+          "name": "waiting",
+          "transitions": [
+            {
+              "trigger": {
+                "kind": "on_call",
+                "operation": "approve"
+              },
+              "target": "approved",
+              "effects": [
+                {
+                  "behavior": "effect_child_handled"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "approved",
+          "entry": [
+            {
+              "behavior": "entry_child_approved"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "behaviors": {
+    "operation_approve": [
+      {
+        "op": "trace",
+        "value": "operation:approve"
+      }
+    ],
+    "effect_child_handled": [
+      {
+        "op": "trace",
+        "value": "effect:child-handled"
+      }
+    ],
+    "entry_child_approved": [
+      {
+        "op": "trace",
+        "value": "enter:child-approved"
+      }
+    ],
+    "effect_parent_handled": [
+      {
+        "op": "trace",
+        "value": "effect:parent-handled"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "call",
+      "operation": "approve"
+    }
+  ],
+  "expect": {
+    "state": "/SubmachineOnCallPrecedence/drive/OnCallChild/approved",
+    "trace": [
+      {
+        "type": "call",
+        "operation": "approve"
+      },
+      {
+        "type": "trace",
+        "value": "effect:child-handled"
+      },
+      {
+        "type": "trace",
+        "value": "enter:child-approved"
+      },
+      {
+        "type": "trace",
+        "value": "operation:approve"
+      },
+      {
+        "type": "stable",
+        "state": "/SubmachineOnCallPrecedence/drive/OnCallChild/approved"
+      }
+    ]
+  }
+}

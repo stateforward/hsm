@@ -1,0 +1,148 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "submachine_when_child_precedence",
+  "description": "A when transition in the active child submachine is selected before a containing submachine-state when transition for the same attribute change.",
+  "features": [
+    "submachine",
+    "attribute",
+    "when",
+    "selection_order"
+  ],
+  "model": {
+    "name": "SubmachineWhenPrecedence",
+    "initial": "drive",
+    "attributes": {
+      "ready": {
+        "type": "boolean",
+        "default": false
+      }
+    },
+    "states": [
+      {
+        "name": "drive",
+        "kind": "submachine",
+        "machine": "WhenChild",
+        "transitions": [
+          {
+            "trigger": {
+              "kind": "when",
+              "behavior": "when_ready"
+            },
+            "target": "parent_ready",
+            "effects": [
+              {
+                "behavior": "effect_parent_ready"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "parent_ready"
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "WhenChild",
+      "initial": "waiting",
+      "states": [
+        {
+          "name": "waiting",
+          "transitions": [
+            {
+              "trigger": {
+                "kind": "when",
+                "behavior": "when_ready"
+              },
+              "target": "ready",
+              "effects": [
+                {
+                  "behavior": "effect_child_ready"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "ready",
+          "entry": [
+            {
+              "behavior": "entry_child_ready"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "behaviors": {
+    "when_ready": [
+      {
+        "op": "trace",
+        "value": "when:ready"
+      },
+      {
+        "op": "return_equals",
+        "name": "ready",
+        "value": true
+      }
+    ],
+    "effect_child_ready": [
+      {
+        "op": "trace",
+        "value": "effect:child-when"
+      }
+    ],
+    "entry_child_ready": [
+      {
+        "op": "trace",
+        "value": "enter:child-ready"
+      }
+    ],
+    "effect_parent_ready": [
+      {
+        "op": "trace",
+        "value": "effect:parent-when"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "set",
+      "attribute": "ready",
+      "value": true
+    }
+  ],
+  "expect": {
+    "state": "/SubmachineWhenPrecedence/drive/WhenChild/ready",
+    "attributes": {
+      "ready": true
+    },
+    "trace": [
+      {
+        "type": "set",
+        "attribute": "ready",
+        "value": true
+      },
+      {
+        "type": "trace",
+        "value": "when:ready"
+      },
+      {
+        "type": "trace",
+        "value": "effect:child-when"
+      },
+      {
+        "type": "trace",
+        "value": "enter:child-ready"
+      },
+      {
+        "type": "stable",
+        "state": "/SubmachineWhenPrecedence/drive/WhenChild/ready"
+      }
+    ]
+  }
+}

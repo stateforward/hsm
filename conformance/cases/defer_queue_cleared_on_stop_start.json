@@ -1,0 +1,92 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "defer_queue_cleared_on_stop_start",
+  "description": "Stop followed by start clears deferred events from the previous lifecycle so release does not replay stale work.",
+  "features": ["defer", "queue", "lifecycle", "stop"],
+  "model": {
+    "name": "DeferQueueClearedOnStopStart",
+    "initial": "blocked",
+    "states": [
+      {
+        "name": "blocked",
+        "defer": [
+          "work"
+        ],
+        "transitions": [
+          {
+            "on": "release",
+            "target": "ready"
+          }
+        ]
+      },
+      {
+        "name": "ready",
+        "transitions": [
+          {
+            "on": "work",
+            "target": "done",
+            "effects": [
+              {
+                "behavior": "effect_work"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "done"
+      }
+    ]
+  },
+  "behaviors": {
+    "effect_work": [
+      {
+        "op": "trace",
+        "value": "effect:work"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "work"
+    },
+    {
+      "op": "stop"
+    },
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "release"
+    }
+  ],
+  "expect": {
+    "state": "/DeferQueueClearedOnStopStart/ready",
+    "queue": {
+      "lifecycle_cleanup": "deferred_events_cleared_on_stop_start"
+    },
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "work"
+      },
+      {
+        "type": "defer",
+        "event": "work"
+      },
+      {
+        "type": "dispatch",
+        "event": "release"
+      },
+      {
+        "type": "stable",
+        "state": "/DeferQueueClearedOnStopStart/ready"
+      }
+    ]
+  }
+}

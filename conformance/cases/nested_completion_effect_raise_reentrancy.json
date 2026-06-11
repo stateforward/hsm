@@ -1,0 +1,10 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "nested_completion_effect_raise_reentrancy",
+  "description": "A normal internal event raised from a state-owned completion transition effect is processed after the completion target is entered.",
+  "features": ["completion", "final", "nested", "queue", "reentrancy"],
+  "model": {"name": "NestedCompletionEffectRaiseReentrancy", "initial": "parent", "states": [{"name": "parent", "initial": "work", "states": [{"name": "work", "transitions": [{"on": "finish", "target": "../done"}]}, {"name": "done", "kind": "final"}], "transitions": [{"trigger": {"kind": "completion"}, "target": "complete", "effects": [{"behavior": "completion_raise"}]}]}, {"name": "complete", "entry": [{"behavior": "entry_complete"}], "transitions": [{"on": "audit", "target": "audited", "effects": [{"behavior": "effect_audit"}]}]}, {"name": "audited"}]},
+  "behaviors": {"completion_raise": [{"op": "raise", "event": "audit"}, {"op": "trace", "value": "effect:completion"}], "entry_complete": [{"op": "trace", "value": "entry:complete"}], "effect_audit": [{"op": "trace", "value": "effect:audit"}]},
+  "script": [{"op": "start"}, {"op": "dispatch", "event": "finish"}],
+  "expect": {"state": "/NestedCompletionEffectRaiseReentrancy/audited", "trace": [{"type": "dispatch", "event": "finish"}, {"type": "raise", "event": "audit"}, {"type": "trace", "value": "effect:completion"}, {"type": "trace", "value": "entry:complete"}, {"type": "trace", "value": "effect:audit"}, {"type": "stable", "state": "/NestedCompletionEffectRaiseReentrancy/audited"}]}
+}

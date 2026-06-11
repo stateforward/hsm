@@ -1,0 +1,82 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "error_when_behavior",
+  "description": "A when behavior error during attribute-change selection produces a normalized runtime error and leaves state unchanged.",
+  "features": ["error", "when", "attribute"],
+  "model": {
+    "name": "ErrorWhenBehavior",
+    "initial": "idle",
+    "attributes": {
+      "flag": {
+        "type": "boolean",
+        "default": false
+      }
+    },
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "trigger": {
+              "kind": "when",
+              "behavior": "when_raises"
+            },
+            "target": "done"
+          }
+        ]
+      },
+      {
+        "name": "done"
+      }
+    ]
+  },
+  "behaviors": {
+    "when_raises": [
+      {
+        "op": "trace",
+        "value": "when:raise"
+      },
+      {
+        "op": "raise",
+        "code": "when_error",
+        "value": "when boom"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "set",
+      "attribute": "flag",
+      "value": true
+    }
+  ],
+  "expect": {
+    "state": "/ErrorWhenBehavior/idle",
+    "error": {
+      "code": "when_error",
+      "message_contains": "when boom"
+    },
+    "trace": [
+      {
+        "type": "set",
+        "attribute": "flag",
+        "value": true
+      },
+      {
+        "type": "trace",
+        "value": "when:raise"
+      },
+      {
+        "type": "error",
+        "code": "when_error"
+      },
+      {
+        "type": "stable",
+        "state": "/ErrorWhenBehavior/idle"
+      }
+    ]
+  }
+}

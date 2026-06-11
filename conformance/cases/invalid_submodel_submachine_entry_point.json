@@ -1,0 +1,63 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_submodel_submachine_entry_point",
+  "mode": "validation",
+  "description": "Submachine entry-point selectors inside child models must validate referenced entry points recursively.",
+  "features": ["submachine", "entry_point", "validation"],
+  "model": {
+    "name": "InvalidSubmodelSubmachineEntryPoint",
+    "initial": "outer",
+    "states": [
+      {
+        "name": "outer",
+        "kind": "submachine",
+        "machine": "OuterChild"
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "InnerChild",
+      "initial": "ready",
+      "entry_points": [
+        {
+          "name": "start",
+          "target": "ready"
+        }
+      ],
+      "states": [
+        {
+          "name": "ready"
+        }
+      ]
+    },
+    {
+      "name": "OuterChild",
+      "initial": "idle",
+      "states": [
+        {
+          "name": "idle",
+          "transitions": [
+            {
+              "on": "go",
+              "target": "inner",
+              "entry_point": "missing"
+            }
+          ]
+        },
+        {
+          "name": "inner",
+          "kind": "submachine",
+          "machine": "InnerChild"
+        }
+      ]
+    }
+  ],
+  "expect": {
+    "validation": [
+      {
+        "code": "missing_entry_point"
+      }
+    ]
+  }
+}

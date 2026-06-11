@@ -1,0 +1,94 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "multiple_initial_effect_error_short_circuit",
+  "description": "A failing initial effect prevents later initial effects and target entry from running.",
+  "features": ["initial", "effect", "error", "selection_order"],
+  "model": {
+    "name": "MultipleInitialEffectErrorShortCircuit",
+    "initial": {
+      "target": "idle",
+      "effects": [
+        {
+          "behavior": "initial_before"
+        },
+        {
+          "behavior": "initial_fail"
+        },
+        {
+          "behavior": "initial_after"
+        }
+      ]
+    },
+    "states": [
+      {
+        "name": "idle",
+        "entry": [
+          {
+            "behavior": "entry_idle"
+          }
+        ]
+      }
+    ]
+  },
+  "behaviors": {
+    "initial_before": [
+      {
+        "op": "trace",
+        "value": "initial:before"
+      }
+    ],
+    "initial_fail": [
+      {
+        "op": "trace",
+        "value": "initial:fail"
+      },
+      {
+        "op": "raise",
+        "code": "initial_error",
+        "value": "initial boom"
+      }
+    ],
+    "initial_after": [
+      {
+        "op": "trace",
+        "value": "initial:after"
+      }
+    ],
+    "entry_idle": [
+      {
+        "op": "trace",
+        "value": "entry:idle"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    }
+  ],
+  "expect": {
+    "state": "/MultipleInitialEffectErrorShortCircuit",
+    "error": {
+      "code": "initial_error",
+      "message_contains": "initial boom"
+    },
+    "trace": [
+      {
+        "type": "trace",
+        "value": "initial:before"
+      },
+      {
+        "type": "trace",
+        "value": "initial:fail"
+      },
+      {
+        "type": "error",
+        "code": "initial_error"
+      },
+      {
+        "type": "stable",
+        "state": "/MultipleInitialEffectErrorShortCircuit"
+      }
+    ]
+  }
+}

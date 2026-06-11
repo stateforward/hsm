@@ -1,0 +1,47 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "runtime_set_unknown_attribute_error",
+  "description": "Runtime set of an unknown attribute produces a normalized runtime error and leaves state unchanged.",
+  "features": ["attribute", "on_set", "error"],
+  "model": {
+    "name": "RuntimeSetUnknownAttributeError",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "set",
+      "attribute": "missing",
+      "value": true
+    }
+  ],
+  "expect": {
+    "state": "/RuntimeSetUnknownAttributeError/idle",
+    "error": {
+      "code": "attribute_error",
+      "message_contains": "missing"
+    },
+    "trace": [
+      {
+        "type": "set",
+        "attribute": "missing",
+        "value": true
+      },
+      {
+        "type": "error",
+        "code": "attribute_error"
+      },
+      {
+        "type": "stable",
+        "state": "/RuntimeSetUnknownAttributeError/idle"
+      }
+    ]
+  }
+}

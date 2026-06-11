@@ -1,0 +1,126 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "root_transition_child_false_guard_falls_through_to_root",
+  "description": "A false guard on an active nested child transition falls through to a source-less root-owned transition for the same event.",
+  "features": [
+    "root_transition",
+    "nested",
+    "guard",
+    "selection_order"
+  ],
+  "model": {
+    "name": "RootTransitionChildFalseGuardFallsThroughToRoot",
+    "initial": "parent",
+    "states": [
+      {
+        "name": "parent",
+        "initial": "child",
+        "states": [
+          {
+            "name": "child",
+            "transitions": [
+              {
+                "on": "go",
+                "guard": {
+                  "behavior": "guard_child_false"
+                },
+                "target": "../wrong",
+                "effects": [
+                  {
+                    "behavior": "effect_child"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "name": "wrong"
+          }
+        ]
+      },
+      {
+        "name": "root_handled",
+        "entry": [
+          {
+            "behavior": "entry_root"
+          }
+        ]
+      }
+    ],
+    "transitions": [
+      {
+        "on": "go",
+        "target": "root_handled",
+        "effects": [
+          {
+            "behavior": "effect_root"
+          }
+        ]
+      }
+    ]
+  },
+  "behaviors": {
+    "guard_child_false": [
+      {
+        "op": "trace",
+        "value": "guard:child"
+      },
+      {
+        "op": "return_value",
+        "value": false
+      }
+    ],
+    "effect_child": [
+      {
+        "op": "trace",
+        "value": "effect:child"
+      }
+    ],
+    "effect_root": [
+      {
+        "op": "trace",
+        "value": "effect:root"
+      }
+    ],
+    "entry_root": [
+      {
+        "op": "trace",
+        "value": "entry:root"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "go"
+    }
+  ],
+  "expect": {
+    "state": "/RootTransitionChildFalseGuardFallsThroughToRoot/root_handled",
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "go"
+      },
+      {
+        "type": "trace",
+        "value": "guard:child"
+      },
+      {
+        "type": "trace",
+        "value": "effect:root"
+      },
+      {
+        "type": "trace",
+        "value": "entry:root"
+      },
+      {
+        "type": "stable",
+        "state": "/RootTransitionChildFalseGuardFallsThroughToRoot/root_handled"
+      }
+    ]
+  }
+}

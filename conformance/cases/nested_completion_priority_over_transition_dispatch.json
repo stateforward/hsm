@@ -1,0 +1,76 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "nested_completion_priority_over_transition_dispatch",
+  "description": "Completion produced inside a nested composite is handled before a regular event dispatched by the transition that reached the nested final state.",
+  "features": ["nested", "completion", "final", "queue", "reentrancy"],
+  "model": {
+    "name": "NestedCompletionPriorityOverTransitionDispatch",
+    "initial": "parent",
+    "states": [
+      {
+        "name": "parent",
+        "initial": "work",
+        "transitions": [
+          {
+            "trigger": {"kind": "completion"},
+            "target": "complete",
+            "effects": [{"behavior": "effect_completion"}]
+          },
+          {
+            "on": "noise",
+            "target": "wrong",
+            "effects": [{"behavior": "effect_wrong"}]
+          }
+        ],
+        "states": [
+          {
+            "name": "work",
+            "transitions": [
+              {
+                "on": "finish",
+                "target": "../done",
+                "effects": [{"behavior": "effect_finish"}]
+              }
+            ]
+          },
+          {"name": "done", "kind": "final"}
+        ]
+      },
+      {
+        "name": "complete",
+        "entry": [{"behavior": "entry_complete"}],
+        "transitions": [
+          {
+            "on": "noise",
+            "target": "after_noise",
+            "effects": [{"behavior": "effect_noise"}]
+          }
+        ]
+      },
+      {"name": "after_noise", "entry": [{"behavior": "entry_after_noise"}]},
+      {"name": "wrong"}
+    ]
+  },
+  "behaviors": {
+    "effect_finish": [{"op": "dispatch", "event": "noise"}, {"op": "trace", "value": "effect:finish"}],
+    "effect_completion": [{"op": "trace", "value": "effect:completion"}],
+    "entry_complete": [{"op": "trace", "value": "entry:complete"}],
+    "effect_noise": [{"op": "trace", "value": "effect:noise"}],
+    "entry_after_noise": [{"op": "trace", "value": "entry:after-noise"}],
+    "effect_wrong": [{"op": "trace", "value": "effect:wrong"}]
+  },
+  "script": [{"op": "start"}, {"op": "dispatch", "event": "finish"}],
+  "expect": {
+    "state": "/NestedCompletionPriorityOverTransitionDispatch/after_noise",
+    "trace": [
+      {"type": "dispatch", "event": "finish"},
+      {"type": "dispatch", "event": "noise"},
+      {"type": "trace", "value": "effect:finish"},
+      {"type": "trace", "value": "effect:completion"},
+      {"type": "trace", "value": "entry:complete"},
+      {"type": "trace", "value": "effect:noise"},
+      {"type": "trace", "value": "entry:after-noise"},
+      {"type": "stable", "state": "/NestedCompletionPriorityOverTransitionDispatch/after_noise"}
+    ]
+  }
+}

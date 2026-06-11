@@ -1,0 +1,149 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "event_metadata_isolation_observable",
+  "description": "Observable group dispatch recipients share ordinary mutable metadata while preserving the immutable event envelope.",
+  "features": [
+    "event_ownership",
+    "group",
+    "broadcast",
+    "guard"
+  ],
+  "model": {
+    "name": "EventMetadataIsolationObservable",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "on": "mutate",
+            "guard": {
+              "behavior": "owner_is_caller"
+            },
+            "target": "done",
+            "effects": [
+              {
+                "behavior": "mutate_metadata"
+              }
+            ]
+          },
+          {
+            "on": "mutate",
+            "target": "leaked",
+            "effects": [
+              {
+                "behavior": "effect_leaked"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "done"
+      },
+      {
+        "name": "leaked"
+      }
+    ]
+  },
+  "instances": [
+    {
+      "id": "first"
+    },
+    {
+      "id": "second"
+    }
+  ],
+  "groups": [
+    {
+      "id": "both",
+      "members": [
+        "first",
+        "second"
+      ]
+    }
+  ],
+  "behaviors": {
+    "owner_is_caller": [
+      {
+        "op": "trace",
+        "value": "guard:owner-caller"
+      },
+      {
+        "op": "event_metadata_equals",
+        "name": "owner",
+        "value": "caller"
+      }
+    ],
+    "mutate_metadata": [
+      {
+        "op": "event_metadata_set",
+        "name": "owner",
+        "value": "changed"
+      },
+      {
+        "op": "trace",
+        "value": "effect:isolated"
+      }
+    ],
+    "effect_leaked": [
+      {
+        "op": "trace",
+        "value": "effect:leaked"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start",
+      "instance": "first"
+    },
+    {
+      "op": "start",
+      "instance": "second"
+    },
+    {
+      "op": "group_dispatch",
+      "group": "both",
+      "event": {
+        "name": "mutate",
+        "metadata": {
+          "owner": "caller"
+        }
+      }
+    }
+  ],
+  "expect": {
+    "states": {
+      "first": "/EventMetadataIsolationObservable/done",
+      "second": "/EventMetadataIsolationObservable/leaked"
+    },
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "mutate",
+        "target": "both"
+      },
+      {
+        "type": "trace",
+        "value": "guard:owner-caller"
+      },
+      {
+        "type": "trace",
+        "value": "effect:isolated"
+      },
+      {
+        "type": "trace",
+        "value": "guard:owner-caller"
+      },
+      {
+        "type": "trace",
+        "value": "effect:leaked"
+      },
+      {
+        "type": "stable",
+        "state": "group:both"
+      }
+    ]
+  }
+}

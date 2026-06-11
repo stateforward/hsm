@@ -1,0 +1,199 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "submachine_exit_point_self_reentry_entry_point",
+  "description": "An exit-point handler can self-reenter the same submachine through an entry point.",
+  "features": [
+    "submachine",
+    "entry_point",
+    "exit_point",
+    "self",
+    "entry",
+    "exit"
+  ],
+  "model": {
+    "name": "SubmachineExitSelfEntry",
+    "initial": "drive",
+    "states": [
+      {
+        "name": "drive",
+        "kind": "submachine",
+        "machine": "ExitSelfChild",
+        "entry": [
+          {
+            "behavior": "entry_drive"
+          }
+        ],
+        "exit": [
+          {
+            "behavior": "exit_drive"
+          }
+        ],
+        "transitions": [
+          {
+            "trigger": {
+              "kind": "exit_point",
+              "exit_point": "restart"
+            },
+            "kind": "self",
+            "target": "drive",
+            "entry_point": "resume",
+            "effects": [
+              {
+                "behavior": "effect_parent_restart"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "ExitSelfChild",
+      "initial": "cold",
+      "entry_points": [
+        {
+          "name": "resume",
+          "target": "running",
+          "effects": [
+            {
+              "behavior": "effect_resume"
+            }
+          ]
+        }
+      ],
+      "exit_points": [
+        {
+          "name": "restart",
+          "effects": [
+            {
+              "behavior": "effect_exit_point"
+            }
+          ]
+        }
+      ],
+      "states": [
+        {
+          "name": "cold",
+          "transitions": [
+            {
+              "on": "restart",
+              "target": "restart",
+              "effects": [
+                {
+                  "behavior": "effect_child_restart"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "running",
+          "entry": [
+            {
+              "behavior": "entry_running"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "behaviors": {
+    "entry_drive": [
+      {
+        "op": "trace",
+        "value": "enter:drive"
+      }
+    ],
+    "exit_drive": [
+      {
+        "op": "trace",
+        "value": "exit:drive"
+      }
+    ],
+    "effect_child_restart": [
+      {
+        "op": "trace",
+        "value": "effect:child-restart"
+      }
+    ],
+    "effect_exit_point": [
+      {
+        "op": "trace",
+        "value": "effect:exit-point"
+      }
+    ],
+    "effect_parent_restart": [
+      {
+        "op": "trace",
+        "value": "effect:parent-restart"
+      }
+    ],
+    "effect_resume": [
+      {
+        "op": "trace",
+        "value": "effect:resume"
+      }
+    ],
+    "entry_running": [
+      {
+        "op": "trace",
+        "value": "enter:running"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "restart"
+    }
+  ],
+  "expect": {
+    "state": "/SubmachineExitSelfEntry/drive/ExitSelfChild/running",
+    "trace": [
+      {
+        "type": "trace",
+        "value": "enter:drive"
+      },
+      {
+        "type": "dispatch",
+        "event": "restart"
+      },
+      {
+        "type": "trace",
+        "value": "effect:child-restart"
+      },
+      {
+        "type": "trace",
+        "value": "effect:exit-point"
+      },
+      {
+        "type": "trace",
+        "value": "exit:drive"
+      },
+      {
+        "type": "trace",
+        "value": "effect:parent-restart"
+      },
+      {
+        "type": "trace",
+        "value": "effect:resume"
+      },
+      {
+        "type": "trace",
+        "value": "enter:drive"
+      },
+      {
+        "type": "trace",
+        "value": "enter:running"
+      },
+      {
+        "type": "stable",
+        "state": "/SubmachineExitSelfEntry/drive/ExitSelfChild/running"
+      }
+    ]
+  }
+}

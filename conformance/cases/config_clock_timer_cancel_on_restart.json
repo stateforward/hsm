@@ -1,0 +1,29 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "config_clock_timer_cancel_on_restart",
+  "description": "Restarting an instance cancels the old configured-clock timer and schedules a fresh configured-clock timer.",
+  "features": ["timer", "after", "cancellation", "restart"],
+  "model": {
+    "name": "ConfigClockTimerCancelOnRestart",
+    "initial": "waiting",
+    "states": [
+      {"name": "waiting", "transitions": [{"trigger": {"kind": "after", "duration_ms": 100}, "target": "timeout", "effects": [{"behavior": "effect_timeout"}]}]},
+      {"name": "timeout"}
+    ]
+  },
+  "instances": [{"id": "default", "config": {"clock": "trace_nonzero_sleep"}}],
+  "behaviors": {"effect_timeout": [{"op": "trace", "value": "effect:timeout"}]},
+  "script": [{"op": "start"}, {"op": "restart"}],
+  "expect": {
+    "state": "/ConfigClockTimerCancelOnRestart/waiting",
+    "trace": [
+      {"type": "timer_scheduled"},
+      {"type": "trace", "value": "clock:sleep:nonzero"},
+      {"type": "restart"},
+      {"type": "timer_cancelled"},
+      {"type": "timer_scheduled"},
+      {"type": "trace", "value": "clock:sleep:nonzero"},
+      {"type": "stable", "state": "/ConfigClockTimerCancelOnRestart/waiting"}
+    ]
+  }
+}

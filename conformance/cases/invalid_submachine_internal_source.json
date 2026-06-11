@@ -1,0 +1,50 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_submachine_internal_source",
+  "mode": "validation",
+  "description": "Parent/root transitions must not source-qualify arbitrary internal states of a child submachine.",
+  "features": [
+    "submachine",
+    "source",
+    "validation"
+  ],
+  "model": {
+    "name": "InvalidSubmachineInternalSource",
+    "initial": "drive",
+    "states": [
+      {
+        "name": "drive",
+        "kind": "submachine",
+        "machine": "SourceChild"
+      },
+      {
+        "name": "outside"
+      }
+    ],
+    "transitions": [
+      {
+        "source": "drive/inside",
+        "on": "leave",
+        "target": "outside"
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "SourceChild",
+      "initial": "inside",
+      "states": [
+        {
+          "name": "inside"
+        }
+      ]
+    }
+  ],
+  "expect": {
+    "validation": [
+      {
+        "code": "invalid_submachine_internal_source"
+      }
+    ]
+  }
+}

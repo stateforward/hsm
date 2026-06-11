@@ -1,0 +1,47 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "config_queue_when_attribute_change_event_fifo",
+  "description": "A script attribute update event is routed through the configured FIFO queue before when transition selection.",
+  "features": ["queue", "attribute", "when"],
+  "model": {
+    "name": "ConfigQueueWhenAttributeChangeEventFifo",
+    "initial": "idle",
+    "attributes": {
+      "flag": {"type": "boolean", "default": false}
+    },
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "trigger": {"kind": "when", "attribute": "flag"},
+            "target": "changed",
+            "effects": [{"behavior": "effect_changed"}]
+          }
+        ]
+      },
+      {"name": "changed", "entry": [{"behavior": "entry_changed"}]}
+    ]
+  },
+  "instances": [{"id": "default", "config": {"queue": "trace_fifo"}}],
+  "behaviors": {
+    "effect_changed": [{"op": "trace", "value": "effect:changed"}],
+    "entry_changed": [{"op": "trace", "value": "entry:changed"}]
+  },
+  "script": [
+    {"op": "start"},
+    {"op": "set", "attribute": "flag", "value": true}
+  ],
+  "expect": {
+    "state": "/ConfigQueueWhenAttributeChangeEventFifo/changed",
+    "attributes": {"flag": true},
+    "trace": [
+      {"type": "set", "attribute": "flag", "value": true},
+      {"type": "trace", "value": "queue:push:/ConfigQueueWhenAttributeChangeEventFifo/flag"},
+      {"type": "trace", "value": "queue:pop:/ConfigQueueWhenAttributeChangeEventFifo/flag"},
+      {"type": "trace", "value": "effect:changed"},
+      {"type": "trace", "value": "entry:changed"},
+      {"type": "stable", "state": "/ConfigQueueWhenAttributeChangeEventFifo/changed"}
+    ]
+  }
+}

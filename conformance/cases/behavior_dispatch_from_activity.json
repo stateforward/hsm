@@ -1,0 +1,81 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "behavior_dispatch_from_activity",
+  "description": "A behavior dispatch op from an activity is processed through the normal queue while the state is active.",
+  "features": ["activity", "async", "queue", "reentrancy"],
+  "model": {
+    "name": "BehaviorDispatchFromActivity",
+    "initial": "active",
+    "states": [
+      {
+        "name": "active",
+        "activity": [
+          {
+            "behavior": "activity_dispatch"
+          }
+        ],
+        "transitions": [
+          {
+            "on": "audit",
+            "target": "done",
+            "effects": [
+              {
+                "behavior": "effect_audit"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "done"
+      }
+    ]
+  },
+  "behaviors": {
+    "activity_dispatch": [
+      {
+        "op": "yield"
+      },
+      {
+        "op": "dispatch",
+        "event": "audit"
+      },
+      {
+        "op": "trace",
+        "value": "activity:dispatch"
+      }
+    ],
+    "effect_audit": [
+      {
+        "op": "trace",
+        "value": "effect:audit"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "sleep",
+      "millis": 10
+    }
+  ],
+  "expect": {
+    "state": "/BehaviorDispatchFromActivity/done",
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "audit"
+      },
+      {
+        "type": "trace",
+        "value": "effect:audit"
+      },
+      {
+        "type": "stable",
+        "state": "/BehaviorDispatchFromActivity/done"
+      }
+    ]
+  }
+}

@@ -1,0 +1,62 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_submodel_choice_default_not_last",
+  "mode": "validation",
+  "description": "Choice defaults inside child models must be the final choice transition.",
+  "features": ["submachine", "choice", "validation"],
+  "model": {
+    "name": "InvalidSubmodelChoiceDefaultNotLast",
+    "initial": "drive",
+    "states": [
+      {
+        "name": "drive",
+        "kind": "submachine",
+        "machine": "ChildChoiceDefaultNotLast"
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "ChildChoiceDefaultNotLast",
+      "initial": "choice",
+      "states": [
+        {
+          "name": "choice",
+          "kind": "choice",
+          "transitions": [
+            {
+              "target": "fallback"
+            },
+            {
+              "guard": {
+                "behavior": "guard_true"
+              },
+              "target": "done"
+            }
+          ]
+        },
+        {
+          "name": "fallback"
+        },
+        {
+          "name": "done"
+        }
+      ]
+    }
+  ],
+  "behaviors": {
+    "guard_true": [
+      {
+        "op": "return_value",
+        "value": true
+      }
+    ]
+  },
+  "expect": {
+    "validation": [
+      {
+        "code": "choice_default_not_last"
+      }
+    ]
+  }
+}

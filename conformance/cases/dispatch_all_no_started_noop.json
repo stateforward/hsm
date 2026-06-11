@@ -1,0 +1,46 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "dispatch_all_no_started_noop",
+  "description": "dispatch_all with no started instances is a no-op with a completed broadcast step.",
+  "features": ["broadcast"],
+  "model": {
+    "name": "DispatchAllNoStartedNoop",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle"
+      }
+    ]
+  },
+  "instances": [
+    {
+      "id": "one"
+    },
+    {
+      "id": "two"
+    }
+  ],
+  "script": [
+    {
+      "op": "dispatch_all",
+      "event": "go"
+    }
+  ],
+  "expect": {
+    "states": {
+      "one": "",
+      "two": ""
+    },
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "go",
+        "target": "all"
+      },
+      {
+        "type": "stable",
+        "state": "all"
+      }
+    ]
+  }
+}

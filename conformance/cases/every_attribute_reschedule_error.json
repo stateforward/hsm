@@ -1,0 +1,88 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "every_attribute_reschedule_error",
+  "description": "An every timer using an attribute interval reports an error if reschedule reads an invalid interval after the first fire.",
+  "features": ["timer", "every", "attribute", "error", "self"],
+  "model": {
+    "name": "EveryAttributeRescheduleError",
+    "initial": "waiting",
+    "attributes": {
+      "interval_ms": {
+        "type": "any",
+        "default": 10
+      }
+    },
+    "states": [
+      {
+        "name": "waiting",
+        "transitions": [
+          {
+            "trigger": {
+              "kind": "every",
+              "attribute": "interval_ms"
+            },
+            "kind": "self",
+            "target": "waiting",
+            "effects": [
+              {
+                "behavior": "effect_tick"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "behaviors": {
+    "effect_tick": [
+      {
+        "op": "trace",
+        "value": "effect:tick"
+      },
+      {
+        "op": "set_attr",
+        "name": "interval_ms",
+        "value": "bad"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "tick",
+      "millis": 10
+    }
+  ],
+  "expect": {
+    "state": "/EveryAttributeRescheduleError/waiting",
+    "attributes": {
+      "interval_ms": "bad"
+    },
+    "error": {
+      "code": "timer_error",
+      "message_contains": "invalid interval"
+    },
+    "trace": [
+      {
+        "type": "timer_scheduled"
+      },
+      {
+        "type": "timer_fired"
+      },
+      {
+        "type": "trace",
+        "value": "effect:tick"
+      },
+      {
+        "type": "error",
+        "code": "timer_error"
+      },
+      {
+        "type": "stable",
+        "state": "/EveryAttributeRescheduleError/waiting"
+      }
+    ]
+  }
+}

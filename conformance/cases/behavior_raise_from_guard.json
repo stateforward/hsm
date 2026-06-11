@@ -1,0 +1,97 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "behavior_raise_from_guard",
+  "description": "A normal internal event raised from a true guard is processed after the guarded transition completes.",
+  "features": ["guard", "queue", "reentrancy"],
+  "model": {
+    "name": "BehaviorRaiseFromGuard",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "on": "go",
+            "guard": {
+              "behavior": "guard_raise"
+            },
+            "target": "waiting"
+          }
+        ]
+      },
+      {
+        "name": "waiting",
+        "transitions": [
+          {
+            "on": "audit",
+            "target": "done",
+            "effects": [
+              {
+                "behavior": "effect_audit"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "done"
+      }
+    ]
+  },
+  "behaviors": {
+    "guard_raise": [
+      {
+        "op": "raise",
+        "event": "audit"
+      },
+      {
+        "op": "trace",
+        "value": "guard:true"
+      },
+      {
+        "op": "return_value",
+        "value": true
+      }
+    ],
+    "effect_audit": [
+      {
+        "op": "trace",
+        "value": "effect:audit"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "go"
+    }
+  ],
+  "expect": {
+    "state": "/BehaviorRaiseFromGuard/done",
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "go"
+      },
+      {
+        "type": "raise",
+        "event": "audit"
+      },
+      {
+        "type": "trace",
+        "value": "guard:true"
+      },
+      {
+        "type": "trace",
+        "value": "effect:audit"
+      },
+      {
+        "type": "stable",
+        "state": "/BehaviorRaiseFromGuard/done"
+      }
+    ]
+  }
+}

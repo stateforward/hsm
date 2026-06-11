@@ -1,0 +1,177 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "lifecycle_runtime_apis_after_restart_succeed",
+  "description": "After restart, set, call, and dispatch use the fresh started runtime instead of behaving like stopped or stale-instance APIs.",
+  "features": ["lifecycle", "restart", "attribute", "on_set", "operation", "on_call"],
+  "model": {
+    "name": "LifecycleRuntimeApisAfterRestartSucceed",
+    "initial": "idle",
+    "attributes": {
+      "flag": {
+        "type": "boolean",
+        "default": false
+      }
+    },
+    "operations": {
+      "ping": {
+        "behavior": "operation_ping"
+      }
+    },
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "on": "dirty",
+            "target": "dirty"
+          },
+          {
+            "trigger": {
+              "kind": "on_set",
+              "attribute": "flag"
+            },
+            "target": "after_set",
+            "effects": [
+              {
+                "behavior": "effect_set"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "dirty"
+      },
+      {
+        "name": "after_set",
+        "transitions": [
+          {
+            "trigger": {
+              "kind": "on_call",
+              "operation": "ping"
+            },
+            "target": "after_call",
+            "effects": [
+              {
+                "behavior": "effect_call"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "after_call",
+        "transitions": [
+          {
+            "on": "finish",
+            "target": "done",
+            "effects": [
+              {
+                "behavior": "effect_finish"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "done"
+      }
+    ]
+  },
+  "behaviors": {
+    "operation_ping": [
+      {
+        "op": "trace",
+        "value": "operation:ping"
+      }
+    ],
+    "effect_set": [
+      {
+        "op": "trace",
+        "value": "effect:set"
+      }
+    ],
+    "effect_call": [
+      {
+        "op": "trace",
+        "value": "effect:call"
+      }
+    ],
+    "effect_finish": [
+      {
+        "op": "trace",
+        "value": "effect:finish"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "dirty"
+    },
+    {
+      "op": "restart"
+    },
+    {
+      "op": "set",
+      "attribute": "flag",
+      "value": true
+    },
+    {
+      "op": "call",
+      "operation": "ping"
+    },
+    {
+      "op": "dispatch",
+      "event": "finish"
+    }
+  ],
+  "expect": {
+    "state": "/LifecycleRuntimeApisAfterRestartSucceed/done",
+    "attributes": {
+      "flag": true
+    },
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "dirty"
+      },
+      {
+        "type": "set",
+        "attribute": "flag",
+        "value": true
+      },
+      {
+        "type": "trace",
+        "value": "effect:set"
+      },
+      {
+        "type": "call",
+        "operation": "ping"
+      },
+      {
+        "type": "trace",
+        "value": "effect:call"
+      },
+      {
+        "type": "trace",
+        "value": "operation:ping"
+      },
+      {
+        "type": "dispatch",
+        "event": "finish"
+      },
+      {
+        "type": "trace",
+        "value": "effect:finish"
+      },
+      {
+        "type": "stable",
+        "state": "/LifecycleRuntimeApisAfterRestartSucceed/done"
+      }
+    ]
+  }
+}

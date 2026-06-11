@@ -1,0 +1,76 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "when_same_value_noop",
+  "description": "Setting an attribute to its current value does not re-evaluate when transitions.",
+  "features": [
+    "attribute",
+    "when"
+  ],
+  "model": {
+    "name": "WhenSameValueNoop",
+    "initial": "idle",
+    "attributes": {
+      "ready": {
+        "type": "boolean",
+        "default": false
+      }
+    },
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "trigger": {
+              "kind": "when",
+              "behavior": "when_ready"
+            },
+            "target": "ready"
+          }
+        ]
+      },
+      {
+        "name": "ready"
+      }
+    ]
+  },
+  "behaviors": {
+    "when_ready": [
+      {
+        "op": "trace",
+        "value": "when:ready"
+      },
+      {
+        "op": "return_equals",
+        "name": "ready",
+        "value": true
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "set",
+      "attribute": "ready",
+      "value": false
+    }
+  ],
+  "expect": {
+    "state": "/WhenSameValueNoop/idle",
+    "attributes": {
+      "ready": false
+    },
+    "trace": [
+      {
+        "type": "set",
+        "attribute": "ready",
+        "value": false
+      },
+      {
+        "type": "stable",
+        "state": "/WhenSameValueNoop/idle"
+      }
+    ]
+  }
+}

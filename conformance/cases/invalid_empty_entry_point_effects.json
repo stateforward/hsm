@@ -1,0 +1,43 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_empty_entry_point_effects",
+  "mode": "validation",
+  "description": "Entry-point effects arrays must not be empty when present.",
+  "features": ["submachine", "entry_point", "validation"],
+  "model": {
+    "name": "InvalidEmptyEntryPointEffects",
+    "initial": "drive",
+    "states": [
+      {
+        "name": "drive",
+        "kind": "submachine",
+        "machine": "Child"
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "Child",
+      "initial": "idle",
+      "entry_points": [
+        {
+          "name": "resume",
+          "target": "idle",
+          "effects": []
+        }
+      ],
+      "states": [
+        {
+          "name": "idle"
+        }
+      ]
+    }
+  ],
+  "expect": {
+    "validation": [
+      {
+        "code": "empty_behavior_array"
+      }
+    ]
+  }
+}

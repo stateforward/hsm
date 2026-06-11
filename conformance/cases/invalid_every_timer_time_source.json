@@ -1,0 +1,35 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_every_timer_time_source",
+  "mode": "validation",
+  "description": "An every timer must use a duration source, not an absolute timepoint source.",
+  "features": ["timer", "every", "validation"],
+  "model": {
+    "name": "InvalidEveryTimerTimeSource",
+    "initial": "waiting",
+    "states": [
+      {
+        "name": "waiting",
+        "transitions": [
+          {
+            "trigger": {
+              "kind": "every",
+              "time_ms": 10
+            },
+            "target": "done"
+          }
+        ]
+      },
+      {
+        "name": "done"
+      }
+    ]
+  },
+  "expect": {
+    "validation": [
+      {
+        "code": "invalid_timer_source"
+      }
+    ]
+  }
+}

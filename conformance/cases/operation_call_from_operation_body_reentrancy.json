@@ -1,0 +1,129 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "operation_call_from_operation_body_reentrancy",
+  "description": "An operation called from another operation body queues its on_call event through the normal operation-event path.",
+  "features": [
+    "operation",
+    "on_call",
+    "queue",
+    "reentrancy"
+  ],
+  "model": {
+    "name": "OperationCallFromOperationBodyReentrancy",
+    "initial": "idle",
+    "operations": {
+      "outer": {
+        "behavior": "operation_outer"
+      },
+      "audit": {
+        "behavior": "operation_audit"
+      }
+    },
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "trigger": {
+              "kind": "on_call",
+              "operation": "audit"
+            },
+            "target": "handled",
+            "effects": [
+              {
+                "behavior": "effect_audit"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "handled",
+        "entry": [
+          {
+            "behavior": "entry_handled"
+          }
+        ]
+      }
+    ]
+  },
+  "behaviors": {
+    "operation_audit": [
+      {
+        "op": "trace",
+        "value": "operation:audit"
+      }
+    ],
+    "operation_outer": [
+      {
+        "op": "trace",
+        "value": "operation:outer-before-call"
+      },
+      {
+        "op": "call",
+        "name": "audit"
+      },
+      {
+        "op": "trace",
+        "value": "operation:outer-after-call"
+      }
+    ],
+    "effect_audit": [
+      {
+        "op": "trace",
+        "value": "effect:audit"
+      }
+    ],
+    "entry_handled": [
+      {
+        "op": "trace",
+        "value": "entry:handled"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "call",
+      "operation": "outer"
+    }
+  ],
+  "expect": {
+    "state": "/OperationCallFromOperationBodyReentrancy/handled",
+    "queue": {
+      "operation_call_from_operation_body": "nested_operation_call_dispatches_on_call_event"
+    },
+    "trace": [
+      {
+        "type": "call",
+        "operation": "outer"
+      },
+      {
+        "type": "trace",
+        "value": "operation:outer-before-call"
+      },
+      {
+        "type": "trace",
+        "value": "operation:audit"
+      },
+      {
+        "type": "trace",
+        "value": "effect:audit"
+      },
+      {
+        "type": "trace",
+        "value": "entry:handled"
+      },
+      {
+        "type": "trace",
+        "value": "operation:outer-after-call"
+      },
+      {
+        "type": "stable",
+        "state": "/OperationCallFromOperationBodyReentrancy/handled"
+      }
+    ]
+  }
+}

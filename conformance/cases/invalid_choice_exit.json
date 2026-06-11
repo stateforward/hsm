@@ -1,0 +1,45 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_choice_exit",
+  "mode": "validation",
+  "description": "Choice pseudostates must not declare exit behaviors.",
+  "features": ["choice", "exit", "validation"],
+  "model": {
+    "name": "InvalidChoiceExit",
+    "initial": "choice",
+    "states": [
+      {
+        "name": "choice",
+        "kind": "choice",
+        "exit": [
+          {
+            "behavior": "exit_choice"
+          }
+        ],
+        "transitions": [
+          {
+            "target": "done"
+          }
+        ]
+      },
+      {
+        "name": "done"
+      }
+    ]
+  },
+  "behaviors": {
+    "exit_choice": [
+      {
+        "op": "trace",
+        "value": "exit:choice"
+      }
+    ]
+  },
+  "expect": {
+    "validation": [
+      {
+        "code": "invalid_pseudostate_contents"
+      }
+    ]
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_on_set_extraneous_event",
+  "mode": "validation",
+  "description": "An on_set trigger must not declare event operands from other trigger kinds.",
+  "features": ["attribute", "on_set", "validation"],
+  "model": {
+    "name": "InvalidOnSetExtraneousEvent",
+    "initial": "idle",
+    "attributes": {
+      "flag": {
+        "type": "boolean",
+        "default": false
+      }
+    },
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "trigger": {
+              "kind": "on_set",
+              "attribute": "flag",
+              "event": "go"
+            },
+            "target": "done"
+          }
+        ]
+      },
+      {
+        "name": "done"
+      }
+    ]
+  },
+  "expect": {
+    "validation": [
+      {
+        "code": "extraneous_trigger_operand"
+      }
+    ]
+  }
+}

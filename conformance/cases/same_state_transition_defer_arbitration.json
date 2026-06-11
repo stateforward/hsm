@@ -1,0 +1,249 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "same_state_transition_defer_arbitration",
+  "description": "A state with both same-event transitions and defer first selects enabled transitions, but defers when matching transitions are disabled.",
+  "features": [
+    "defer",
+    "queue",
+    "guard",
+    "selection_order",
+    "dispatch_to"
+  ],
+  "model": {
+    "name": "SameStateTransitionDeferArbitration",
+    "initial": "blocked",
+    "states": [
+      {
+        "name": "blocked",
+        "defer": [
+          "maybe",
+          "take"
+        ],
+        "transitions": [
+          {
+            "on": "maybe",
+            "guard": {
+              "behavior": "guard_false"
+            },
+            "target": "wrong"
+          },
+          {
+            "on": "take",
+            "target": "taken",
+            "effects": [
+              {
+                "behavior": "effect_take"
+              }
+            ]
+          },
+          {
+            "on": "release",
+            "target": "ready",
+            "effects": [
+              {
+                "behavior": "effect_release"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "ready",
+        "entry": [
+          {
+            "behavior": "entry_ready"
+          }
+        ],
+        "transitions": [
+          {
+            "on": "maybe",
+            "target": "done",
+            "effects": [
+              {
+                "behavior": "effect_maybe"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "taken",
+        "entry": [
+          {
+            "behavior": "entry_taken"
+          }
+        ]
+      },
+      {
+        "name": "done",
+        "entry": [
+          {
+            "behavior": "entry_done"
+          }
+        ]
+      },
+      {
+        "name": "wrong",
+        "entry": [
+          {
+            "behavior": "entry_wrong"
+          }
+        ]
+      }
+    ]
+  },
+  "instances": [
+    {
+      "id": "false_path"
+    },
+    {
+      "id": "enabled_path"
+    }
+  ],
+  "behaviors": {
+    "guard_false": [
+      {
+        "op": "trace",
+        "value": "guard:false"
+      },
+      {
+        "op": "return_value",
+        "value": false
+      }
+    ],
+    "effect_release": [
+      {
+        "op": "trace",
+        "value": "effect:release"
+      }
+    ],
+    "entry_ready": [
+      {
+        "op": "trace",
+        "value": "enter:ready"
+      }
+    ],
+    "effect_maybe": [
+      {
+        "op": "trace",
+        "value": "effect:maybe"
+      }
+    ],
+    "entry_done": [
+      {
+        "op": "trace",
+        "value": "enter:done"
+      }
+    ],
+    "effect_take": [
+      {
+        "op": "trace",
+        "value": "effect:take"
+      }
+    ],
+    "entry_taken": [
+      {
+        "op": "trace",
+        "value": "enter:taken"
+      }
+    ],
+    "entry_wrong": [
+      {
+        "op": "trace",
+        "value": "enter:wrong"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start",
+      "instance": "false_path"
+    },
+    {
+      "op": "start",
+      "instance": "enabled_path"
+    },
+    {
+      "op": "dispatch_to",
+      "instance": "false_path",
+      "event": "maybe"
+    },
+    {
+      "op": "dispatch_to",
+      "instance": "false_path",
+      "event": "release"
+    },
+    {
+      "op": "dispatch_to",
+      "instance": "enabled_path",
+      "event": "take"
+    }
+  ],
+  "expect": {
+    "states": {
+      "false_path": "/SameStateTransitionDeferArbitration/done",
+      "enabled_path": "/SameStateTransitionDeferArbitration/taken"
+    },
+    "queue": {
+      "same_state_transition": "enabled_transition_before_defer",
+      "same_state_false_guard": "defer_after_disabled_transition"
+    },
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "maybe",
+        "target": "false_path"
+      },
+      {
+        "type": "trace",
+        "value": "guard:false"
+      },
+      {
+        "type": "defer",
+        "event": "maybe"
+      },
+      {
+        "type": "dispatch",
+        "event": "release",
+        "target": "false_path"
+      },
+      {
+        "type": "undefer",
+        "event": "maybe"
+      },
+      {
+        "type": "trace",
+        "value": "effect:release"
+      },
+      {
+        "type": "trace",
+        "value": "enter:ready"
+      },
+      {
+        "type": "trace",
+        "value": "effect:maybe"
+      },
+      {
+        "type": "trace",
+        "value": "enter:done"
+      },
+      {
+        "type": "dispatch",
+        "event": "take",
+        "target": "enabled_path"
+      },
+      {
+        "type": "trace",
+        "value": "effect:take"
+      },
+      {
+        "type": "trace",
+        "value": "enter:taken"
+      },
+      {
+        "type": "stable",
+        "state": "enabled_path"
+      }
+    ]
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "lifecycle_restart_before_start_error",
+  "description": "Restarting an instance before it has started produces a normalized lifecycle error.",
+  "features": ["lifecycle", "restart", "error"],
+  "model": {
+    "name": "LifecycleRestartBeforeStartError",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "restart"
+    }
+  ],
+  "expect": {
+    "state": "",
+    "error": {
+      "code": "lifecycle_error",
+      "message_contains": "started"
+    },
+    "trace": [
+      {
+        "type": "error",
+        "code": "lifecycle_error"
+      },
+      {
+        "type": "stable",
+        "state": ""
+      }
+    ]
+  }
+}

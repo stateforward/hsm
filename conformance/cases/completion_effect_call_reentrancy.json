@@ -1,0 +1,10 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "completion_effect_call_reentrancy",
+  "description": "A behavior-side operation call from a completion transition effect queues its on_call event until completion routing reaches its target.",
+  "features": ["completion", "final", "operation", "on_call", "queue", "reentrancy"],
+  "model": {"name": "CompletionEffectCallReentrancy", "initial": "work", "operations": {"audit": {"behavior": "operation_audit"}}, "states": [{"name": "work", "transitions": [{"on": "finish", "target": "done"}]}, {"name": "done", "kind": "final"}, {"name": "complete", "entry": [{"behavior": "entry_complete"}], "transitions": [{"trigger": {"kind": "on_call", "operation": "audit"}, "target": "audited", "effects": [{"behavior": "effect_audit"}]}]}, {"name": "audited"}], "transitions": [{"trigger": {"kind": "completion"}, "target": "complete", "effects": [{"behavior": "completion_call"}]}]},
+  "behaviors": {"operation_audit": [{"op": "trace", "value": "operation:audit"}], "completion_call": [{"op": "call", "name": "audit"}, {"op": "trace", "value": "effect:completion"}], "entry_complete": [{"op": "trace", "value": "entry:complete"}], "effect_audit": [{"op": "trace", "value": "effect:audit"}]},
+  "script": [{"op": "start"}, {"op": "dispatch", "event": "finish"}],
+  "expect": {"state": "/CompletionEffectCallReentrancy/audited", "trace": [{"type": "dispatch", "event": "finish"}, {"type": "trace", "value": "operation:audit"}, {"type": "trace", "value": "effect:completion"}, {"type": "trace", "value": "entry:complete"}, {"type": "trace", "value": "effect:audit"}, {"type": "stable", "state": "/CompletionEffectCallReentrancy/audited"}]}
+}

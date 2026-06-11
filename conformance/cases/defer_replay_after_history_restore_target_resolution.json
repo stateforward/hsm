@@ -1,0 +1,262 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "defer_replay_after_history_restore_target_resolution",
+  "description": "A deferred event replays only after a history target restores and enters its concrete nested leaf.",
+  "features": [
+    "defer",
+    "queue",
+    "history",
+    "shallow_history",
+    "nested"
+  ],
+  "model": {
+    "name": "DeferReplayAfterHistoryRestoreTargetResolution",
+    "initial": "comp",
+    "states": [
+      {
+        "name": "comp",
+        "initial": "parent",
+        "transitions": [
+          {
+            "on": "work",
+            "target": "wrong",
+            "effects": [
+              {
+                "behavior": "effect_wrong_comp"
+              }
+            ]
+          }
+        ],
+        "states": [
+          {
+            "name": "parent",
+            "initial": "ready",
+            "transitions": [
+              {
+                "on": "work",
+                "target": "../../wrong",
+                "effects": [
+                  {
+                    "behavior": "effect_wrong_parent"
+                  }
+                ]
+              }
+            ],
+            "states": [
+              {
+                "name": "ready",
+                "entry": [
+                  {
+                    "behavior": "entry_ready"
+                  }
+                ],
+                "transitions": [
+                  {
+                    "on": "leave",
+                    "target": "../../../blocked"
+                  },
+                  {
+                    "on": "work",
+                    "target": "../../../done",
+                    "effects": [
+                      {
+                        "behavior": "effect_work"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "name": "other",
+            "entry": [
+              {
+                "behavior": "entry_other"
+              }
+            ]
+          },
+          {
+            "name": "h",
+            "kind": "shallow_history",
+            "transitions": [
+              {
+                "target": "other"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "blocked",
+        "defer": [
+          "work"
+        ],
+        "exit": [
+          {
+            "behavior": "exit_blocked"
+          }
+        ],
+        "transitions": [
+          {
+            "on": "release",
+            "target": "comp/h",
+            "effects": [
+              {
+                "behavior": "effect_release"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "done",
+        "entry": [
+          {
+            "behavior": "entry_done"
+          }
+        ]
+      },
+      {
+        "name": "wrong",
+        "entry": [
+          {
+            "behavior": "entry_wrong"
+          }
+        ]
+      }
+    ]
+  },
+  "behaviors": {
+    "entry_ready": [
+      {
+        "op": "trace",
+        "value": "entry:ready"
+      }
+    ],
+    "entry_other": [
+      {
+        "op": "trace",
+        "value": "entry:other"
+      }
+    ],
+    "exit_blocked": [
+      {
+        "op": "trace",
+        "value": "exit:blocked"
+      }
+    ],
+    "effect_release": [
+      {
+        "op": "trace",
+        "value": "effect:release"
+      }
+    ],
+    "effect_work": [
+      {
+        "op": "trace",
+        "value": "effect:work"
+      }
+    ],
+    "entry_done": [
+      {
+        "op": "trace",
+        "value": "entry:done"
+      }
+    ],
+    "effect_wrong_comp": [
+      {
+        "op": "trace",
+        "value": "effect:wrong-comp"
+      }
+    ],
+    "effect_wrong_parent": [
+      {
+        "op": "trace",
+        "value": "effect:wrong-parent"
+      }
+    ],
+    "entry_wrong": [
+      {
+        "op": "trace",
+        "value": "entry:wrong"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "leave"
+    },
+    {
+      "op": "dispatch",
+      "event": "work"
+    },
+    {
+      "op": "dispatch",
+      "event": "release"
+    }
+  ],
+  "expect": {
+    "state": "/DeferReplayAfterHistoryRestoreTargetResolution/done",
+    "queue": {
+      "deferred": [
+        "work"
+      ],
+      "replay": "after_history_restore_target_resolution"
+    },
+    "trace": [
+      {
+        "type": "trace",
+        "value": "entry:ready"
+      },
+      {
+        "type": "dispatch",
+        "event": "leave"
+      },
+      {
+        "type": "dispatch",
+        "event": "work"
+      },
+      {
+        "type": "defer",
+        "event": "work"
+      },
+      {
+        "type": "dispatch",
+        "event": "release"
+      },
+      {
+        "type": "undefer",
+        "event": "work"
+      },
+      {
+        "type": "trace",
+        "value": "exit:blocked"
+      },
+      {
+        "type": "trace",
+        "value": "effect:release"
+      },
+      {
+        "type": "trace",
+        "value": "entry:ready"
+      },
+      {
+        "type": "trace",
+        "value": "effect:work"
+      },
+      {
+        "type": "trace",
+        "value": "entry:done"
+      },
+      {
+        "type": "stable",
+        "state": "/DeferReplayAfterHistoryRestoreTargetResolution/done"
+      }
+    ]
+  }
+}

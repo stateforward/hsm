@@ -1,0 +1,99 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "dispatch_to_duplicate_targets_once",
+  "description": "dispatch_to with duplicate target ids selects each matching started machine at most once.",
+  "features": ["dispatch_to", "multi_target"],
+  "model": {
+    "name": "DispatchToDuplicateTargetsOnce",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "on": "go",
+            "target": "seen",
+            "effects": [
+              {
+                "behavior": "effect_once"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "seen",
+        "transitions": [
+          {
+            "on": "go",
+            "target": "duplicate",
+            "effects": [
+              {
+                "behavior": "effect_duplicate"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "duplicate"
+      }
+    ]
+  },
+  "instances": [
+    {
+      "id": "one"
+    }
+  ],
+  "behaviors": {
+    "effect_once": [
+      {
+        "op": "trace",
+        "value": "effect:once"
+      }
+    ],
+    "effect_duplicate": [
+      {
+        "op": "trace",
+        "value": "effect:duplicate"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start",
+      "instance": "one"
+    },
+    {
+      "op": "dispatch_to",
+      "targets": [
+        "one",
+        "one"
+      ],
+      "event": "go"
+    }
+  ],
+  "expect": {
+    "states": {
+      "one": "/DispatchToDuplicateTargetsOnce/seen"
+    },
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "go",
+        "target": [
+          "one",
+          "one"
+        ]
+      },
+      {
+        "type": "trace",
+        "value": "effect:once"
+      },
+      {
+        "type": "stable",
+        "state": "targets:one,one"
+      }
+    ]
+  }
+}

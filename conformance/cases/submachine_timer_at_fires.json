@@ -1,0 +1,100 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "submachine_timer_at_fires",
+  "description": "An at timer scheduled by an active child submachine state fires while the containing submachine remains active.",
+  "features": [
+    "submachine",
+    "timer",
+    "at"
+  ],
+  "model": {
+    "name": "SubmachineTimerAt",
+    "initial": "drive",
+    "states": [
+      {
+        "name": "drive",
+        "kind": "submachine",
+        "machine": "TimerAtChild"
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "TimerAtChild",
+      "initial": "waiting",
+      "states": [
+        {
+          "name": "waiting",
+          "transitions": [
+            {
+              "trigger": {
+                "kind": "at",
+                "time_ms": 50
+              },
+              "target": "fired",
+              "effects": [
+                {
+                  "behavior": "effect_timer"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "fired",
+          "entry": [
+            {
+              "behavior": "entry_fired"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "behaviors": {
+    "effect_timer": [
+      {
+        "op": "trace",
+        "value": "effect:child-timer"
+      }
+    ],
+    "entry_fired": [
+      {
+        "op": "trace",
+        "value": "enter:child-fired"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "tick",
+      "millis": 100
+    }
+  ],
+  "expect": {
+    "state": "/SubmachineTimerAt/drive/TimerAtChild/fired",
+    "trace": [
+      {
+        "type": "timer_scheduled"
+      },
+      {
+        "type": "timer_fired"
+      },
+      {
+        "type": "trace",
+        "value": "effect:child-timer"
+      },
+      {
+        "type": "trace",
+        "value": "enter:child-fired"
+      },
+      {
+        "type": "stable",
+        "state": "/SubmachineTimerAt/drive/TimerAtChild/fired"
+      }
+    ]
+  }
+}

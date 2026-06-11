@@ -1,0 +1,172 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "submachine_deep_history_entry_point",
+  "description": "An entry point can target child deep history and restore the remembered nested leaf.",
+  "features": [
+    "submachine",
+    "entry_point",
+    "history",
+    "deep_history",
+    "nested"
+  ],
+  "model": {
+    "name": "SubmachineDeepHistory",
+    "initial": "outside",
+    "states": [
+      {
+        "name": "outside",
+        "transitions": [
+          {
+            "on": "enter",
+            "target": "drive"
+          },
+          {
+            "on": "resume",
+            "target": "drive",
+            "entry_point": "deep"
+          }
+        ]
+      },
+      {
+        "name": "drive",
+        "kind": "submachine",
+        "machine": "DeepHistoryChild",
+        "transitions": [
+          {
+            "on": "leave",
+            "target": "outside"
+          }
+        ]
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "DeepHistoryChild",
+      "initial": "comp",
+      "entry_points": [
+        {
+          "name": "deep",
+          "target": "comp/h",
+          "effects": [
+            {
+              "behavior": "effect_history"
+            }
+          ]
+        }
+      ],
+      "states": [
+        {
+          "name": "comp",
+          "initial": "a",
+          "states": [
+            {
+              "name": "a",
+              "transitions": [
+                {
+                  "on": "to_b",
+                  "target": "../b/leaf"
+                }
+              ]
+            },
+            {
+              "name": "b",
+              "initial": "leaf",
+              "states": [
+                {
+                  "name": "leaf",
+                  "entry": [
+                    {
+                      "behavior": "entry_leaf"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "h",
+              "kind": "deep_history",
+              "transitions": [
+                {
+                  "target": "a"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "behaviors": {
+    "effect_history": [
+      {
+        "op": "trace",
+        "value": "effect:history"
+      }
+    ],
+    "entry_leaf": [
+      {
+        "op": "trace",
+        "value": "enter:leaf"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "enter"
+    },
+    {
+      "op": "dispatch",
+      "event": "to_b"
+    },
+    {
+      "op": "dispatch",
+      "event": "leave"
+    },
+    {
+      "op": "dispatch",
+      "event": "resume"
+    }
+  ],
+  "expect": {
+    "state": "/SubmachineDeepHistory/drive/DeepHistoryChild/comp/b/leaf",
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "enter"
+      },
+      {
+        "type": "dispatch",
+        "event": "to_b"
+      },
+      {
+        "type": "trace",
+        "value": "enter:leaf"
+      },
+      {
+        "type": "dispatch",
+        "event": "leave"
+      },
+      {
+        "type": "dispatch",
+        "event": "resume"
+      },
+      {
+        "type": "trace",
+        "value": "effect:history"
+      },
+      {
+        "type": "trace",
+        "value": "enter:leaf"
+      },
+      {
+        "type": "stable",
+        "state": "/SubmachineDeepHistory/drive/DeepHistoryChild/comp/b/leaf"
+      }
+    ]
+  }
+}

@@ -1,0 +1,61 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "config_queue_dispatch_all_mixed_started_stopped_filters_inactive_before_queue_hooks",
+  "description": "Caller-originated broadcast filters stopped recipients before queue hooks and enqueues regular events through active recipients' configured queues.",
+  "features": ["queue", "broadcast", "lifecycle", "stop"],
+  "model": {
+    "name": "ConfigQueueDispatchAllMixedStartedStoppedFiltersInactiveBeforeQueueHooks",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "on": "audit",
+            "target": "done",
+            "effects": [{"behavior": "effect_audit"}]
+          }
+        ]
+      },
+      {
+        "name": "done",
+        "entry": [{"behavior": "entry_done"}]
+      }
+    ]
+  },
+  "instances": [
+    {"id": "worker_a", "config": {"queue": "trace_fifo"}},
+    {"id": "worker_b", "config": {"queue": "trace_fifo"}},
+    {"id": "stopped", "config": {"queue": "push_error"}}
+  ],
+  "behaviors": {
+    "effect_audit": [{"op": "trace", "value": "effect:audit"}],
+    "entry_done": [{"op": "trace", "value": "entry:done"}]
+  },
+  "script": [
+    {"op": "start", "instance": "worker_a"},
+    {"op": "start", "instance": "worker_b"},
+    {"op": "start", "instance": "stopped"},
+    {"op": "stop", "instance": "stopped"},
+    {"op": "dispatch_all", "event": "audit"}
+  ],
+  "expect": {
+    "states": {
+      "worker_a": "/ConfigQueueDispatchAllMixedStartedStoppedFiltersInactiveBeforeQueueHooks/done",
+      "worker_b": "/ConfigQueueDispatchAllMixedStartedStoppedFiltersInactiveBeforeQueueHooks/done",
+      "stopped": "/ConfigQueueDispatchAllMixedStartedStoppedFiltersInactiveBeforeQueueHooks"
+    },
+    "trace": [
+      {"type": "dispatch", "event": "audit", "target": "all"},
+      {"type": "trace", "value": "queue:push:audit"},
+      {"type": "trace", "value": "queue:pop:audit"},
+      {"type": "trace", "value": "effect:audit"},
+      {"type": "trace", "value": "entry:done"},
+      {"type": "trace", "value": "queue:push:audit"},
+      {"type": "trace", "value": "queue:pop:audit"},
+      {"type": "trace", "value": "effect:audit"},
+      {"type": "trace", "value": "entry:done"},
+      {"type": "stable", "state": "all"}
+    ]
+  }
+}

@@ -1,0 +1,86 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "event_object_trigger_ref",
+  "description": "An on trigger may declare its event as an event object and still match by event name.",
+  "features": ["event_data", "guard"],
+  "model": {
+    "name": "EventObjectTriggerRef",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "trigger": {
+              "kind": "on",
+              "event": {
+                "name": "submit",
+                "data": {
+                  "kind": "declared"
+                }
+              }
+            },
+            "guard": {
+              "behavior": "payload_ok"
+            },
+            "target": "accepted",
+            "effects": [
+              {
+                "behavior": "effect_accept"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "accepted"
+      }
+    ]
+  },
+  "behaviors": {
+    "payload_ok": [
+      {
+        "op": "event_data_equals",
+        "path": "kind",
+        "value": "runtime"
+      }
+    ],
+    "effect_accept": [
+      {
+        "op": "trace",
+        "value": "effect:accept"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": {
+        "name": "submit",
+        "data": {
+          "kind": "runtime"
+        }
+      }
+    }
+  ],
+  "expect": {
+    "state": "/EventObjectTriggerRef/accepted",
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "submit"
+      },
+      {
+        "type": "trace",
+        "value": "effect:accept"
+      },
+      {
+        "type": "stable",
+        "state": "/EventObjectTriggerRef/accepted"
+      }
+    ]
+  }
+}

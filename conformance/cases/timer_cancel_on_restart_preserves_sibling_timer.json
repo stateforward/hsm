@@ -1,0 +1,110 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "timer_cancel_on_restart_preserves_sibling_timer",
+  "description": "Restarting one instance cancels and reschedules only that instance's timer while a sibling instance's original pending timer can still fire.",
+  "features": [
+    "timer",
+    "after",
+    "cancellation",
+    "restart",
+    "multi_target"
+  ],
+  "model": {
+    "name": "TimerCancelOnRestartPreservesSiblingTimer",
+    "initial": "waiting",
+    "states": [
+      {
+        "name": "waiting",
+        "transitions": [
+          {
+            "trigger": {
+              "kind": "after",
+              "duration_ms": 50
+            },
+            "target": "timeout",
+            "effects": [
+              {
+                "behavior": "effect_timeout"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "timeout"
+      }
+    ]
+  },
+  "instances": [
+    {
+      "id": "restarted"
+    },
+    {
+      "id": "sibling"
+    }
+  ],
+  "behaviors": {
+    "effect_timeout": [
+      {
+        "op": "trace",
+        "value": "effect:timeout"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start",
+      "instance": "restarted"
+    },
+    {
+      "op": "start",
+      "instance": "sibling"
+    },
+    {
+      "op": "tick",
+      "millis": 20
+    },
+    {
+      "op": "restart",
+      "instance": "restarted"
+    },
+    {
+      "op": "tick",
+      "millis": 40
+    }
+  ],
+  "expect": {
+    "states": {
+      "restarted": "/TimerCancelOnRestartPreservesSiblingTimer/waiting",
+      "sibling": "/TimerCancelOnRestartPreservesSiblingTimer/timeout"
+    },
+    "trace": [
+      {
+        "type": "timer_scheduled"
+      },
+      {
+        "type": "timer_scheduled"
+      },
+      {
+        "type": "restart"
+      },
+      {
+        "type": "timer_cancelled"
+      },
+      {
+        "type": "timer_scheduled"
+      },
+      {
+        "type": "timer_fired"
+      },
+      {
+        "type": "trace",
+        "value": "effect:timeout"
+      },
+      {
+        "type": "stable",
+        "state": "/TimerCancelOnRestartPreservesSiblingTimer/waiting"
+      }
+    ]
+  }
+}

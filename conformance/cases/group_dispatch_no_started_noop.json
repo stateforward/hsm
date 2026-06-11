@@ -1,0 +1,58 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "group_dispatch_no_started_noop",
+  "description": "Group dispatch to a group whose members are not started completes as a no-op.",
+  "features": [
+    "group"
+  ],
+  "model": {
+    "name": "GroupDispatchNoStartedNoop",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle"
+      }
+    ]
+  },
+  "instances": [
+    {
+      "id": "one"
+    },
+    {
+      "id": "two"
+    }
+  ],
+  "groups": [
+    {
+      "id": "both",
+      "members": [
+        "one",
+        "two"
+      ]
+    }
+  ],
+  "script": [
+    {
+      "op": "group_dispatch",
+      "group": "both",
+      "event": "go"
+    }
+  ],
+  "expect": {
+    "states": {
+      "one": "",
+      "two": ""
+    },
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "go",
+        "target": "both"
+      },
+      {
+        "type": "stable",
+        "state": "group:both"
+      }
+    ]
+  }
+}

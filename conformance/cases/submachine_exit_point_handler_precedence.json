@@ -1,0 +1,166 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "submachine_exit_point_handler_precedence",
+  "description": "A containing submachine state's exit-point handler wins over an ancestor source-qualified handler for the same exit-point outcome.",
+  "features": [
+    "submachine",
+    "exit_point",
+    "source",
+    "selection_order"
+  ],
+  "model": {
+    "name": "SubmachineExitHandlerPrecedence",
+    "initial": "outer",
+    "states": [
+      {
+        "name": "outer",
+        "initial": "drive",
+        "states": [
+          {
+            "name": "drive",
+            "kind": "submachine",
+            "machine": "PrecedenceChild",
+            "transitions": [
+              {
+                "trigger": {
+                  "kind": "exit_point",
+                  "exit_point": "done"
+                },
+                "target": "../local_done",
+                "effects": [
+                  {
+                    "behavior": "effect_local"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "name": "local_done",
+            "entry": [
+              {
+                "behavior": "entry_local"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "ancestor_done",
+        "entry": [
+          {
+            "behavior": "entry_ancestor"
+          }
+        ]
+      }
+    ],
+    "transitions": [
+      {
+        "source": "outer/drive",
+        "trigger": {
+          "kind": "exit_point",
+          "exit_point": "done"
+        },
+        "target": "ancestor_done",
+        "effects": [
+          {
+            "behavior": "effect_ancestor"
+          }
+        ]
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "PrecedenceChild",
+      "initial": "active",
+      "exit_points": [
+        {
+          "name": "done"
+        }
+      ],
+      "states": [
+        {
+          "name": "active",
+          "transitions": [
+            {
+              "on": "finish",
+              "target": "done",
+              "effects": [
+                {
+                  "behavior": "effect_child"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "behaviors": {
+    "effect_child": [
+      {
+        "op": "trace",
+        "value": "effect:child"
+      }
+    ],
+    "effect_local": [
+      {
+        "op": "trace",
+        "value": "effect:local"
+      }
+    ],
+    "effect_ancestor": [
+      {
+        "op": "trace",
+        "value": "effect:ancestor"
+      }
+    ],
+    "entry_local": [
+      {
+        "op": "trace",
+        "value": "enter:local"
+      }
+    ],
+    "entry_ancestor": [
+      {
+        "op": "trace",
+        "value": "enter:ancestor"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "finish"
+    }
+  ],
+  "expect": {
+    "state": "/SubmachineExitHandlerPrecedence/outer/local_done",
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "finish"
+      },
+      {
+        "type": "trace",
+        "value": "effect:child"
+      },
+      {
+        "type": "trace",
+        "value": "effect:local"
+      },
+      {
+        "type": "trace",
+        "value": "enter:local"
+      },
+      {
+        "type": "stable",
+        "state": "/SubmachineExitHandlerPrecedence/outer/local_done"
+      }
+    ]
+  }
+}

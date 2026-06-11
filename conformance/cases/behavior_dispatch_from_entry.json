@@ -1,0 +1,78 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "behavior_dispatch_from_entry",
+  "description": "A behavior dispatch op from entry is queued and processed after entry completes.",
+  "features": ["entry", "queue", "reentrancy"],
+  "model": {
+    "name": "BehaviorDispatchFromEntry",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle",
+        "entry": [
+          {
+            "behavior": "entry_dispatch"
+          }
+        ],
+        "transitions": [
+          {
+            "on": "audit",
+            "target": "done",
+            "effects": [
+              {
+                "behavior": "effect_audit"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "done"
+      }
+    ]
+  },
+  "behaviors": {
+    "entry_dispatch": [
+      {
+        "op": "dispatch",
+        "event": "audit"
+      },
+      {
+        "op": "trace",
+        "value": "entry:idle"
+      }
+    ],
+    "effect_audit": [
+      {
+        "op": "trace",
+        "value": "effect:audit"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    }
+  ],
+  "expect": {
+    "state": "/BehaviorDispatchFromEntry/done",
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "audit"
+      },
+      {
+        "type": "trace",
+        "value": "entry:idle"
+      },
+      {
+        "type": "trace",
+        "value": "effect:audit"
+      },
+      {
+        "type": "stable",
+        "state": "/BehaviorDispatchFromEntry/done"
+      }
+    ]
+  }
+}

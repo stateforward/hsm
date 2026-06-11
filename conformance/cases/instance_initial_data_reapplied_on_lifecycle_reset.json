@@ -1,0 +1,126 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "instance_initial_data_reapplied_on_lifecycle_reset",
+  "description": "Restart and stop/start rebuild the fresh initial event from the instance's configured initial data.",
+  "features": [
+    "attribute",
+    "initial",
+    "lifecycle",
+    "restart",
+    "stop"
+  ],
+  "model": {
+    "name": "InstanceInitialDataReappliedOnLifecycleReset",
+    "initial": {
+      "target": "idle",
+      "effects": [
+        {
+          "behavior": "capture_seed"
+        }
+      ]
+    },
+    "attributes": {
+      "seed": {
+        "type": "number",
+        "default": 0
+      }
+    },
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "on": "dirty",
+            "target": "dirty",
+            "effects": [
+              {
+                "behavior": "dirty_seed"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "dirty"
+      }
+    ]
+  },
+  "instances": [
+    {
+      "id": "restarted",
+      "config": {
+        "data": {
+          "seed": 7
+        }
+      }
+    },
+    {
+      "id": "stopped",
+      "data": {
+        "seed": 8
+      }
+    }
+  ],
+  "behaviors": {
+    "capture_seed": [
+      {
+        "op": "set_attr_from_event_data",
+        "name": "seed",
+        "path": "seed"
+      }
+    ],
+    "dirty_seed": [
+      {
+        "op": "set_attr",
+        "name": "seed",
+        "value": 99
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start",
+      "instance": "restarted"
+    },
+    {
+      "op": "dispatch_to",
+      "target": "restarted",
+      "event": "dirty"
+    },
+    {
+      "op": "restart",
+      "instance": "restarted"
+    },
+    {
+      "op": "start",
+      "instance": "stopped"
+    },
+    {
+      "op": "dispatch_to",
+      "target": "stopped",
+      "event": "dirty"
+    },
+    {
+      "op": "stop",
+      "instance": "stopped"
+    },
+    {
+      "op": "start",
+      "instance": "stopped"
+    }
+  ],
+  "expect": {
+    "states": {
+      "restarted": "/InstanceInitialDataReappliedOnLifecycleReset/idle",
+      "stopped": "/InstanceInitialDataReappliedOnLifecycleReset/idle"
+    },
+    "instance_attributes": {
+      "restarted": {
+        "seed": 7
+      },
+      "stopped": {
+        "seed": 8
+      }
+    }
+  }
+}

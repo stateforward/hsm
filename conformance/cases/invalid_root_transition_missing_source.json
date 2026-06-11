@@ -1,0 +1,20 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_root_transition_missing_source",
+  "mode": "validation",
+  "description": "Root-owned source-qualified transitions must resolve source paths inside the root model.",
+  "features": ["source", "validation"],
+  "model": {
+    "name": "InvalidRootTransitionMissingSource",
+    "initial": "idle",
+    "states": [{"name": "idle"}, {"name": "done"}],
+    "transitions": [
+      {
+        "source": "missing",
+        "on": "go",
+        "target": "done"
+      }
+    ]
+  },
+  "expect": {"validation": [{"code": "missing_source"}]}
+}

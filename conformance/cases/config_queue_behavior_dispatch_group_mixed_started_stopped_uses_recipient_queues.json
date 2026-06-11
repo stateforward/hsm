@@ -1,0 +1,110 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "config_queue_behavior_dispatch_group_mixed_started_stopped_uses_recipient_queues",
+  "description": "Behavior-originated group dispatch filters stopped members before queue hooks and enqueues regular events through active recipients' configured queues.",
+  "features": ["queue", "group", "lifecycle", "stop", "reentrancy"],
+  "model": {
+    "name": "ConfigQueueBehaviorDispatchGroupMixedProducer",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "on": "go",
+            "target": "sent",
+            "effects": [
+              {"behavior": "dispatch_group"},
+              {"behavior": "effect_after"}
+            ]
+          }
+        ]
+      },
+      {
+        "name": "sent",
+        "entry": [{"behavior": "entry_sent"}]
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "ConfigQueueBehaviorDispatchGroupMixedWorker",
+      "initial": "idle",
+      "states": [
+        {
+          "name": "idle",
+          "transitions": [
+            {
+              "on": "audit",
+              "target": "done",
+              "effects": [{"behavior": "effect_audit"}]
+            }
+          ]
+        },
+        {
+          "name": "done",
+          "entry": [{"behavior": "entry_done"}]
+        }
+      ]
+    }
+  ],
+  "instances": [
+    {"id": "producer"},
+    {
+      "id": "worker_a",
+      "model": "ConfigQueueBehaviorDispatchGroupMixedWorker",
+      "config": {"queue": "trace_fifo"}
+    },
+    {
+      "id": "worker_b",
+      "model": "ConfigQueueBehaviorDispatchGroupMixedWorker",
+      "config": {"queue": "trace_fifo"}
+    },
+    {
+      "id": "stopped",
+      "model": "ConfigQueueBehaviorDispatchGroupMixedWorker",
+      "config": {"queue": "push_error"}
+    }
+  ],
+  "groups": [
+    {"id": "workers", "members": ["stopped", "worker_a", "worker_b"]}
+  ],
+  "behaviors": {
+    "dispatch_group": [{"op": "dispatch", "event": "audit", "group": "workers"}],
+    "effect_after": [{"op": "trace", "value": "effect:after"}],
+    "entry_sent": [{"op": "trace", "value": "entry:sent"}],
+    "effect_audit": [{"op": "trace", "value": "effect:audit"}],
+    "entry_done": [{"op": "trace", "value": "entry:done"}]
+  },
+  "script": [
+    {"op": "start", "instance": "producer"},
+    {"op": "start", "instance": "worker_a"},
+    {"op": "start", "instance": "worker_b"},
+    {"op": "start", "instance": "stopped"},
+    {"op": "stop", "instance": "stopped"},
+    {"op": "dispatch_to", "target": "producer", "event": "go"}
+  ],
+  "expect": {
+    "states": {
+      "producer": "/ConfigQueueBehaviorDispatchGroupMixedProducer/sent",
+      "worker_a": "/ConfigQueueBehaviorDispatchGroupMixedWorker/done",
+      "worker_b": "/ConfigQueueBehaviorDispatchGroupMixedWorker/done",
+      "stopped": "/ConfigQueueBehaviorDispatchGroupMixedWorker"
+    },
+    "trace": [
+      {"type": "dispatch", "event": "go", "target": "producer"},
+      {"type": "dispatch", "event": "audit", "target": "workers"},
+      {"type": "trace", "value": "effect:after"},
+      {"type": "trace", "value": "entry:sent"},
+      {"type": "trace", "value": "queue:push:audit"},
+      {"type": "trace", "value": "queue:pop:audit"},
+      {"type": "trace", "value": "effect:audit"},
+      {"type": "trace", "value": "entry:done"},
+      {"type": "trace", "value": "queue:push:audit"},
+      {"type": "trace", "value": "queue:pop:audit"},
+      {"type": "trace", "value": "effect:audit"},
+      {"type": "trace", "value": "entry:done"},
+      {"type": "stable", "state": "producer"}
+    ]
+  }
+}

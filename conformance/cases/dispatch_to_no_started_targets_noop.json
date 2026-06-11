@@ -1,0 +1,83 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "dispatch_to_no_started_targets_noop",
+  "description": "dispatch_to with only stopped and never-started targets completes as a no-op without a lifecycle error.",
+  "features": ["dispatch_to", "multi_target", "lifecycle", "stop"],
+  "model": {
+    "name": "DispatchToNoStartedTargetsNoop",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "on": "go",
+            "target": "done",
+            "effects": [
+              {
+                "behavior": "effect_go"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "done"
+      }
+    ]
+  },
+  "instances": [
+    {
+      "id": "stopped"
+    },
+    {
+      "id": "never"
+    }
+  ],
+  "behaviors": {
+    "effect_go": [
+      {
+        "op": "trace",
+        "value": "effect:go"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start",
+      "instance": "stopped"
+    },
+    {
+      "op": "stop",
+      "instance": "stopped"
+    },
+    {
+      "op": "dispatch_to",
+      "targets": [
+        "stopped",
+        "never"
+      ],
+      "event": "go"
+    }
+  ],
+  "expect": {
+    "states": {
+      "stopped": "/DispatchToNoStartedTargetsNoop",
+      "never": ""
+    },
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "go",
+        "target": [
+          "stopped",
+          "never"
+        ]
+      },
+      {
+        "type": "stable",
+        "state": "targets:stopped,never"
+      }
+    ]
+  }
+}

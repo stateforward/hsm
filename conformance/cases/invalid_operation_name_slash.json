@@ -1,0 +1,36 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_operation_name_slash",
+  "mode": "validation",
+  "description": "Operation names must not contain path separators.",
+  "features": ["operation", "validation"],
+  "model": {
+    "name": "InvalidOperationNameSlash",
+    "initial": "idle",
+    "operations": {
+      "bad/op": {
+        "behavior": "noop"
+      }
+    },
+    "states": [
+      {
+        "name": "idle"
+      }
+    ]
+  },
+  "behaviors": {
+    "noop": [
+      {
+        "op": "return_value",
+        "value": null
+      }
+    ]
+  },
+  "expect": {
+    "validation": [
+      {
+        "code": "invalid_name"
+      }
+    ]
+  }
+}

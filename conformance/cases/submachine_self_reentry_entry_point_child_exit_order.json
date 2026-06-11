@@ -1,0 +1,184 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "submachine_self_reentry_entry_point_child_exit_order",
+  "description": "Self reentry into a submachine through an entry point exits the active child leaf before the boundary exit and entry-point effects.",
+  "features": [
+    "submachine",
+    "entry_point",
+    "self",
+    "entry",
+    "exit"
+  ],
+  "model": {
+    "name": "SubmachineSelfEntryOrder",
+    "initial": "drive",
+    "states": [
+      {
+        "name": "drive",
+        "kind": "submachine",
+        "machine": "SelfEntryOrderChild",
+        "entry": [
+          {
+            "behavior": "entry_drive"
+          }
+        ],
+        "exit": [
+          {
+            "behavior": "exit_drive"
+          }
+        ],
+        "transitions": [
+          {
+            "on": "reset",
+            "kind": "self",
+            "target": "drive",
+            "entry_point": "resume",
+            "effects": [
+              {
+                "behavior": "effect_reset"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "SelfEntryOrderChild",
+      "initial": "cold",
+      "entry_points": [
+        {
+          "name": "resume",
+          "target": "running",
+          "effects": [
+            {
+              "behavior": "effect_resume"
+            }
+          ]
+        }
+      ],
+      "states": [
+        {
+          "name": "cold",
+          "entry": [
+            {
+              "behavior": "entry_cold"
+            }
+          ],
+          "exit": [
+            {
+              "behavior": "exit_cold"
+            }
+          ]
+        },
+        {
+          "name": "running",
+          "entry": [
+            {
+              "behavior": "entry_running"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "behaviors": {
+    "entry_drive": [
+      {
+        "op": "trace",
+        "value": "enter:drive"
+      }
+    ],
+    "exit_drive": [
+      {
+        "op": "trace",
+        "value": "exit:drive"
+      }
+    ],
+    "entry_cold": [
+      {
+        "op": "trace",
+        "value": "enter:cold"
+      }
+    ],
+    "exit_cold": [
+      {
+        "op": "trace",
+        "value": "exit:cold"
+      }
+    ],
+    "effect_reset": [
+      {
+        "op": "trace",
+        "value": "effect:reset"
+      }
+    ],
+    "effect_resume": [
+      {
+        "op": "trace",
+        "value": "effect:resume"
+      }
+    ],
+    "entry_running": [
+      {
+        "op": "trace",
+        "value": "enter:running"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "reset"
+    }
+  ],
+  "expect": {
+    "state": "/SubmachineSelfEntryOrder/drive/SelfEntryOrderChild/running",
+    "trace": [
+      {
+        "type": "trace",
+        "value": "enter:drive"
+      },
+      {
+        "type": "trace",
+        "value": "enter:cold"
+      },
+      {
+        "type": "dispatch",
+        "event": "reset"
+      },
+      {
+        "type": "trace",
+        "value": "exit:cold"
+      },
+      {
+        "type": "trace",
+        "value": "exit:drive"
+      },
+      {
+        "type": "trace",
+        "value": "effect:reset"
+      },
+      {
+        "type": "trace",
+        "value": "effect:resume"
+      },
+      {
+        "type": "trace",
+        "value": "enter:drive"
+      },
+      {
+        "type": "trace",
+        "value": "enter:running"
+      },
+      {
+        "type": "stable",
+        "state": "/SubmachineSelfEntryOrder/drive/SelfEntryOrderChild/running"
+      }
+    ]
+  }
+}

@@ -1,0 +1,88 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "history_memory_cleared_on_lifecycle_reset",
+  "description": "Restart and stop/start clear shallow-history memory so later history entry uses the default target.",
+  "features": ["history", "shallow_history", "lifecycle", "restart", "stop", "nested"],
+  "model": {
+    "name": "HistoryMemoryClearedOnLifecycleReset",
+    "initial": "outside",
+    "states": [
+      {
+        "name": "outside",
+        "transitions": [
+          {
+            "on": "enter_history",
+            "target": "comp/h",
+            "effects": [{"behavior": "effect_enter_history"}]
+          }
+        ]
+      },
+      {
+        "name": "comp",
+        "initial": "a",
+        "states": [
+          {
+            "name": "a",
+            "entry": [{"behavior": "entry_a"}],
+            "transitions": [
+              {"on": "to_b", "target": "../b"}
+            ]
+          },
+          {
+            "name": "b",
+            "entry": [{"behavior": "entry_b"}]
+          },
+          {
+            "name": "h",
+            "kind": "shallow_history",
+            "transitions": [
+              {"target": "a"}
+            ]
+          }
+        ],
+        "transitions": [
+          {"source": "comp/b", "on": "leave", "target": "outside"}
+        ]
+      }
+    ]
+  },
+  "behaviors": {
+    "effect_enter_history": [{"op": "trace", "value": "effect:history"}],
+    "entry_a": [{"op": "trace", "value": "entry:a"}],
+    "entry_b": [{"op": "trace", "value": "entry:b"}]
+  },
+  "script": [
+    {"op": "start"},
+    {"op": "dispatch", "event": "enter_history"},
+    {"op": "dispatch", "event": "to_b"},
+    {"op": "dispatch", "event": "leave"},
+    {"op": "restart"},
+    {"op": "dispatch", "event": "enter_history"},
+    {"op": "dispatch", "event": "to_b"},
+    {"op": "dispatch", "event": "leave"},
+    {"op": "stop"},
+    {"op": "start"},
+    {"op": "dispatch", "event": "enter_history"}
+  ],
+  "expect": {
+    "state": "/HistoryMemoryClearedOnLifecycleReset/comp/a",
+    "trace": [
+      {"type": "dispatch", "event": "enter_history"},
+      {"type": "trace", "value": "effect:history"},
+      {"type": "trace", "value": "entry:a"},
+      {"type": "dispatch", "event": "to_b"},
+      {"type": "trace", "value": "entry:b"},
+      {"type": "dispatch", "event": "leave"},
+      {"type": "dispatch", "event": "enter_history"},
+      {"type": "trace", "value": "effect:history"},
+      {"type": "trace", "value": "entry:a"},
+      {"type": "dispatch", "event": "to_b"},
+      {"type": "trace", "value": "entry:b"},
+      {"type": "dispatch", "event": "leave"},
+      {"type": "dispatch", "event": "enter_history"},
+      {"type": "trace", "value": "effect:history"},
+      {"type": "trace", "value": "entry:a"},
+      {"type": "stable", "state": "/HistoryMemoryClearedOnLifecycleReset/comp/a"}
+    ]
+  }
+}

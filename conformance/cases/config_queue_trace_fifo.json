@@ -1,0 +1,111 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "config_queue_trace_fifo",
+  "description": "An instance config queue hook receives regular events and returns them for normal transition selection.",
+  "features": ["queue", "reentrancy"],
+  "model": {
+    "name": "ConfigQueueTraceFifo",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "on": "go",
+            "target": "waiting",
+            "effects": [
+              {
+                "behavior": "dispatch_audit"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "waiting",
+        "transitions": [
+          {
+            "on": "audit",
+            "target": "done",
+            "effects": [
+              {
+                "behavior": "effect_audit"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "done"
+      }
+    ]
+  },
+  "instances": [
+    {
+      "id": "default",
+      "config": {
+        "queue": "trace_fifo"
+      }
+    }
+  ],
+  "behaviors": {
+    "dispatch_audit": [
+      {
+        "op": "dispatch",
+        "event": "audit"
+      }
+    ],
+    "effect_audit": [
+      {
+        "op": "trace",
+        "value": "effect:audit"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "go"
+    }
+  ],
+  "expect": {
+    "state": "/ConfigQueueTraceFifo/done",
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "go"
+      },
+      {
+        "type": "trace",
+        "value": "queue:push:go"
+      },
+      {
+        "type": "trace",
+        "value": "queue:pop:go"
+      },
+      {
+        "type": "dispatch",
+        "event": "audit"
+      },
+      {
+        "type": "trace",
+        "value": "queue:push:audit"
+      },
+      {
+        "type": "trace",
+        "value": "queue:pop:audit"
+      },
+      {
+        "type": "trace",
+        "value": "effect:audit"
+      },
+      {
+        "type": "stable",
+        "state": "/ConfigQueueTraceFifo/done"
+      }
+    ]
+  }
+}

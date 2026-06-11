@@ -1,0 +1,130 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "submodel_absolute_transition_target_path",
+  "description": "A transition declared inside a reusable child model resolves an absolute target from the child model root and maps it to the mounted submachine instance.",
+  "features": [
+    "submachine",
+    "path_resolution",
+    "nested"
+  ],
+  "model": {
+    "name": "SubmodelAbsoluteTransitionTargetPath",
+    "initial": "drive",
+    "states": [
+      {
+        "name": "drive",
+        "kind": "submachine",
+        "machine": "ChildAbsoluteTransitionTargetPath"
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "ChildAbsoluteTransitionTargetPath",
+      "initial": "a",
+      "states": [
+        {
+          "name": "a",
+          "entry": [
+            {
+              "behavior": "entry_a"
+            }
+          ],
+          "transitions": [
+            {
+              "on": "go",
+              "target": "/ChildAbsoluteTransitionTargetPath/parent/leaf",
+              "effects": [
+                {
+                  "behavior": "effect_go"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "parent",
+          "entry": [
+            {
+              "behavior": "entry_parent"
+            }
+          ],
+          "states": [
+            {
+              "name": "leaf",
+              "entry": [
+                {
+                  "behavior": "entry_leaf"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "behaviors": {
+    "entry_a": [
+      {
+        "op": "trace",
+        "value": "entry:a"
+      }
+    ],
+    "effect_go": [
+      {
+        "op": "trace",
+        "value": "effect:go"
+      }
+    ],
+    "entry_parent": [
+      {
+        "op": "trace",
+        "value": "entry:parent"
+      }
+    ],
+    "entry_leaf": [
+      {
+        "op": "trace",
+        "value": "entry:leaf"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "go"
+    }
+  ],
+  "expect": {
+    "state": "/SubmodelAbsoluteTransitionTargetPath/drive/ChildAbsoluteTransitionTargetPath/parent/leaf",
+    "trace": [
+      {
+        "type": "trace",
+        "value": "entry:a"
+      },
+      {
+        "type": "dispatch",
+        "event": "go"
+      },
+      {
+        "type": "trace",
+        "value": "effect:go"
+      },
+      {
+        "type": "trace",
+        "value": "entry:parent"
+      },
+      {
+        "type": "trace",
+        "value": "entry:leaf"
+      },
+      {
+        "type": "stable",
+        "state": "/SubmodelAbsoluteTransitionTargetPath/drive/ChildAbsoluteTransitionTargetPath/parent/leaf"
+      }
+    ]
+  }
+}

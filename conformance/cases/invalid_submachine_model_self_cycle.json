@@ -1,0 +1,38 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_submachine_model_self_cycle",
+  "mode": "validation",
+  "description": "A child model must not contain a submachine state that directly references the same child model.",
+  "features": ["submachine", "validation"],
+  "model": {
+    "name": "InvalidSubmachineSelfCycle",
+    "initial": "drive",
+    "states": [
+      {
+        "name": "drive",
+        "kind": "submachine",
+        "machine": "SelfCycle"
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "SelfCycle",
+      "initial": "loop",
+      "states": [
+        {
+          "name": "loop",
+          "kind": "submachine",
+          "machine": "SelfCycle"
+        }
+      ]
+    }
+  ],
+  "expect": {
+    "validation": [
+      {
+        "code": "submachine_model_cycle"
+      }
+    ]
+  }
+}

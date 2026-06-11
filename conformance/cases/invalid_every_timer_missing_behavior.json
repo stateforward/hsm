@@ -1,0 +1,35 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_every_timer_missing_behavior",
+  "mode": "validation",
+  "description": "An every timer trigger using a behavior source must reference a declared behavior program.",
+  "features": ["timer", "every", "validation"],
+  "model": {
+    "name": "InvalidEveryTimerMissingBehavior",
+    "initial": "waiting",
+    "states": [
+      {
+        "name": "waiting",
+        "transitions": [
+          {
+            "trigger": {
+              "kind": "every",
+              "behavior": "missing_interval_behavior"
+            },
+            "target": "done"
+          }
+        ]
+      },
+      {
+        "name": "done"
+      }
+    ]
+  },
+  "expect": {
+    "validation": [
+      {
+        "code": "missing_behavior"
+      }
+    ]
+  }
+}

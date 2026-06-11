@@ -1,0 +1,141 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "operation_call_from_guard_false_replays",
+  "description": "An operation called from a false guard queues its on_call event and replays it after selection leaves the source state active.",
+  "features": [
+    "operation",
+    "on_call",
+    "guard",
+    "queue",
+    "reentrancy"
+  ],
+  "model": {
+    "name": "OperationCallFromGuardFalse",
+    "initial": "idle",
+    "operations": {
+      "audit": {
+        "behavior": "operation_audit"
+      }
+    },
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "on": "go",
+            "guard": {
+              "behavior": "guard_calls_audit_false"
+            },
+            "target": "done"
+          },
+          {
+            "trigger": {
+              "kind": "on_call",
+              "operation": "audit"
+            },
+            "target": "audit_handled",
+            "effects": [
+              {
+                "behavior": "effect_audit"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "done"
+      },
+      {
+        "name": "audit_handled",
+        "entry": [
+          {
+            "behavior": "entry_audit_handled"
+          }
+        ]
+      }
+    ]
+  },
+  "behaviors": {
+    "operation_audit": [
+      {
+        "op": "trace",
+        "value": "operation:audit"
+      }
+    ],
+    "guard_calls_audit_false": [
+      {
+        "op": "trace",
+        "value": "guard:before-call"
+      },
+      {
+        "op": "call",
+        "name": "audit"
+      },
+      {
+        "op": "trace",
+        "value": "guard:after-call"
+      },
+      {
+        "op": "return_value",
+        "value": false
+      }
+    ],
+    "effect_audit": [
+      {
+        "op": "trace",
+        "value": "effect:audit"
+      }
+    ],
+    "entry_audit_handled": [
+      {
+        "op": "trace",
+        "value": "enter:audit-handled"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "go"
+    }
+  ],
+  "expect": {
+    "state": "/OperationCallFromGuardFalse/audit_handled",
+    "queue": {
+      "guard_call_false": "on_call_replayed_after_failed_selection"
+    },
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "go"
+      },
+      {
+        "type": "trace",
+        "value": "guard:before-call"
+      },
+      {
+        "type": "trace",
+        "value": "operation:audit"
+      },
+      {
+        "type": "trace",
+        "value": "guard:after-call"
+      },
+      {
+        "type": "trace",
+        "value": "effect:audit"
+      },
+      {
+        "type": "trace",
+        "value": "enter:audit-handled"
+      },
+      {
+        "type": "stable",
+        "state": "/OperationCallFromGuardFalse/audit_handled"
+      }
+    ]
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_submodel_nested_missing_initial",
+  "mode": "validation",
+  "description": "Nested composite states inside child models must declare an initial target when they have multiple children.",
+  "features": ["submachine", "nested", "validation"],
+  "model": {
+    "name": "InvalidSubmodelNestedMissingInitial",
+    "initial": "drive",
+    "states": [
+      {
+        "name": "drive",
+        "kind": "submachine",
+        "machine": "ChildNestedMissingInitial"
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "ChildNestedMissingInitial",
+      "initial": "parent",
+      "states": [
+        {
+          "name": "parent",
+          "states": [
+            {
+              "name": "a"
+            },
+            {
+              "name": "b"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "expect": {
+    "validation": [
+      {
+        "code": "missing_initial"
+      }
+    ]
+  }
+}

@@ -1,0 +1,45 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_choice_activity",
+  "mode": "validation",
+  "description": "Choice pseudostates must not declare activities.",
+  "features": ["choice", "activity", "validation"],
+  "model": {
+    "name": "InvalidChoiceActivity",
+    "initial": "choice",
+    "states": [
+      {
+        "name": "choice",
+        "kind": "choice",
+        "activity": [
+          {
+            "behavior": "activity_choice"
+          }
+        ],
+        "transitions": [
+          {
+            "target": "done"
+          }
+        ]
+      },
+      {
+        "name": "done"
+      }
+    ]
+  },
+  "behaviors": {
+    "activity_choice": [
+      {
+        "op": "trace",
+        "value": "activity:choice"
+      }
+    ]
+  },
+  "expect": {
+    "validation": [
+      {
+        "code": "invalid_pseudostate_contents"
+      }
+    ]
+  }
+}

@@ -6,7 +6,7 @@ All DSL functions are **namespace/module-level functions** (not methods on objec
 
 > **Notation:** `hsm.FunctionName(...)` represents a function in the `hsm` namespace/module. These are free functions, not instance methods.
 
-> **Naming convention:** All canonical exported DSL and runtime API functions use **PascalCase**. This choice is intentional, even though it conflicts with some language-specific style guides. PascalCase is the *only* casing convention that is consistently supported across **all major languages** for **both namespace-level functions and object methods**, without ambiguity or special rules. This ensures the DSL can be mapped 1:1 into C, C++, Rust, Go, C#, Java, Python, JavaScript, and scripting bindings while preserving identical API names and documentation. Implementations may also expose language-native aliases, such as TypeScript's camelCase aliases or Python's snake_case aliases (`Define` -> `define`, `OnSet` -> `on_set`, `TakeSnapshot` -> `take_snapshot`, `MakeGroup` -> `make_group`, `DefaultClock` -> `default_clock`, `StateKind` -> `state_kind`, `CompletionEvent` -> `completion_event`, `EventSnapshot` -> `event_snapshot`, `Config(ID=..., Clock=..., Queue=...)` -> `Config(id=..., clock=..., queue=...)`), but those aliases must map directly to the canonical PascalCase API and must not introduce separate behavior.
+> **Naming convention:** All canonical exported DSL and runtime API functions use **PascalCase**. This choice is intentional, even though it conflicts with some language-specific style guides. PascalCase is the *only* casing convention that is consistently supported across **all major languages** for **both namespace-level functions and object methods**, without ambiguity or special rules. This ensures the DSL can be mapped 1:1 into C, C++, Rust, Go, C#, Java, Python, JavaScript, and scripting bindings while preserving identical API names and documentation. Implementations may also expose language-native aliases, such as TypeScript's camelCase aliases or Python's snake_case aliases (`Define` -> `define`, `OnSet` -> `on_set`, `TakeSnapshot` -> `take_snapshot`, `MakeGroup` -> `make_group`, `DefaultClock` -> `default_clock`, `StateKind` -> `state_kind`, `CompletionEvent` -> `completion_event`, `Config(ID=..., Clock=..., Queue=...)` -> `Config(id=..., clock=..., queue=...)`), but those aliases must map directly to the canonical PascalCase API and must not introduce separate behavior.
 
 ---
 
@@ -14,20 +14,21 @@ All DSL functions are **namespace/module-level functions** (not methods on objec
 
 1. [Model Definition](#model-definition)
 2. [State Declaration](#state-declaration)
-3. [Pseudostates](#pseudostates)
-4. [Transitions](#transitions)
-5. [Event Triggers](#event-triggers)
-6. [Timing Events](#timing-events)
-7. [Transition Targets & Routing](#transition-targets--routing)
-8. [State Behaviors](#state-behaviors)
-9. [Guards & Deferral](#guards--deferral)
-10. [Model Metadata](#model-metadata)
-11. [Group Operations](#group-operations)
-12. [Type Utilities](#type-utilities)
-13. [Runtime Attribute Access](#runtime-attribute-access)
-14. [Runtime Configuration](#runtime-configuration)
-15. [Snapshotting](#snapshotting)
-16. [Runtime Constants](#runtime-constants)
+3. [Submachine Composition](#submachine-composition)
+4. [Pseudostates](#pseudostates)
+5. [Transitions](#transitions)
+6. [Event Triggers](#event-triggers)
+7. [Timing Events](#timing-events)
+8. [Transition Targets & Routing](#transition-targets--routing)
+9. [State Behaviors](#state-behaviors)
+10. [Guards & Deferral](#guards--deferral)
+11. [Model Metadata](#model-metadata)
+12. [Group Operations](#group-operations)
+13. [Type Utilities](#type-utilities)
+14. [Runtime Attribute Access](#runtime-attribute-access)
+15. [Runtime Configuration](#runtime-configuration)
+16. [Snapshotting](#snapshotting)
+17. [Runtime Constants](#runtime-constants)
 
 ---
 
@@ -88,6 +89,78 @@ Declares a UML final state: an absorbing state with no outgoing transitions.
 
 **Description:**
 Represents a terminal state indicating the completion of a region or the entire state machine.
+
+---
+
+## Submachine Composition
+
+### `hsm.SubmachineState(name, machine, partials...)`
+
+Declares a state whose active behavior is provided by a referenced state machine model.
+
+**Parameters:**
+
+* `name` Submachine state name. Cannot contain `/`.
+* `machine` A statically defined `hsm.Define(...)` model reference.
+* `partials...` Entry/exit/activity actions, transitions, deferral, and other state-level declarations for the containing state boundary.
+
+**Constraints:**
+
+* Submachine state names must not contain `/`.
+* `machine` must refer to a complete, valid state machine model.
+* A submachine state must not directly contain nested `hsm.State(...)`, `hsm.Initial(...)`, `hsm.Final(...)`, or pseudostate declarations.
+* Parent transitions must not target arbitrary internal states of the child machine; they must enter through the child machine's default initial transition or a declared `hsm.EntryPoint(...)`.
+* Compile-time function.
+
+**Description:**
+Represents a reusable state machine as a state in another state machine. Entering the submachine state activates the referenced child machine. Exiting the submachine state exits the active child configuration before executing the submachine state's exit behavior.
+
+While a `SubmachineState` is active, incoming events are evaluated using the same bottom-up transition selection used for ordinary hierarchical states. Selection begins at the deepest active state of the child machine. If no enabled transition is found in the child machine, selection continues at the containing `SubmachineState` and then outward through the parent hierarchy. A selected child transition does not exit the containing `SubmachineState` unless the child reaches a `Final` state or an `hsm.ExitPoint(...)`.
+
+If a transition targets a `SubmachineState` directly, the child machine enters through its normal `hsm.Initial(...)` transition. If a transition targets one of the child machine's `hsm.EntryPoint(...)` declarations, the child machine enters through that named entry point.
+
+### `hsm.EntryPoint(name, partials...)`
+
+Declares a named public entry point for a state machine model.
+
+**Parameters:**
+
+* `name` Entry point name. Cannot contain `/`.
+* `partials...` Target path and optional effect action.
+
+**Constraints:**
+
+* Entry point names must not contain `/`.
+* Must include a target.
+* Target must resolve to a state or supported pseudostate inside the declaring machine.
+* Entry points are valid transition targets only from outside the declaring machine through a containing `hsm.SubmachineState(...)`.
+* Compile-time function.
+
+**Description:**
+Defines a public boundary through which a parent machine may enter a child machine without targeting the child machine's internal states directly. Entry points preserve submachine encapsulation while allowing a reusable child machine to expose multiple well-defined entry routes.
+
+When used as a transition partial with no target partials, `hsm.EntryPoint(name)` selects the named child entry point for a transition whose target is a `hsm.SubmachineState(...)`. In that context, the entry point name must resolve in the target submachine's referenced model.
+
+### `hsm.ExitPoint(name, partials...)`
+
+Declares a named public exit point for a state machine model.
+
+**Parameters:**
+
+* `name` Exit point name. Cannot contain `/`.
+* `partials...` Optional effect action.
+
+**Constraints:**
+
+* Exit point names must not contain `/`.
+* Exit points may be targeted only by transitions inside the declaring machine.
+* Reaching an exit point exits the child machine through that named boundary and returns transition selection to the containing `hsm.SubmachineState(...)`.
+* Compile-time function.
+
+**Description:**
+Defines a public boundary through which a child machine may complete with a named outcome. When an active child machine reaches an exit point, the containing submachine state handles the exit-point outcome as part of normal run-to-completion processing. Parent transitions may use the named exit point to decide the next parent state without the child machine directly targeting parent states.
+
+When used as a transition partial with no target partials inside a `hsm.SubmachineState(...)`, `hsm.ExitPoint(name)` matches the named exit-point outcome from the active child machine. In that context, the exit point name must resolve in the submachine state's referenced model.
 
 ---
 
@@ -158,7 +231,7 @@ Declares a transition between states or pseudostates.
 
 **Parameters:**
 
-* `partials...` Any combination of event trigger, target path, guard condition, effect action, and/or source state.
+* `partials...` Any combination of event trigger, target path, guard condition, effect action, source state, entry-point selector, and/or exit-point outcome.
 
 **Constraints:**
 
@@ -219,7 +292,7 @@ Enables simple event triggering by string name, useful for events without struct
 
 ### Event Ownership
 
-Dispatch implementations should treat event metadata as per-recipient runtime state. Mutating metadata fields such as `Name`, `QualifiedName`, `Source`, `Target`, `ID`, `Kind`, or `Schema` inside a behavior must not mutate the caller's event object and must not leak to sibling recipients during broadcast or group dispatch.
+Dispatch implementations should treat the event envelope (`Name`, `QualifiedName`, `Source`, `Target`, `ID`, and `Kind`) as immutable routing state. Behavior metadata writes must not change those envelope fields; mutable payload data and schema metadata remain application-owned values.
 
 Event payload data is application-owned. Implementations may pass payload data by reference unless a language binding explicitly documents stronger copy semantics. Callers that need isolated mutable payloads should provide immutable data or copy it at the application boundary.
 
@@ -272,7 +345,7 @@ Declares a timeout trigger that fires after a specified duration.
 * Compile-time function.
 
 **Description:**
-Defines a time-based trigger. The duration can be statically specified via a callable, or dynamically specified via an attribute value. The timeout is relative (elapsed time) rather than absolute.
+Defines a time-based trigger. The duration can be statically specified via a callable, or dynamically specified via an attribute value. The timeout is relative (elapsed time) rather than absolute. See the distinct-timer and `hsm.Choice` note under `hsm.Every(...)`.
 
 ### `hsm.Every(interval_source)`
 
@@ -288,6 +361,8 @@ Declares a periodic interval trigger that fires repeatedly at fixed intervals.
 
 **Description:**
 Defines a repeating timer. The transition (typically a self-transition) fires on each interval expiration.
+
+Each `hsm.After(...)`, `hsm.Every(...)`, or `hsm.At(...)` on a transition creates a **distinct** time event and timer activity. Multiple transitions that use the same duration expression are **not** merged: each fires on its own run-to-completion step. To branch on one timer firing, route into `hsm.Choice(...)` with guarded transitions instead of duplicating the same trigger on sibling transitions.
 
 ### `hsm.At(timepoint_source)`
 
@@ -318,7 +393,8 @@ Declares the target state of a transition using a hierarchical path.
 
 **Constraints:**
 
-* Path must resolve to a state or supported pseudostate in the model.
+* Path must resolve to a state, supported pseudostate, or entry point in the model.
+* Paths that cross into a child machine may resolve only to a declared `hsm.EntryPoint(...)`; arbitrary child internal states are not valid cross-boundary targets.
 * Compile-time function.
 
 **Description:**
@@ -520,6 +596,8 @@ Declares that certain event types should be deferred (queued) while in a state, 
 **Description:**
 Specifies event types that should not be processed in the current state but instead queued for later processing when the state is exited.
 
+Deferred events are scoped to the runtime region that deferred them. If an active child machine defers an event and the containing `hsm.SubmachineState(...)` is later exited by a parent transition before the child can replay that event, the child-owned deferred event is discarded as part of child runtime teardown. It must not be replayed into the parent machine after the submachine boundary has been exited.
+
 ---
 
 ## Model Metadata
@@ -689,7 +767,21 @@ Dispatch submits the event and optionally lets callers wait until the resulting 
 * Waiting on the returned completion handle is the supported production synchronization path after dispatch.
 * Completion handles must not carry `Processed`, `Deferred`, `QueueFull`, or equivalent dispatch-result values.
 * Queue failures are runtime errors, not normal dispatch results. If processing can continue, implementations should surface queue failures through the runtime error-event mechanism.
-* Dispatch implementations should treat event metadata as per-recipient runtime state. Mutating metadata fields such as `Name`, `QualifiedName`, `Source`, `Target`, `ID`, `Kind`, or `Schema` inside a behavior must not mutate the caller's event object and must not leak to sibling recipients during broadcast or group dispatch.
+* Dispatch implementations should treat the event envelope (`Name`, `QualifiedName`, `Source`, `Target`, `ID`, and `Kind`) as immutable routing state. Behavior metadata writes must not change those envelope fields; mutable payload data and schema metadata remain application-owned values.
+
+### Runtime Context
+
+Runtime contexts are immutable request values modeled after Go `context.Context`: adding HSM runtime values returns an extended context and must not mutate the parent context.
+
+Implementations should expose canonical context keys and lookup helpers:
+
+* `hsm.Keys.HSM` identifies the current state machine or group in an extended runtime context.
+* `hsm.Keys.Owner` identifies the previous enclosing state machine or group when a machine extends an existing machine context.
+* `hsm.Keys.Instances` identifies the shared started-machine registry for a runtime context tree.
+* `hsm.FromContext(ctx)` returns the current state machine or group and whether one was present.
+* `hsm.InstancesFromContext(ctx)` returns the started machines visible through `ctx` and whether a registry was present.
+
+Machine start extends the supplied context with `Keys.HSM`, `Keys.Owner`, and the shared `Keys.Instances` registry. Behavior callbacks receive an extended context whose current `Keys.HSM` is the executing machine. Cross-machine dispatch uses this context to populate missing per-recipient event envelope fields: `Source` from the current machine ID and `Target` from the recipient machine ID. Explicit caller-provided `Source` or `Target` metadata remains payload metadata and must not be overwritten.
 
 ### `hsm.DispatchAll(ctx, event)`
 
@@ -780,22 +872,21 @@ Configures a runtime state machine instance without changing the model.
 **Description:**
 Provides instance-specific identity, initial data, and scheduling behavior. Configuration values affect runtime observability and execution only; they do not alter the DSL model structure.
 
-### `hsm.Queue(...)`
+### `hsm.Queue(fifo...)`
 
-Defines runtime event queue hooks for regular event ingress and selection.
+Defines runtime event queue behavior for regular event ingress and selection.
 
-**Fields:**
+**Parameters:**
 
-* `Push(context, event)` Receives one regular event into the runtime buffer and returns an error if the event could not be buffered.
-* `Pop(context)` Returns the next regular event to process, whether an event was available, and an error if selection failed.
-* `Len(context)` Returns the number of currently buffered regular events and an error if the length could not be determined.
+* `fifo` Optional regular-event FIFO backend with synchronous `push(event)`, `pop()`, and `len()` methods. Defaults to an internal `Fifo` deque. May also be another `Queue` instance whose `push`/`pop`/`len` handle regular events only.
 
 **Constraints:**
 
 * Runtime facility.
 * Queue configuration is instance-specific and must not mutate the model.
 * Implementations must provide a default queue when no `Config.Queue` is supplied.
-* A supplied queue must provide all three operations: `Push`, `Pop`, and `Len`.
+* A custom `fifo` backend must implement all three operations: `push`, `pop`, and `len`.
+* Queue operations are synchronous runtime hooks. `Push`, `Pop`, and `Len` must not return promises, futures, tasks, coroutines, channels, or other awaitable/asynchronous results.
 * A supplied queue receives regular events only. Runtime completion events remain in the runtime-owned priority queue, are selected before regular events, and must not be routed through custom queue hooks.
 * Queue operation errors must be propagated through the runtime as `ErrorEvent` when processing can continue. Since `ErrorEvent` derives from `CompletionEvent`, those propagated errors must enter the runtime-owned priority queue and must not be routed back through the supplied queue.
 * Queue implementations must preserve run-to-completion compatibility: `Push` must not process transitions directly, and `Pop` must return events to the runtime for normal transition selection.
@@ -860,15 +951,16 @@ Collects a consistent, read-only view of the machine at the time of invocation. 
 
 The following structures describe the **logical snapshot schema**. Field names are normative; concrete language bindings may map them to equivalent native representations.
 
-#### `EventDetail`
+#### `TransitionSnapshot`
 
-Describes an event that was recently processed or is pending in the queue.
+Describes a transition that is visible from the current active state at the time the snapshot is captured.
 
-* `Name` String identifier of the event.
-* `Kind` Event kind identifier.
-* `Target` Absolute target state path, if resolved.
+* `Name` Fully-qualified transition name.
+* `Kind` Transition kind identifier.
+* `Source` Absolute source vertex path.
+* `Target` Absolute target vertex path, if resolved.
+* `Events` Ordered list of trigger event names for the transition.
 * `Guard` Boolean indicating whether the transition has a guard.
-* `Schema` Optional event payload or schema information (dynamic value).
 
 #### `Snapshot`
 
@@ -879,13 +971,13 @@ Represents the complete observable state of a machine at a point in time.
 * `State` Current active state path.
 * `Attributes` Map of fully-qualified attribute names to their current values (dynamic values).
 * `QueueLen` Number of events currently queued.
-* `Events` Ordered list of `EventDetail` entries describing recent or queued events.
+* `Transitions` Ordered list of `TransitionSnapshot` entries describing transitions visible from the current active state.
 
 **Notes:**
 
-* Attribute and schema values are represented using a dynamic value container (`Any` / `Variant` / equivalent).
+* Attribute values are represented using a dynamic value container (`Any` / `Variant` / equivalent).
 * Snapshot contents are immutable once produced.
-* Implementations may cap the number of events recorded for bounded memory usage.
+* Implementations may cap the number of transitions recorded for bounded memory usage.
 
 ---
 

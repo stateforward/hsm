@@ -1,0 +1,62 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "dispatch_unhandled_event_noop",
+  "description": "Dispatching an unhandled event to a started instance completes normally and leaves the active state unchanged.",
+  "features": [
+    "event",
+    "queue"
+  ],
+  "model": {
+    "name": "DispatchUnhandledEventNoop",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "on": "handled",
+            "target": "done",
+            "effects": [
+              {
+                "behavior": "effect_done"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "done"
+      }
+    ]
+  },
+  "behaviors": {
+    "effect_done": [
+      {
+        "op": "trace",
+        "value": "effect:done"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "unknown"
+    }
+  ],
+  "expect": {
+    "state": "/DispatchUnhandledEventNoop/idle",
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "unknown"
+      },
+      {
+        "type": "stable",
+        "state": "/DispatchUnhandledEventNoop/idle"
+      }
+    ]
+  }
+}

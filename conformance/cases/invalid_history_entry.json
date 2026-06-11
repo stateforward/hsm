@@ -1,0 +1,51 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_history_entry",
+  "mode": "validation",
+  "description": "History pseudostates must not declare entry behaviors.",
+  "features": ["history", "entry", "validation"],
+  "model": {
+    "name": "InvalidHistoryEntry",
+    "initial": "parent",
+    "states": [
+      {
+        "name": "parent",
+        "initial": "h",
+        "states": [
+          {
+            "name": "h",
+            "kind": "shallow_history",
+            "entry": [
+              {
+                "behavior": "entry_h"
+              }
+            ],
+            "transitions": [
+              {
+                "target": "idle"
+              }
+            ]
+          },
+          {
+            "name": "idle"
+          }
+        ]
+      }
+    ]
+  },
+  "behaviors": {
+    "entry_h": [
+      {
+        "op": "trace",
+        "value": "entry:h"
+      }
+    ]
+  },
+  "expect": {
+    "validation": [
+      {
+        "code": "invalid_pseudostate_contents"
+      }
+    ]
+  }
+}

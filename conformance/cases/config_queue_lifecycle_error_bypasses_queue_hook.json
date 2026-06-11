@@ -1,0 +1,61 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "config_queue_lifecycle_error_bypasses_queue_hook",
+  "description": "A lifecycle dispatch error on a stopped instance is raised before invoking that instance's configured queue hook.",
+  "features": ["queue", "lifecycle", "stop", "error"],
+  "model": {
+    "name": "ConfigQueueLifecycleErrorBypassesQueueHook",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle"
+      }
+    ]
+  },
+  "instances": [
+    {
+      "id": "queued",
+      "config": {
+        "queue": "push_error"
+      }
+    }
+  ],
+  "script": [
+    {
+      "op": "start",
+      "instance": "queued"
+    },
+    {
+      "op": "stop",
+      "instance": "queued"
+    },
+    {
+      "op": "dispatch",
+      "instance": "queued",
+      "event": "go"
+    }
+  ],
+  "expect": {
+    "states": {
+      "queued": "/ConfigQueueLifecycleErrorBypassesQueueHook"
+    },
+    "error": {
+      "code": "lifecycle_error",
+      "message_contains": "started"
+    },
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "go"
+      },
+      {
+        "type": "error",
+        "code": "lifecycle_error"
+      },
+      {
+        "type": "stable",
+        "state": "/ConfigQueueLifecycleErrorBypassesQueueHook"
+      }
+    ]
+  }
+}

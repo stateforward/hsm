@@ -1,0 +1,139 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "submachine_default_entry_completion",
+  "description": "A submachine state with no entry-point selector enters the child through its default initial transition and bubbles child final completion to the containing state.",
+  "features": [
+    "submachine",
+    "completion",
+    "final"
+  ],
+  "model": {
+    "name": "DefaultSubmachine",
+    "initial": "drive",
+    "states": [
+      {
+        "name": "drive",
+        "kind": "submachine",
+        "machine": "Worker",
+        "transitions": [
+          {
+            "trigger": {
+              "kind": "completion"
+            },
+            "target": "idle",
+            "effects": [
+              {
+                "behavior": "effect_done"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "idle",
+        "entry": [
+          {
+            "behavior": "entry_idle"
+          }
+        ]
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "Worker",
+      "initial": "off",
+      "states": [
+        {
+          "name": "off",
+          "entry": [
+            {
+              "behavior": "entry_off"
+            }
+          ],
+          "transitions": [
+            {
+              "on": "start",
+              "target": "running"
+            }
+          ]
+        },
+        {
+          "name": "running",
+          "transitions": [
+            {
+              "on": "finish",
+              "target": "done"
+            }
+          ]
+        },
+        {
+          "name": "done",
+          "kind": "final"
+        }
+      ]
+    }
+  ],
+  "behaviors": {
+    "entry_off": [
+      {
+        "op": "trace",
+        "value": "enter:/Worker/off"
+      }
+    ],
+    "effect_done": [
+      {
+        "op": "trace",
+        "value": "effect:parent-done"
+      }
+    ],
+    "entry_idle": [
+      {
+        "op": "trace",
+        "value": "enter:/DefaultSubmachine/idle"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "finish"
+    }
+  ],
+  "expect": {
+    "state": "/DefaultSubmachine/idle",
+    "trace": [
+      {
+        "type": "trace",
+        "value": "enter:/Worker/off"
+      },
+      {
+        "type": "dispatch",
+        "event": "start"
+      },
+      {
+        "type": "dispatch",
+        "event": "finish"
+      },
+      {
+        "type": "trace",
+        "value": "effect:parent-done"
+      },
+      {
+        "type": "trace",
+        "value": "enter:/DefaultSubmachine/idle"
+      },
+      {
+        "type": "stable",
+        "state": "/DefaultSubmachine/idle"
+      }
+    ]
+  }
+}

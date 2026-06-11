@@ -1,0 +1,103 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "timer_cancel_on_stop_preserves_sibling_timer",
+  "description": "Stopping one instance cancels only that instance's pending timer while a sibling instance's pending timer can still fire.",
+  "features": [
+    "timer",
+    "after",
+    "cancellation",
+    "stop",
+    "multi_target"
+  ],
+  "model": {
+    "name": "TimerCancelOnStopPreservesSiblingTimer",
+    "initial": "waiting",
+    "states": [
+      {
+        "name": "waiting",
+        "transitions": [
+          {
+            "trigger": {
+              "kind": "after",
+              "duration_ms": 10
+            },
+            "target": "timeout",
+            "effects": [
+              {
+                "behavior": "effect_timeout"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "timeout"
+      }
+    ]
+  },
+  "instances": [
+    {
+      "id": "stopped"
+    },
+    {
+      "id": "sibling"
+    }
+  ],
+  "behaviors": {
+    "effect_timeout": [
+      {
+        "op": "trace",
+        "value": "effect:timeout"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start",
+      "instance": "stopped"
+    },
+    {
+      "op": "start",
+      "instance": "sibling"
+    },
+    {
+      "op": "stop",
+      "instance": "stopped"
+    },
+    {
+      "op": "tick",
+      "millis": 50
+    }
+  ],
+  "expect": {
+    "states": {
+      "stopped": "/TimerCancelOnStopPreservesSiblingTimer",
+      "sibling": "/TimerCancelOnStopPreservesSiblingTimer/timeout"
+    },
+    "trace": [
+      {
+        "type": "timer_scheduled"
+      },
+      {
+        "type": "timer_scheduled"
+      },
+      {
+        "type": "stop"
+      },
+      {
+        "type": "timer_cancelled"
+      },
+      {
+        "type": "timer_fired"
+      },
+      {
+        "type": "trace",
+        "value": "effect:timeout"
+      },
+      {
+        "type": "stable",
+        "state": "/TimerCancelOnStopPreservesSiblingTimer"
+      }
+    ]
+  }
+}

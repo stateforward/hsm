@@ -1,0 +1,39 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_submodel_duplicate_state_names",
+  "mode": "validation",
+  "description": "Sibling state names inside child models must be unique.",
+  "features": ["submachine", "validation"],
+  "model": {
+    "name": "InvalidSubmodelDuplicateStateNames",
+    "initial": "drive",
+    "states": [
+      {
+        "name": "drive",
+        "kind": "submachine",
+        "machine": "ChildDuplicateStates"
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "ChildDuplicateStates",
+      "initial": "idle",
+      "states": [
+        {
+          "name": "idle"
+        },
+        {
+          "name": "idle"
+        }
+      ]
+    }
+  ],
+  "expect": {
+    "validation": [
+      {
+        "code": "duplicate_state"
+      }
+    ]
+  }
+}

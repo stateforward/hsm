@@ -1,0 +1,125 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "source_qualified_overlap_order",
+  "description": "Overlapping source-qualified transitions owned by the same parent prefer the most specific source path when more than one source matches the active leaf.",
+  "features": [
+    "source",
+    "selection_order",
+    "nested"
+  ],
+  "model": {
+    "name": "SourceOverlapOrder",
+    "initial": "parent",
+    "states": [
+      {
+        "name": "parent",
+        "initial": "a",
+        "transitions": [
+          {
+            "source": "parent/a",
+            "on": "go",
+            "target": "broad",
+            "effects": [
+              {
+                "behavior": "effect_broad"
+              }
+            ]
+          },
+          {
+            "source": "parent/a/x",
+            "on": "go",
+            "target": "specific",
+            "effects": [
+              {
+                "behavior": "effect_specific"
+              }
+            ]
+          }
+        ],
+        "states": [
+          {
+            "name": "a",
+            "initial": "x",
+            "states": [
+              {
+                "name": "x"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "broad",
+        "entry": [
+          {
+            "behavior": "entry_broad"
+          }
+        ]
+      },
+      {
+        "name": "specific",
+        "entry": [
+          {
+            "behavior": "entry_specific"
+          }
+        ]
+      }
+    ]
+  },
+  "behaviors": {
+    "effect_broad": [
+      {
+        "op": "trace",
+        "value": "effect:broad"
+      }
+    ],
+    "effect_specific": [
+      {
+        "op": "trace",
+        "value": "effect:specific"
+      }
+    ],
+    "entry_broad": [
+      {
+        "op": "trace",
+        "value": "enter:broad"
+      }
+    ],
+    "entry_specific": [
+      {
+        "op": "trace",
+        "value": "enter:specific"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "go"
+    }
+  ],
+  "expect": {
+    "state": "/SourceOverlapOrder/specific",
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "go"
+      },
+      {
+        "type": "trace",
+        "value": "effect:specific"
+      },
+      {
+        "type": "trace",
+        "value": "enter:specific"
+      },
+      {
+        "type": "stable",
+        "state": "/SourceOverlapOrder/specific"
+      }
+    ]
+  }
+}

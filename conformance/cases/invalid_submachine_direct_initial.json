@@ -1,0 +1,40 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_submachine_direct_initial",
+  "mode": "validation",
+  "description": "A submachine state must not declare its own initial target because child structure comes only from the referenced machine.",
+  "features": [
+    "submachine",
+    "validation"
+  ],
+  "model": {
+    "name": "InvalidSubmachineDirectInitial",
+    "initial": "drive",
+    "states": [
+      {
+        "name": "drive",
+        "kind": "submachine",
+        "machine": "InitialChild",
+        "initial": "inside"
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "InitialChild",
+      "initial": "inside",
+      "states": [
+        {
+          "name": "inside"
+        }
+      ]
+    }
+  ],
+  "expect": {
+    "validation": [
+      {
+        "code": "invalid_submachine_initial"
+      }
+    ]
+  }
+}

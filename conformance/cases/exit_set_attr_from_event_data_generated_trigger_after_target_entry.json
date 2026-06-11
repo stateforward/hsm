@@ -1,0 +1,50 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "exit_set_attr_from_event_data_generated_trigger_after_target_entry",
+  "description": "Event-data attribute work generated from exit behavior replays only after the transition target is entered.",
+  "features": ["exit", "attribute", "event_data", "on_set", "when", "queue", "reentrancy"],
+  "model": {
+    "name": "ExitSetAttrFromEventDataGeneratedTriggerAfterTargetEntry",
+    "initial": "active",
+    "attributes": {"flag": {"type": "boolean", "default": false}, "ready": {"type": "boolean", "default": false}},
+    "states": [
+      {
+        "name": "active",
+        "exit": [{"behavior": "exit_capture"}],
+        "transitions": [
+          {"on": "submit", "target": "target"},
+          {"trigger": {"kind": "on_set", "attribute": "flag"}, "target": "wrong", "effects": [{"behavior": "effect_wrong"}]}
+        ]
+      },
+      {"name": "target", "entry": [{"behavior": "entry_target"}], "transitions": [{"trigger": {"kind": "on_set", "attribute": "flag"}, "target": "flag_seen", "effects": [{"behavior": "effect_flag"}]}]},
+      {"name": "flag_seen", "entry": [{"behavior": "entry_flag"}], "transitions": [{"trigger": {"kind": "when", "behavior": "ready_when"}, "target": "all_seen", "effects": [{"behavior": "effect_ready"}]}]},
+      {"name": "all_seen", "entry": [{"behavior": "entry_all"}]},
+      {"name": "wrong"}
+    ]
+  },
+  "behaviors": {
+    "exit_capture": [{"op": "set_attr_from_event_data", "name": "flag", "path": "flag"}, {"op": "set_attr_from_event_data", "name": "ready", "path": "ready"}, {"op": "trace", "value": "exit:active"}],
+    "ready_when": [{"op": "return_equals", "name": "ready", "value": true}],
+    "entry_target": [{"op": "trace", "value": "entry:target"}],
+    "effect_flag": [{"op": "trace", "value": "effect:flag"}],
+    "entry_flag": [{"op": "trace", "value": "entry:flag"}],
+    "effect_ready": [{"op": "trace", "value": "effect:ready"}],
+    "entry_all": [{"op": "trace", "value": "entry:all"}],
+    "effect_wrong": [{"op": "trace", "value": "effect:wrong"}]
+  },
+  "script": [{"op": "start"}, {"op": "dispatch", "event": {"name": "submit", "data": {"flag": true, "ready": true}}}],
+  "expect": {
+    "state": "/ExitSetAttrFromEventDataGeneratedTriggerAfterTargetEntry/all_seen",
+    "attributes": {"flag": true, "ready": true},
+    "trace": [
+      {"type": "dispatch", "event": "submit"},
+      {"type": "trace", "value": "exit:active"},
+      {"type": "trace", "value": "entry:target"},
+      {"type": "trace", "value": "effect:flag"},
+      {"type": "trace", "value": "entry:flag"},
+      {"type": "trace", "value": "effect:ready"},
+      {"type": "trace", "value": "entry:all"},
+      {"type": "stable", "state": "/ExitSetAttrFromEventDataGeneratedTriggerAfterTargetEntry/all_seen"}
+    ]
+  }
+}

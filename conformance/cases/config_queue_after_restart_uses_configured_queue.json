@@ -1,0 +1,88 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "config_queue_after_restart_uses_configured_queue",
+  "description": "A restarted instance continues to route subsequent regular events through its configured queue.",
+  "features": ["queue", "lifecycle", "restart", "dispatch_to"],
+  "model": {
+    "name": "ConfigQueueAfterRestartUsesConfiguredQueue",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "on": "go",
+            "target": "done",
+            "effects": [
+              {
+                "behavior": "effect_go"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "done"
+      }
+    ]
+  },
+  "instances": [
+    {
+      "id": "queued",
+      "config": {
+        "queue": "trace_fifo"
+      }
+    }
+  ],
+  "behaviors": {
+    "effect_go": [
+      {
+        "op": "trace",
+        "value": "effect:go"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start",
+      "instance": "queued"
+    },
+    {
+      "op": "restart",
+      "instance": "queued"
+    },
+    {
+      "op": "dispatch_to",
+      "target": "queued",
+      "event": "go"
+    }
+  ],
+  "expect": {
+    "states": {
+      "queued": "/ConfigQueueAfterRestartUsesConfiguredQueue/done"
+    },
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "go",
+        "target": "queued"
+      },
+      {
+        "type": "trace",
+        "value": "queue:push:go"
+      },
+      {
+        "type": "trace",
+        "value": "queue:pop:go"
+      },
+      {
+        "type": "trace",
+        "value": "effect:go"
+      },
+      {
+        "type": "stable",
+        "state": "queued"
+      }
+    ]
+  }
+}

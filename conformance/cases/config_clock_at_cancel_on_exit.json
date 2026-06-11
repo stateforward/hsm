@@ -1,0 +1,95 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "config_clock_at_cancel_on_exit",
+  "description": "An at timer using an instance config clock is cancelled when its source state exits before firing.",
+  "features": ["timer", "at", "cancellation"],
+  "model": {
+    "name": "ConfigClockAtCancelOnExit",
+    "initial": "waiting",
+    "states": [
+      {
+        "name": "waiting",
+        "transitions": [
+          {
+            "trigger": {
+              "kind": "at",
+              "time_ms": 100
+            },
+            "target": "fired"
+          },
+          {
+            "on": "leave",
+            "target": "done"
+          }
+        ]
+      },
+      {
+        "name": "fired"
+      },
+      {
+        "name": "done",
+        "entry": [
+          {
+            "behavior": "entry_done"
+          }
+        ]
+      }
+    ]
+  },
+  "instances": [
+    {
+      "id": "default",
+      "config": {
+        "clock": "trace_nonzero_sleep"
+      }
+    }
+  ],
+  "behaviors": {
+    "entry_done": [
+      {
+        "op": "trace",
+        "value": "enter:done"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "leave"
+    },
+    {
+      "op": "tick",
+      "millis": 10
+    }
+  ],
+  "expect": {
+    "state": "/ConfigClockAtCancelOnExit/done",
+    "trace": [
+      {
+        "type": "timer_scheduled"
+      },
+      {
+        "type": "trace",
+        "value": "clock:sleep:nonzero"
+      },
+      {
+        "type": "dispatch",
+        "event": "leave"
+      },
+      {
+        "type": "timer_cancelled"
+      },
+      {
+        "type": "trace",
+        "value": "enter:done"
+      },
+      {
+        "type": "stable",
+        "state": "/ConfigClockAtCancelOnExit/done"
+      }
+    ]
+  }
+}

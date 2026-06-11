@@ -1,0 +1,38 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_submodel_missing_initial",
+  "mode": "validation",
+  "description": "A child model with multiple ordinary states must declare its own root initial target.",
+  "features": ["submachine", "validation"],
+  "model": {
+    "name": "InvalidSubmodelMissingInitial",
+    "initial": "drive",
+    "states": [
+      {
+        "name": "drive",
+        "kind": "submachine",
+        "machine": "ChildMissingInitial"
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "ChildMissingInitial",
+      "states": [
+        {
+          "name": "a"
+        },
+        {
+          "name": "b"
+        }
+      ]
+    }
+  ],
+  "expect": {
+    "validation": [
+      {
+        "code": "missing_initial"
+      }
+    ]
+  }
+}

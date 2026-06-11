@@ -1,0 +1,24 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_empty_entry_array",
+  "mode": "validation",
+  "description": "State entry behavior arrays must not be empty when present.",
+  "features": ["entry", "validation"],
+  "model": {
+    "name": "InvalidEmptyEntryArray",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle",
+        "entry": []
+      }
+    ]
+  },
+  "expect": {
+    "validation": [
+      {
+        "code": "empty_behavior_array"
+      }
+    ]
+  }
+}

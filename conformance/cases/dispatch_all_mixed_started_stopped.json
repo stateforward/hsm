@@ -1,0 +1,84 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "dispatch_all_mixed_started_stopped",
+  "description": "dispatch_all delivers to started instances and ignores stopped instances in the same broadcast.",
+  "features": ["broadcast", "lifecycle", "stop"],
+  "model": {
+    "name": "DispatchAllMixedStartedStopped",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "on": "go",
+            "target": "done",
+            "effects": [
+              {
+                "behavior": "effect_go"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "done"
+      }
+    ]
+  },
+  "instances": [
+    {
+      "id": "started"
+    },
+    {
+      "id": "stopped"
+    }
+  ],
+  "behaviors": {
+    "effect_go": [
+      {
+        "op": "trace",
+        "value": "effect:go"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start",
+      "instance": "started"
+    },
+    {
+      "op": "start",
+      "instance": "stopped"
+    },
+    {
+      "op": "stop",
+      "instance": "stopped"
+    },
+    {
+      "op": "dispatch_all",
+      "event": "go"
+    }
+  ],
+  "expect": {
+    "states": {
+      "started": "/DispatchAllMixedStartedStopped/done",
+      "stopped": "/DispatchAllMixedStartedStopped"
+    },
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "go",
+        "target": "all"
+      },
+      {
+        "type": "trace",
+        "value": "effect:go"
+      },
+      {
+        "type": "stable",
+        "state": "all"
+      }
+    ]
+  }
+}

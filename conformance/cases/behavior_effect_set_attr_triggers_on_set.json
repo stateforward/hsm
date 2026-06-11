@@ -1,0 +1,119 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "behavior_effect_set_attr_triggers_on_set",
+  "description": "A transition effect set_attr change emits an on_set transition after the current transition reaches its target.",
+  "features": ["attribute", "on_set", "behavior_attr", "queue", "reentrancy"],
+  "model": {
+    "name": "EffectSetAttrOnSet",
+    "initial": "idle",
+    "attributes": {
+      "flag": {
+        "type": "boolean",
+        "default": false
+      }
+    },
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "on": "go",
+            "target": "waiting",
+            "effects": [
+              {
+                "behavior": "effect_set_flag"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "waiting",
+        "transitions": [
+          {
+            "trigger": {
+              "kind": "on_set",
+              "attribute": "flag"
+            },
+            "target": "changed",
+            "effects": [
+              {
+                "behavior": "effect_changed"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "changed",
+        "entry": [
+          {
+            "behavior": "entry_changed"
+          }
+        ]
+      }
+    ]
+  },
+  "behaviors": {
+    "effect_set_flag": [
+      {
+        "op": "trace",
+        "value": "effect:set-flag"
+      },
+      {
+        "op": "set_attr",
+        "name": "flag",
+        "value": true
+      }
+    ],
+    "effect_changed": [
+      {
+        "op": "trace",
+        "value": "effect:on-set"
+      }
+    ],
+    "entry_changed": [
+      {
+        "op": "trace",
+        "value": "enter:changed"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "go"
+    }
+  ],
+  "expect": {
+    "state": "/EffectSetAttrOnSet/changed",
+    "attributes": {
+      "flag": true
+    },
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "go"
+      },
+      {
+        "type": "trace",
+        "value": "effect:set-flag"
+      },
+      {
+        "type": "trace",
+        "value": "effect:on-set"
+      },
+      {
+        "type": "trace",
+        "value": "enter:changed"
+      },
+      {
+        "type": "stable",
+        "state": "/EffectSetAttrOnSet/changed"
+      }
+    ]
+  }
+}

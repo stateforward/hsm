@@ -1,0 +1,100 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "root_transition_on_call_global",
+  "description": "A source-less root-owned on_call transition can be selected from the active leaf and runs before the operation body completes.",
+  "features": [
+    "root_transition",
+    "operation",
+    "on_call"
+  ],
+  "model": {
+    "name": "RootTransitionOnCallGlobal",
+    "initial": "idle",
+    "operations": {
+      "approve": {
+        "behavior": "operation_approve"
+      }
+    },
+    "states": [
+      {
+        "name": "idle"
+      },
+      {
+        "name": "approved",
+        "entry": [
+          {
+            "behavior": "entry_approved"
+          }
+        ]
+      }
+    ],
+    "transitions": [
+      {
+        "trigger": {
+          "kind": "on_call",
+          "operation": "approve"
+        },
+        "target": "approved",
+        "effects": [
+          {
+            "behavior": "effect_approved"
+          }
+        ]
+      }
+    ]
+  },
+  "behaviors": {
+    "operation_approve": [
+      {
+        "op": "trace",
+        "value": "operation:approve"
+      }
+    ],
+    "effect_approved": [
+      {
+        "op": "trace",
+        "value": "effect:approved"
+      }
+    ],
+    "entry_approved": [
+      {
+        "op": "trace",
+        "value": "entry:approved"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "call",
+      "operation": "approve"
+    }
+  ],
+  "expect": {
+    "state": "/RootTransitionOnCallGlobal/approved",
+    "trace": [
+      {
+        "type": "call",
+        "operation": "approve"
+      },
+      {
+        "type": "trace",
+        "value": "effect:approved"
+      },
+      {
+        "type": "trace",
+        "value": "entry:approved"
+      },
+      {
+        "type": "trace",
+        "value": "operation:approve"
+      },
+      {
+        "type": "stable",
+        "state": "/RootTransitionOnCallGlobal/approved"
+      }
+    ]
+  }
+}

@@ -1,0 +1,117 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "submachine_history_entry_point_default",
+  "description": "An entry point targeting child history uses the history default path when that submachine instance has no recorded history.",
+  "features": [
+    "submachine",
+    "entry_point",
+    "history",
+    "shallow_history"
+  ],
+  "model": {
+    "name": "SubmachineHistoryDefault",
+    "initial": "outside",
+    "states": [
+      {
+        "name": "outside",
+        "transitions": [
+          {
+            "on": "resume",
+            "target": "drive",
+            "entry_point": "history"
+          }
+        ]
+      },
+      {
+        "name": "drive",
+        "kind": "submachine",
+        "machine": "HistoryDefaultChild"
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "HistoryDefaultChild",
+      "initial": "comp",
+      "entry_points": [
+        {
+          "name": "history",
+          "target": "comp/h",
+          "effects": [
+            {
+              "behavior": "effect_history"
+            }
+          ]
+        }
+      ],
+      "states": [
+        {
+          "name": "comp",
+          "initial": "a",
+          "states": [
+            {
+              "name": "a",
+              "entry": [
+                {
+                  "behavior": "entry_a"
+                }
+              ]
+            },
+            {
+              "name": "b"
+            },
+            {
+              "name": "h",
+              "kind": "shallow_history",
+              "transitions": [
+                {
+                  "target": "b"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "behaviors": {
+    "effect_history": [
+      {
+        "op": "trace",
+        "value": "effect:history"
+      }
+    ],
+    "entry_a": [
+      {
+        "op": "trace",
+        "value": "enter:a"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "resume"
+    }
+  ],
+  "expect": {
+    "state": "/SubmachineHistoryDefault/drive/HistoryDefaultChild/comp/b",
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "resume"
+      },
+      {
+        "type": "trace",
+        "value": "effect:history"
+      },
+      {
+        "type": "stable",
+        "state": "/SubmachineHistoryDefault/drive/HistoryDefaultChild/comp/b"
+      }
+    ]
+  }
+}

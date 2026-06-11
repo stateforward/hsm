@@ -1,0 +1,81 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "behavior_raise_from_activity",
+  "description": "A normal internal event raised from an activity is processed through the normal queue while the state is active.",
+  "features": ["activity", "async", "queue", "reentrancy"],
+  "model": {
+    "name": "BehaviorRaiseFromActivity",
+    "initial": "active",
+    "states": [
+      {
+        "name": "active",
+        "activity": [
+          {
+            "behavior": "activity_raise"
+          }
+        ],
+        "transitions": [
+          {
+            "on": "audit",
+            "target": "done",
+            "effects": [
+              {
+                "behavior": "effect_audit"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "done"
+      }
+    ]
+  },
+  "behaviors": {
+    "activity_raise": [
+      {
+        "op": "yield"
+      },
+      {
+        "op": "raise",
+        "event": "audit"
+      },
+      {
+        "op": "trace",
+        "value": "activity:raise"
+      }
+    ],
+    "effect_audit": [
+      {
+        "op": "trace",
+        "value": "effect:audit"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "sleep",
+      "millis": 10
+    }
+  ],
+  "expect": {
+    "state": "/BehaviorRaiseFromActivity/done",
+    "trace": [
+      {
+        "type": "raise",
+        "event": "audit"
+      },
+      {
+        "type": "trace",
+        "value": "effect:audit"
+      },
+      {
+        "type": "stable",
+        "state": "/BehaviorRaiseFromActivity/done"
+      }
+    ]
+  }
+}

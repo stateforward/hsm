@@ -1,0 +1,119 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "timer_every_attribute_reschedule_changed_interval",
+  "description": "An every timer using an attribute interval reschedules from the updated interval after a self transition.",
+  "features": ["timer", "every", "attribute", "self"],
+  "model": {
+    "name": "TimerEveryAttributeChangedInterval",
+    "initial": "waiting",
+    "attributes": {
+      "interval_ms": {
+        "type": "duration_ms",
+        "default": 10
+      }
+    },
+    "states": [
+      {
+        "name": "waiting",
+        "transitions": [
+          {
+            "trigger": {
+              "kind": "every",
+              "attribute": "interval_ms"
+            },
+            "kind": "self",
+            "target": "waiting",
+            "effects": [
+              {
+                "behavior": "effect_first_tick"
+              }
+            ]
+          },
+          {
+            "on": "stop",
+            "target": "done"
+          }
+        ]
+      },
+      {
+        "name": "done"
+      }
+    ]
+  },
+  "behaviors": {
+    "effect_first_tick": [
+      {
+        "op": "trace",
+        "value": "effect:tick"
+      },
+      {
+        "op": "set_attr",
+        "name": "interval_ms",
+        "value": 50
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "tick",
+      "millis": 10
+    },
+    {
+      "op": "tick",
+      "millis": 40
+    },
+    {
+      "op": "tick",
+      "millis": 10
+    },
+    {
+      "op": "dispatch",
+      "event": "stop"
+    }
+  ],
+  "expect": {
+    "state": "/TimerEveryAttributeChangedInterval/done",
+    "attributes": {
+      "interval_ms": 50
+    },
+    "trace": [
+      {
+        "type": "timer_scheduled"
+      },
+      {
+        "type": "timer_fired"
+      },
+      {
+        "type": "trace",
+        "value": "effect:tick"
+      },
+      {
+        "type": "timer_scheduled"
+      },
+      {
+        "type": "timer_fired"
+      },
+      {
+        "type": "trace",
+        "value": "effect:tick"
+      },
+      {
+        "type": "timer_scheduled"
+      },
+      {
+        "type": "dispatch",
+        "event": "stop"
+      },
+      {
+        "type": "timer_cancelled"
+      },
+      {
+        "type": "stable",
+        "state": "/TimerEveryAttributeChangedInterval/done"
+      }
+    ]
+  }
+}

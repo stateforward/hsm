@@ -1,0 +1,33 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_deep_history_missing_default",
+  "mode": "validation",
+  "description": "Deep history pseudostates must declare a default transition partial.",
+  "features": ["history", "deep_history", "validation"],
+  "model": {
+    "name": "InvalidDeepHistoryMissingDefault",
+    "initial": "parent",
+    "states": [
+      {
+        "name": "parent",
+        "initial": "h",
+        "states": [
+          {
+            "name": "h",
+            "kind": "deep_history"
+          },
+          {
+            "name": "idle"
+          }
+        ]
+      }
+    ]
+  },
+  "expect": {
+    "validation": [
+      {
+        "code": "history_missing_default"
+      }
+    ]
+  }
+}

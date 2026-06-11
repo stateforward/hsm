@@ -1,0 +1,37 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "lifecycle_stop_before_start_error",
+  "description": "Stopping an instance before it has been started produces a normalized lifecycle error.",
+  "features": ["lifecycle", "error"],
+  "model": {
+    "name": "LifecycleStopBeforeStartError",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "stop"
+    }
+  ],
+  "expect": {
+    "state": "",
+    "error": {
+      "code": "lifecycle_error",
+      "message_contains": "started"
+    },
+    "trace": [
+      {
+        "type": "error",
+        "code": "lifecycle_error"
+      },
+      {
+        "type": "stable",
+        "state": ""
+      }
+    ]
+  }
+}

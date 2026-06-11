@@ -1,0 +1,33 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_choice_initial",
+  "mode": "validation",
+  "description": "Choice pseudostates must not declare initial transitions.",
+  "features": ["choice", "initial", "validation"],
+  "model": {
+    "name": "InvalidChoiceInitial",
+    "initial": "choice",
+    "states": [
+      {
+        "name": "choice",
+        "kind": "choice",
+        "initial": "../done",
+        "transitions": [
+          {
+            "target": "done"
+          }
+        ]
+      },
+      {
+        "name": "done"
+      }
+    ]
+  },
+  "expect": {
+    "validation": [
+      {
+        "code": "already has an initial state"
+      }
+    ]
+  }
+}

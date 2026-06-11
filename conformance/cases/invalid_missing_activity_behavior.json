@@ -1,0 +1,31 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_missing_activity_behavior",
+  "mode": "validation",
+  "description": "State activity behavior references must resolve to declared portable behavior programs.",
+  "features": [
+    "activity",
+    "validation"
+  ],
+  "model": {
+    "name": "InvalidMissingActivityBehavior",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle",
+        "activity": [
+          {
+            "behavior": "missing_activity"
+          }
+        ]
+      }
+    ]
+  },
+  "expect": {
+    "validation": [
+      {
+        "code": "missing_behavior"
+      }
+    ]
+  }
+}

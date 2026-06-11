@@ -1,0 +1,85 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "snapshot_event_details_ancestor_transition",
+  "description": "Snapshots taken at a nested active leaf include transition snapshots for selectable ancestor transitions and exclude inactive sibling transitions.",
+  "features": [
+    "snapshot",
+    "nested",
+    "selection_order"
+  ],
+  "model": {
+    "name": "SnapshotEventDetailsAncestorTransition",
+    "initial": "parent",
+    "states": [
+      {
+        "name": "parent",
+        "initial": "child",
+        "transitions": [
+          {
+            "on": "parent_go",
+            "target": "done"
+          }
+        ],
+        "states": [
+          {
+            "name": "child"
+          },
+          {
+            "name": "sibling",
+            "transitions": [
+              {
+                "on": "sibling_only",
+                "target": "../child"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "done"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "snapshot"
+    }
+  ],
+  "expect": {
+    "state": "/SnapshotEventDetailsAncestorTransition/parent/child",
+    "snapshots": {
+      "last": {
+        "id": "default",
+        "qualified_name": "/SnapshotEventDetailsAncestorTransition",
+        "state": "/SnapshotEventDetailsAncestorTransition/parent/child",
+        "attributes": {},
+        "queue_len": 0,
+        "transitions": [
+          {
+            "name": "/SnapshotEventDetailsAncestorTransition/parent/transition_9",
+            "kind": 67343,
+            "source": "/SnapshotEventDetailsAncestorTransition/parent",
+            "target": "/SnapshotEventDetailsAncestorTransition/done",
+            "events": [
+              "parent_go"
+            ],
+            "guard": false
+          }
+        ]
+      }
+    },
+    "trace": [
+      {
+        "type": "snapshot",
+        "state": "/SnapshotEventDetailsAncestorTransition/parent/child"
+      },
+      {
+        "type": "stable",
+        "state": "/SnapshotEventDetailsAncestorTransition/parent/child"
+      }
+    ]
+  }
+}

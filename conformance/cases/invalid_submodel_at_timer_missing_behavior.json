@@ -1,0 +1,48 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_submodel_at_timer_missing_behavior",
+  "mode": "validation",
+  "description": "at timer behavior references inside child models must be validated recursively.",
+  "features": ["submachine", "timer", "at", "validation"],
+  "model": {
+    "name": "InvalidSubmodelAtTimerMissingBehavior",
+    "initial": "drive",
+    "states": [
+      {
+        "name": "drive",
+        "kind": "submachine",
+        "machine": "ChildWithMissingAtTimerBehavior"
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "ChildWithMissingAtTimerBehavior",
+      "initial": "waiting",
+      "states": [
+        {
+          "name": "waiting",
+          "transitions": [
+            {
+              "trigger": {
+                "kind": "at",
+                "behavior": "missing_child_deadline"
+              },
+              "target": "done"
+            }
+          ]
+        },
+        {
+          "name": "done"
+        }
+      ]
+    }
+  ],
+  "expect": {
+    "validation": [
+      {
+        "code": "missing_behavior"
+      }
+    ]
+  }
+}

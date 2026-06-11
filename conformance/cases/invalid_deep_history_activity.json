@@ -1,0 +1,51 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_deep_history_activity",
+  "mode": "validation",
+  "description": "Deep history pseudostates must not declare activities.",
+  "features": ["history", "deep_history", "activity", "validation"],
+  "model": {
+    "name": "InvalidDeepHistoryActivity",
+    "initial": "parent",
+    "states": [
+      {
+        "name": "parent",
+        "initial": "h",
+        "states": [
+          {
+            "name": "h",
+            "kind": "deep_history",
+            "activity": [
+              {
+                "behavior": "activity_h"
+              }
+            ],
+            "transitions": [
+              {
+                "target": "idle"
+              }
+            ]
+          },
+          {
+            "name": "idle"
+          }
+        ]
+      }
+    ]
+  },
+  "behaviors": {
+    "activity_h": [
+      {
+        "op": "trace",
+        "value": "activity:h"
+      }
+    ]
+  },
+  "expect": {
+    "validation": [
+      {
+        "code": "invalid_pseudostate_contents"
+      }
+    ]
+  }
+}

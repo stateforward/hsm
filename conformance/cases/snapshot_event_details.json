@@ -1,0 +1,80 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "snapshot_event_details",
+  "description": "Snapshots include transition snapshot entries for transitions selectable from the current state.",
+  "features": [
+    "snapshot",
+    "guard"
+  ],
+  "model": {
+    "name": "SnapshotEventDetails",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "on": "go",
+            "guard": {
+              "behavior": "allow"
+            },
+            "target": "done"
+          }
+        ]
+      },
+      {
+        "name": "done"
+      }
+    ]
+  },
+  "behaviors": {
+    "allow": [
+      {
+        "op": "return_value",
+        "value": true
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "snapshot"
+    }
+  ],
+  "expect": {
+    "state": "/SnapshotEventDetails/idle",
+    "snapshots": {
+      "last": {
+        "id": "default",
+        "qualified_name": "/SnapshotEventDetails",
+        "state": "/SnapshotEventDetails/idle",
+        "attributes": {},
+        "queue_len": 0,
+        "transitions": [
+          {
+            "name": "/SnapshotEventDetails/idle/transition_4",
+            "kind": 67343,
+            "source": "/SnapshotEventDetails/idle",
+            "target": "/SnapshotEventDetails/done",
+            "events": [
+              "go"
+            ],
+            "guard": true
+          }
+        ]
+      }
+    },
+    "trace": [
+      {
+        "type": "snapshot",
+        "state": "/SnapshotEventDetails/idle"
+      },
+      {
+        "type": "stable",
+        "state": "/SnapshotEventDetails/idle"
+      }
+    ]
+  }
+}

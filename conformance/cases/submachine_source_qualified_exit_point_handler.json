@@ -1,0 +1,125 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "submachine_source_qualified_exit_point_handler",
+  "description": "A parent-owned source-qualified transition can handle a submachine exit-point outcome.",
+  "features": [
+    "submachine",
+    "exit_point",
+    "source"
+  ],
+  "model": {
+    "name": "SubmachineSourceQualifiedExit",
+    "initial": "drive",
+    "states": [
+      {
+        "name": "drive",
+        "kind": "submachine",
+        "machine": "SourceExitChild"
+      },
+      {
+        "name": "done",
+        "entry": [
+          {
+            "behavior": "entry_done"
+          }
+        ]
+      }
+    ],
+    "transitions": [
+      {
+        "source": "drive",
+        "trigger": {
+          "kind": "exit_point",
+          "exit_point": "done"
+        },
+        "target": "done",
+        "effects": [
+          {
+            "behavior": "effect_done"
+          }
+        ]
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "SourceExitChild",
+      "initial": "active",
+      "exit_points": [
+        {
+          "name": "done"
+        }
+      ],
+      "states": [
+        {
+          "name": "active",
+          "transitions": [
+            {
+              "on": "finish",
+              "target": "done",
+              "effects": [
+                {
+                  "behavior": "effect_child"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "behaviors": {
+    "effect_child": [
+      {
+        "op": "trace",
+        "value": "effect:child"
+      }
+    ],
+    "effect_done": [
+      {
+        "op": "trace",
+        "value": "effect:done"
+      }
+    ],
+    "entry_done": [
+      {
+        "op": "trace",
+        "value": "enter:done"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "finish"
+    }
+  ],
+  "expect": {
+    "state": "/SubmachineSourceQualifiedExit/done",
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "finish"
+      },
+      {
+        "type": "trace",
+        "value": "effect:child"
+      },
+      {
+        "type": "trace",
+        "value": "effect:done"
+      },
+      {
+        "type": "trace",
+        "value": "enter:done"
+      },
+      {
+        "type": "stable",
+        "state": "/SubmachineSourceQualifiedExit/done"
+      }
+    ]
+  }
+}

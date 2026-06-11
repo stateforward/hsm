@@ -1,0 +1,132 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "submachine_entry_point_effect_error_short_circuit",
+    "description": "A failing entry-point effect preserves the source state and prevents later entry-point effects and child entry.",
+  "features": ["submachine", "entry_point", "effect", "error", "selection_order"],
+  "model": {
+    "name": "SubmachineEntryPointEffectErrorShortCircuit",
+    "initial": "outside",
+    "states": [
+      {
+        "name": "outside",
+        "transitions": [
+          {
+            "on": "go",
+            "target": "drive",
+            "entry_point": "warm"
+          }
+        ]
+      },
+      {
+        "name": "drive",
+        "kind": "submachine",
+        "machine": "EntryPointErrorChild"
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "EntryPointErrorChild",
+      "initial": "cold",
+      "entry_points": [
+        {
+          "name": "warm",
+          "target": "running",
+          "effects": [
+            {
+              "behavior": "effect_before"
+            },
+            {
+              "behavior": "effect_fail"
+            },
+            {
+              "behavior": "effect_after"
+            }
+          ]
+        }
+      ],
+      "states": [
+        {
+          "name": "cold"
+        },
+        {
+          "name": "running",
+          "entry": [
+            {
+              "behavior": "entry_running"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "behaviors": {
+    "effect_before": [
+      {
+        "op": "trace",
+        "value": "entry-point:before"
+      }
+    ],
+    "effect_fail": [
+      {
+        "op": "trace",
+        "value": "entry-point:fail"
+      },
+      {
+        "op": "raise",
+        "code": "entry_point_error",
+        "value": "entry point boom"
+      }
+    ],
+    "effect_after": [
+      {
+        "op": "trace",
+        "value": "entry-point:after"
+      }
+    ],
+    "entry_running": [
+      {
+        "op": "trace",
+        "value": "entry:running"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "go"
+    }
+  ],
+  "expect": {
+        "state": "/SubmachineEntryPointEffectErrorShortCircuit/outside",
+    "error": {
+      "code": "entry_point_error",
+      "message_contains": "entry point boom"
+    },
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "go"
+      },
+      {
+        "type": "trace",
+        "value": "entry-point:before"
+      },
+      {
+        "type": "trace",
+        "value": "entry-point:fail"
+      },
+      {
+        "type": "error",
+        "code": "entry_point_error"
+      },
+      {
+        "type": "stable",
+                "state": "/SubmachineEntryPointEffectErrorShortCircuit/outside"
+      }
+    ]
+  }
+}

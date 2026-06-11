@@ -1,0 +1,70 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "error_operation_body",
+  "description": "An operation body error raised by script call produces a normalized runtime error and leaves state unchanged.",
+  "features": [
+    "error",
+    "operation"
+  ],
+  "model": {
+    "name": "ErrorOperationBody",
+    "initial": "idle",
+    "operations": {
+      "fail": {
+        "behavior": "operation_fail"
+      }
+    },
+    "states": [
+      {
+        "name": "idle"
+      }
+    ]
+  },
+  "behaviors": {
+    "operation_fail": [
+      {
+        "op": "trace",
+        "value": "operation:raise"
+      },
+      {
+        "op": "raise",
+        "code": "operation_error",
+        "value": "operation boom"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "call",
+      "operation": "fail"
+    }
+  ],
+  "expect": {
+    "state": "/ErrorOperationBody/idle",
+    "error": {
+      "code": "operation_error",
+      "message_contains": "operation boom"
+    },
+    "trace": [
+      {
+        "type": "call",
+        "operation": "fail"
+      },
+      {
+        "type": "trace",
+        "value": "operation:raise"
+      },
+      {
+        "type": "error",
+        "code": "operation_error"
+      },
+      {
+        "type": "stable",
+        "state": "/ErrorOperationBody/idle"
+      }
+    ]
+  }
+}

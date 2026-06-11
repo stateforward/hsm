@@ -1,0 +1,91 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "timer_every_guard_false_repeats",
+  "description": "A false guard on an every timer does not exit the active state and the repeating timer remains eligible for later ticks.",
+  "features": [
+    "timer",
+    "every",
+    "guard"
+  ],
+  "model": {
+    "name": "TimerEveryGuardFalseRepeats",
+    "initial": "waiting",
+    "states": [
+      {
+        "name": "waiting",
+        "transitions": [
+          {
+            "trigger": {
+              "kind": "every",
+              "duration_ms": 10
+            },
+            "guard": {
+              "behavior": "guard_false"
+            },
+            "target": "fired"
+          }
+        ]
+      },
+      {
+        "name": "fired"
+      }
+    ]
+  },
+  "behaviors": {
+    "guard_false": [
+      {
+        "op": "trace",
+        "value": "guard:timer"
+      },
+      {
+        "op": "return_value",
+        "value": false
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "tick",
+      "millis": 10
+    },
+    {
+      "op": "tick",
+      "millis": 10
+    }
+  ],
+  "expect": {
+    "state": "/TimerEveryGuardFalseRepeats/waiting",
+    "trace": [
+      {
+        "type": "timer_scheduled"
+      },
+      {
+        "type": "timer_fired"
+      },
+      {
+        "type": "trace",
+        "value": "guard:timer"
+      },
+      {
+        "type": "timer_scheduled"
+      },
+      {
+        "type": "timer_fired"
+      },
+      {
+        "type": "trace",
+        "value": "guard:timer"
+      },
+      {
+        "type": "timer_scheduled"
+      },
+      {
+        "type": "stable",
+        "state": "/TimerEveryGuardFalseRepeats/waiting"
+      }
+    ]
+  }
+}

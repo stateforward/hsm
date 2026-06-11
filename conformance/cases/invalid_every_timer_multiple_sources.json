@@ -1,0 +1,42 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_every_timer_multiple_sources",
+  "mode": "validation",
+  "description": "An every timer trigger must not declare multiple competing interval sources.",
+  "features": ["timer", "every", "validation"],
+  "model": {
+    "name": "InvalidEveryTimerMultipleSources",
+    "initial": "waiting",
+    "attributes": {
+      "interval_ms": {
+        "type": "duration_ms",
+        "default": 10
+      }
+    },
+    "states": [
+      {
+        "name": "waiting",
+        "transitions": [
+          {
+            "trigger": {
+              "kind": "every",
+              "duration_ms": 10,
+              "attribute": "interval_ms"
+            },
+            "target": "done"
+          }
+        ]
+      },
+      {
+        "name": "done"
+      }
+    ]
+  },
+  "expect": {
+    "validation": [
+      {
+        "code": "invalid_timer_source"
+      }
+    ]
+  }
+}

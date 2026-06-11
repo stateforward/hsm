@@ -1,0 +1,57 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "attribute_type_without_default",
+  "description": "An attribute declared with an explicit type and no default can be set and observed through snapshots.",
+  "features": ["attribute", "snapshot"],
+  "model": {
+    "name": "AttributeTypeWithoutDefault",
+    "initial": "idle",
+    "attributes": {
+      "label": {
+        "type": "string"
+      }
+    },
+    "states": [
+      {
+        "name": "idle"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "set",
+      "attribute": "label",
+      "value": "ready"
+    },
+    {
+      "op": "snapshot"
+    }
+  ],
+  "expect": {
+    "state": "/AttributeTypeWithoutDefault/idle",
+    "snapshots": {
+      "last": {
+        "id": "default",
+        "qualified_name": "/AttributeTypeWithoutDefault",
+        "state": "/AttributeTypeWithoutDefault/idle",
+        "attributes": {
+          "label": "ready"
+        },
+        "queue_len": 0
+      }
+    },
+    "trace": [
+      {
+        "type": "snapshot",
+        "state": "/AttributeTypeWithoutDefault/idle"
+      },
+      {
+        "type": "stable",
+        "state": "/AttributeTypeWithoutDefault/idle"
+      }
+    ]
+  }
+}

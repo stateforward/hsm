@@ -1,0 +1,118 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "submachine_exit_point_multiple_effect_order",
+  "description": "Multiple exit-point effects execute in declaration order before the containing submachine boundary exits.",
+  "features": ["submachine", "exit_point", "effect", "exit", "selection_order"],
+  "model": {
+    "name": "SubmachineExitPointMultipleEffects",
+    "initial": "drive",
+    "states": [
+      {
+        "name": "drive",
+        "kind": "submachine",
+        "machine": "ExitPointEffectsChild",
+        "exit": [
+          {
+            "behavior": "exit_drive"
+          }
+        ],
+        "transitions": [
+          {
+            "trigger": {
+              "kind": "exit_point",
+              "exit_point": "done"
+            },
+            "target": "outside"
+          }
+        ]
+      },
+      {
+        "name": "outside"
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "ExitPointEffectsChild",
+      "initial": "active",
+      "exit_points": [
+        {
+          "name": "done",
+          "effects": [
+            {
+              "behavior": "effect_exit_point_1"
+            },
+            {
+              "behavior": "effect_exit_point_2"
+            }
+          ]
+        }
+      ],
+      "states": [
+        {
+          "name": "active",
+          "transitions": [
+            {
+              "on": "finish",
+              "target": "done"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "behaviors": {
+    "effect_exit_point_1": [
+      {
+        "op": "trace",
+        "value": "effect:exit-point:1"
+      }
+    ],
+    "effect_exit_point_2": [
+      {
+        "op": "trace",
+        "value": "effect:exit-point:2"
+      }
+    ],
+    "exit_drive": [
+      {
+        "op": "trace",
+        "value": "exit:drive"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "finish"
+    }
+  ],
+  "expect": {
+    "state": "/SubmachineExitPointMultipleEffects/outside",
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "finish"
+      },
+      {
+        "type": "trace",
+        "value": "effect:exit-point:1"
+      },
+      {
+        "type": "trace",
+        "value": "effect:exit-point:2"
+      },
+      {
+        "type": "trace",
+        "value": "exit:drive"
+      },
+      {
+        "type": "stable",
+        "state": "/SubmachineExitPointMultipleEffects/outside"
+      }
+    ]
+  }
+}

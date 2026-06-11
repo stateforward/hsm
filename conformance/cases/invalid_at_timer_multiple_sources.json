@@ -1,0 +1,42 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_at_timer_multiple_sources",
+  "mode": "validation",
+  "description": "An at timer trigger must not declare multiple competing timepoint sources.",
+  "features": ["timer", "at", "validation"],
+  "model": {
+    "name": "InvalidAtTimerMultipleSources",
+    "initial": "waiting",
+    "attributes": {
+      "deadline_ms": {
+        "type": "time_ms",
+        "default": 10
+      }
+    },
+    "states": [
+      {
+        "name": "waiting",
+        "transitions": [
+          {
+            "trigger": {
+              "kind": "at",
+              "time_ms": 10,
+              "attribute": "deadline_ms"
+            },
+            "target": "done"
+          }
+        ]
+      },
+      {
+        "name": "done"
+      }
+    ]
+  },
+  "expect": {
+    "validation": [
+      {
+        "code": "invalid_timer_source"
+      }
+    ]
+  }
+}

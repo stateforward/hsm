@@ -1,0 +1,168 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "config_queue_completion_priority_over_regular_queue",
+  "description": "Completion events bypass and outrank regular events already buffered in an instance configured queue.",
+  "features": ["queue", "final", "completion", "reentrancy"],
+  "model": {
+    "name": "ConfigQueueCompletionPriorityOverRegularQueue",
+    "initial": "work",
+    "states": [
+      {
+        "name": "work",
+        "transitions": [
+          {
+            "on": "finish",
+            "target": "done",
+            "effects": [
+              {
+                "behavior": "dispatch_audit"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "done",
+        "kind": "final"
+      },
+      {
+        "name": "complete",
+        "entry": [
+          {
+            "behavior": "entry_complete"
+          }
+        ],
+        "transitions": [
+          {
+            "on": "audit",
+            "target": "audited",
+            "effects": [
+              {
+                "behavior": "effect_audit"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "audited",
+        "entry": [
+          {
+            "behavior": "entry_audited"
+          }
+        ]
+      }
+    ],
+    "transitions": [
+      {
+        "trigger": {
+          "kind": "completion"
+        },
+        "target": "complete",
+        "effects": [
+          {
+            "behavior": "effect_completion"
+          }
+        ]
+      }
+    ]
+  },
+  "instances": [
+    {
+      "id": "default",
+      "config": {
+        "queue": "trace_fifo"
+      }
+    }
+  ],
+  "behaviors": {
+    "dispatch_audit": [
+      {
+        "op": "dispatch",
+        "event": "audit"
+      }
+    ],
+    "effect_completion": [
+      {
+        "op": "trace",
+        "value": "effect:completion"
+      }
+    ],
+    "entry_complete": [
+      {
+        "op": "trace",
+        "value": "enter:complete"
+      }
+    ],
+    "effect_audit": [
+      {
+        "op": "trace",
+        "value": "effect:audit"
+      }
+    ],
+    "entry_audited": [
+      {
+        "op": "trace",
+        "value": "enter:audited"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "finish"
+    }
+  ],
+  "expect": {
+    "state": "/ConfigQueueCompletionPriorityOverRegularQueue/audited",
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "finish"
+      },
+      {
+        "type": "trace",
+        "value": "queue:push:finish"
+      },
+      {
+        "type": "trace",
+        "value": "queue:pop:finish"
+      },
+      {
+        "type": "dispatch",
+        "event": "audit"
+      },
+      {
+        "type": "trace",
+        "value": "queue:push:audit"
+      },
+      {
+        "type": "trace",
+        "value": "effect:completion"
+      },
+      {
+        "type": "trace",
+        "value": "enter:complete"
+      },
+      {
+        "type": "trace",
+        "value": "queue:pop:audit"
+      },
+      {
+        "type": "trace",
+        "value": "effect:audit"
+      },
+      {
+        "type": "trace",
+        "value": "enter:audited"
+      },
+      {
+        "type": "stable",
+        "state": "/ConfigQueueCompletionPriorityOverRegularQueue/audited"
+      }
+    ]
+  }
+}

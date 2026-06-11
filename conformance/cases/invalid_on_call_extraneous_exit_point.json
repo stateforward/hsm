@@ -1,0 +1,49 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_on_call_extraneous_exit_point",
+  "mode": "validation",
+  "description": "An on_call trigger must not declare exit-point operands.",
+  "features": ["operation", "on_call", "exit_point", "validation"],
+  "model": {
+    "name": "InvalidOnCallExtraneousExitPoint",
+    "initial": "idle",
+    "operations": {
+      "approve": {
+        "behavior": "operation_approve"
+      }
+    },
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "trigger": {
+              "kind": "on_call",
+              "operation": "approve",
+              "exit_point": "done"
+            },
+            "target": "done"
+          }
+        ]
+      },
+      {
+        "name": "done"
+      }
+    ]
+  },
+  "behaviors": {
+    "operation_approve": [
+      {
+        "op": "trace",
+        "value": "operation:approve"
+      }
+    ]
+  },
+  "expect": {
+    "validation": [
+      {
+        "code": "extraneous_trigger_operand"
+      }
+    ]
+  }
+}

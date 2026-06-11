@@ -1,0 +1,108 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "submachine_boundary_activity_cancel_on_parent_exit",
+  "description": "An activity declared on the submachine boundary state is cancelled when a parent transition exits that boundary.",
+  "features": [
+    "submachine",
+    "activity",
+    "async",
+    "cancellation"
+  ],
+  "model": {
+    "name": "SubmachineBoundaryActivityCancel",
+    "initial": "drive",
+    "states": [
+      {
+        "name": "drive",
+        "kind": "submachine",
+        "machine": "BoundaryActivityChild",
+        "activity": [
+          {
+            "behavior": "boundary_activity"
+          }
+        ],
+        "transitions": [
+          {
+            "on": "leave",
+            "target": "done"
+          }
+        ]
+      },
+      {
+        "name": "done",
+        "entry": [
+          {
+            "behavior": "entry_done"
+          }
+        ]
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "BoundaryActivityChild",
+      "initial": "idle",
+      "states": [
+        {
+          "name": "idle"
+        }
+      ]
+    }
+  ],
+  "behaviors": {
+    "boundary_activity": [
+      {
+        "op": "trace",
+        "value": "boundary-activity:start"
+      },
+      {
+        "op": "sleep",
+        "millis": 1000
+      },
+      {
+        "op": "trace",
+        "value": "boundary-activity:done"
+      }
+    ],
+    "entry_done": [
+      {
+        "op": "trace",
+        "value": "entry:done"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "leave"
+    }
+  ],
+  "expect": {
+    "state": "/SubmachineBoundaryActivityCancel/done",
+    "trace": [
+      {
+        "type": "trace",
+        "value": "boundary-activity:start"
+      },
+      {
+        "type": "dispatch",
+        "event": "leave"
+      },
+      {
+        "type": "activity_cancel",
+        "behavior": "boundary_activity"
+      },
+      {
+        "type": "trace",
+        "value": "entry:done"
+      },
+      {
+        "type": "stable",
+        "state": "/SubmachineBoundaryActivityCancel/done"
+      }
+    ]
+  }
+}

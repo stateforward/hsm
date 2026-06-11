@@ -1,0 +1,191 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "config_queue_behavior_dispatch_to_target_uses_recipient_queue",
+  "description": "A behavior-originated dispatch_to enqueues the regular event through the target instance's configured queue.",
+  "features": [
+    "queue",
+    "dispatch_to",
+    "event_ownership",
+    "reentrancy"
+  ],
+  "model": {
+    "name": "ConfigQueueBehaviorDispatchToTargetProducer",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "on": "go",
+            "target": "sent",
+            "effects": [
+              {
+                "behavior": "dispatch_peer"
+              }
+            ]
+          },
+          {
+            "on": "audit",
+            "target": "self_leaked",
+            "effects": [
+              {
+                "behavior": "effect_self_leaked"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "sent",
+        "entry": [
+          {
+            "behavior": "entry_sent"
+          }
+        ]
+      },
+      {
+        "name": "self_leaked"
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "ConfigQueueBehaviorDispatchToTargetPeer",
+      "initial": "peer_idle",
+      "states": [
+        {
+          "name": "peer_idle",
+          "transitions": [
+            {
+              "on": "audit",
+              "target": "peer_done",
+              "effects": [
+                {
+                  "behavior": "effect_peer"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "peer_done",
+          "entry": [
+            {
+              "behavior": "entry_peer_done"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "instances": [
+    {
+      "id": "producer"
+    },
+    {
+      "id": "peer",
+      "model": "ConfigQueueBehaviorDispatchToTargetPeer",
+      "config": {
+        "queue": "trace_fifo"
+      }
+    }
+  ],
+  "behaviors": {
+    "dispatch_peer": [
+      {
+        "op": "dispatch",
+        "event": "audit",
+        "target": "peer"
+      },
+      {
+        "op": "trace",
+        "value": "effect:dispatch-peer"
+      }
+    ],
+    "entry_sent": [
+      {
+        "op": "trace",
+        "value": "entry:sent"
+      }
+    ],
+    "effect_peer": [
+      {
+        "op": "trace",
+        "value": "effect:peer"
+      }
+    ],
+    "entry_peer_done": [
+      {
+        "op": "trace",
+        "value": "entry:peer-done"
+      }
+    ],
+    "effect_self_leaked": [
+      {
+        "op": "trace",
+        "value": "effect:self-leaked"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start",
+      "instance": "producer"
+    },
+    {
+      "op": "start",
+      "instance": "peer"
+    },
+    {
+      "op": "dispatch_to",
+      "target": "producer",
+      "event": "go"
+    }
+  ],
+  "expect": {
+    "states": {
+      "producer": "/ConfigQueueBehaviorDispatchToTargetProducer/sent",
+      "peer": "/ConfigQueueBehaviorDispatchToTargetPeer/peer_done"
+    },
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "go",
+        "target": "producer"
+      },
+      {
+        "type": "dispatch",
+        "event": "audit",
+        "target": "peer"
+      },
+      {
+        "type": "trace",
+        "value": "queue:push:audit"
+      },
+      {
+        "type": "trace",
+        "value": "queue:pop:audit"
+      },
+      {
+        "type": "trace",
+        "value": "effect:peer"
+      },
+      {
+        "type": "trace",
+        "value": "entry:peer-done"
+      },
+      {
+        "type": "trace",
+        "value": "effect:dispatch-peer"
+      },
+      {
+        "type": "trace",
+        "value": "entry:sent"
+      },
+      {
+        "type": "stable",
+        "state": "producer"
+      }
+    ]
+  }
+}

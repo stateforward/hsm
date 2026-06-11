@@ -1,0 +1,10 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "history_default_guard_behavior",
+  "description": "A history pseudostate default transition can use a guard behavior before entering the restored/default target.",
+  "features": ["history", "history_default", "guard"],
+  "model": {"name": "HistoryDefaultGuardBehavior", "initial": "outside", "states": [{"name": "outside", "transitions": [{"on": "enter", "target": "comp/h"}]}, {"name": "comp", "states": [{"name": "a", "entry": [{"behavior": "entry_a"}]}, {"name": "h", "kind": "shallow_history", "transitions": [{"guard": {"behavior": "history_guard"}, "target": "a"}]}]}]},
+  "behaviors": {"history_guard": [{"op": "trace", "value": "guard:history"}, {"op": "return_value", "value": true}], "entry_a": [{"op": "trace", "value": "entry:a"}]},
+  "script": [{"op": "start"}, {"op": "dispatch", "event": "enter"}],
+  "expect": {"state": "/HistoryDefaultGuardBehavior/comp/a", "trace": [{"type": "dispatch", "event": "enter"}, {"type": "trace", "value": "guard:history"}, {"type": "trace", "value": "entry:a"}, {"type": "stable", "state": "/HistoryDefaultGuardBehavior/comp/a"}]}
+}

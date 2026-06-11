@@ -32,6 +32,8 @@
     "state": "/SnapshotCase/idle",
     "snapshots": {
       "last": {
+        "id": "default",
+        "qualified_name": "/SnapshotCase",
         "state": "/SnapshotCase/idle",
         "attributes": {
           "count": 1

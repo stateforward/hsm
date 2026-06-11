@@ -1,0 +1,85 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "false_guard_set_attr_generated_trigger_replay",
+  "description": "A set_attr from a false guard emits generated attribute work that replays only after a later fallback target is entered.",
+  "features": ["attribute", "on_set", "when", "guard", "queue", "reentrancy", "selection_order"],
+  "model": {
+    "name": "FalseGuardSetAttrGeneratedTriggerReplay",
+    "initial": "idle",
+    "attributes": {
+      "flag": {"type": "boolean", "default": false},
+      "ready": {"type": "boolean", "default": false}
+    },
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "on": "go",
+            "guard": {"behavior": "guard_set_false"},
+            "target": "wrong"
+          },
+          {
+            "on": "go",
+            "target": "waiting",
+            "effects": [{"behavior": "effect_fallback"}]
+          }
+        ]
+      },
+      {
+        "name": "waiting",
+        "entry": [{"behavior": "entry_waiting"}],
+        "transitions": [
+          {
+            "trigger": {"kind": "on_set", "attribute": "flag"},
+            "target": "flag_seen",
+            "effects": [{"behavior": "effect_flag"}]
+          }
+        ]
+      },
+      {
+        "name": "flag_seen",
+        "entry": [{"behavior": "entry_flag"}],
+        "transitions": [
+          {
+            "trigger": {"kind": "when", "behavior": "ready_when"},
+            "target": "all_seen",
+            "effects": [{"behavior": "effect_ready"}]
+          }
+        ]
+      },
+      {"name": "all_seen", "entry": [{"behavior": "entry_all"}]},
+      {"name": "wrong"}
+    ]
+  },
+  "behaviors": {
+    "guard_set_false": [
+      {"op": "set_attr", "name": "flag", "value": true},
+      {"op": "set_attr", "name": "ready", "value": true},
+      {"op": "trace", "value": "guard:false"},
+      {"op": "return_value", "value": false}
+    ],
+    "ready_when": [{"op": "return_equals", "name": "ready", "value": true}],
+    "effect_fallback": [{"op": "trace", "value": "effect:fallback"}],
+    "entry_waiting": [{"op": "trace", "value": "entry:waiting"}],
+    "effect_flag": [{"op": "trace", "value": "effect:flag"}],
+    "entry_flag": [{"op": "trace", "value": "entry:flag"}],
+    "effect_ready": [{"op": "trace", "value": "effect:ready"}],
+    "entry_all": [{"op": "trace", "value": "entry:all"}]
+  },
+  "script": [{"op": "start"}, {"op": "dispatch", "event": "go"}],
+  "expect": {
+    "state": "/FalseGuardSetAttrGeneratedTriggerReplay/all_seen",
+    "trace": [
+      {"type": "dispatch", "event": "go"},
+      {"type": "trace", "value": "guard:false"},
+      {"type": "trace", "value": "effect:fallback"},
+      {"type": "trace", "value": "entry:waiting"},
+      {"type": "trace", "value": "effect:flag"},
+      {"type": "trace", "value": "entry:flag"},
+      {"type": "trace", "value": "effect:ready"},
+      {"type": "trace", "value": "entry:all"},
+      {"type": "stable", "state": "/FalseGuardSetAttrGeneratedTriggerReplay/all_seen"}
+    ]
+  }
+}

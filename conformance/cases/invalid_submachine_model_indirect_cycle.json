@@ -1,0 +1,49 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_submachine_model_indirect_cycle",
+  "mode": "validation",
+  "description": "Child model registry validation rejects indirect submachine model cycles.",
+  "features": ["submachine", "validation"],
+  "model": {
+    "name": "InvalidSubmachineIndirectCycle",
+    "initial": "drive",
+    "states": [
+      {
+        "name": "drive",
+        "kind": "submachine",
+        "machine": "CycleA"
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "CycleB",
+      "initial": "to_a",
+      "states": [
+        {
+          "name": "to_a",
+          "kind": "submachine",
+          "machine": "CycleA"
+        }
+      ]
+    },
+    {
+      "name": "CycleA",
+      "initial": "to_b",
+      "states": [
+        {
+          "name": "to_b",
+          "kind": "submachine",
+          "machine": "CycleB"
+        }
+      ]
+    }
+  ],
+  "expect": {
+    "validation": [
+      {
+        "code": "submachine_model_cycle"
+      }
+    ]
+  }
+}

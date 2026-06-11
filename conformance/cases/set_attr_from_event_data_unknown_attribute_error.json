@@ -1,0 +1,62 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "set_attr_from_event_data_unknown_attribute_error",
+  "description": "set_attr_from_event_data reports a normalized error when the target attribute is unknown.",
+  "features": ["attribute", "initial", "error"],
+  "model": {
+    "name": "SetAttrFromEventDataUnknownAttributeError",
+    "initial": {
+      "target": "idle",
+      "effects": [
+        {
+          "behavior": "capture_missing"
+        }
+      ]
+    },
+    "states": [
+      {
+        "name": "idle"
+      }
+    ]
+  },
+  "instances": [
+    {
+      "id": "default",
+      "data": {
+        "seed": 1
+      }
+    }
+  ],
+  "behaviors": {
+    "capture_missing": [
+      {
+        "op": "set_attr_from_event_data",
+        "name": "missing",
+        "path": "seed"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start",
+      "instance": "default"
+    }
+  ],
+  "expect": {
+    "state": "/SetAttrFromEventDataUnknownAttributeError",
+    "error": {
+      "code": "attribute_error",
+      "message_contains": "missing"
+    },
+    "trace": [
+      {
+        "type": "error",
+        "code": "attribute_error"
+      },
+      {
+        "type": "stable",
+        "state": "/SetAttrFromEventDataUnknownAttributeError"
+      }
+    ]
+  }
+}

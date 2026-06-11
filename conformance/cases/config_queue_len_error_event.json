@@ -1,0 +1,139 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "config_queue_len_error_event",
+  "description": "A custom queue Len failure is converted to a runtime ErrorEvent that bypasses the custom queue hook.",
+  "features": ["queue", "snapshot", "error"],
+  "model": {
+    "name": "ConfigQueueLenErrorEvent",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "on": "hsm_error",
+            "target": "failed",
+            "effects": [
+              {
+                "behavior": "effect_error"
+              }
+            ]
+          },
+          {
+            "on": "go",
+            "target": "done",
+            "effects": [
+              {
+                "behavior": "effect_go"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "failed"
+      },
+      {
+        "name": "done"
+      }
+    ]
+  },
+  "instances": [
+    {
+      "id": "default",
+      "config": {
+        "queue": "len_error_once"
+      }
+    }
+  ],
+  "behaviors": {
+    "effect_error": [
+      {
+        "op": "trace",
+        "value": "effect:error"
+      }
+    ],
+    "effect_go": [
+      {
+        "op": "trace",
+        "value": "effect:go"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "snapshot"
+    },
+    {
+      "op": "dispatch",
+      "event": "go"
+    }
+  ],
+  "expect": {
+    "state": "/ConfigQueueLenErrorEvent/failed",
+    "snapshots": {
+      "last": {
+        "id": "default",
+        "qualified_name": "/ConfigQueueLenErrorEvent",
+        "state": "/ConfigQueueLenErrorEvent/idle",
+        "attributes": {},
+        "queue_len": 0,
+        "transitions": [
+          {
+            "name": "/ConfigQueueLenErrorEvent/idle/transition_4",
+            "kind": 67343,
+            "source": "/ConfigQueueLenErrorEvent/idle",
+            "target": "/ConfigQueueLenErrorEvent/failed",
+            "events": [
+              "hsm_error"
+            ],
+            "guard": false
+          },
+          {
+            "name": "/ConfigQueueLenErrorEvent/idle/transition_6",
+            "kind": 67343,
+            "source": "/ConfigQueueLenErrorEvent/idle",
+            "target": "/ConfigQueueLenErrorEvent/done",
+            "events": [
+              "go"
+            ],
+            "guard": false
+          }
+        ]
+      }
+    },
+    "trace": [
+      {
+        "type": "trace",
+        "value": "queue:len-error"
+      },
+      {
+        "type": "snapshot",
+        "state": "/ConfigQueueLenErrorEvent/idle"
+      },
+      {
+        "type": "dispatch",
+        "event": "go"
+      },
+      {
+        "type": "trace",
+        "value": "queue:push:go"
+      },
+      {
+        "type": "trace",
+        "value": "effect:error"
+      },
+      {
+        "type": "trace",
+        "value": "queue:pop:go"
+      },
+      {
+        "type": "stable",
+        "state": "/ConfigQueueLenErrorEvent/failed"
+      }
+    ]
+  }
+}

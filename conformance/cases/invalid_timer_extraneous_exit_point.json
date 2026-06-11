@@ -1,0 +1,36 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_timer_extraneous_exit_point",
+  "mode": "validation",
+  "description": "A timer trigger must not declare exit-point operands.",
+  "features": ["timer", "after", "exit_point", "validation"],
+  "model": {
+    "name": "InvalidTimerExtraneousExitPoint",
+    "initial": "waiting",
+    "states": [
+      {
+        "name": "waiting",
+        "transitions": [
+          {
+            "trigger": {
+              "kind": "after",
+              "duration_ms": 10,
+              "exit_point": "done"
+            },
+            "target": "done"
+          }
+        ]
+      },
+      {
+        "name": "done"
+      }
+    ]
+  },
+  "expect": {
+    "validation": [
+      {
+        "code": "extraneous_trigger_operand"
+      }
+    ]
+  }
+}

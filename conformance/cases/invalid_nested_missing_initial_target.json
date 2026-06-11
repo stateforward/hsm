@@ -1,0 +1,19 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_nested_missing_initial_target",
+  "mode": "validation",
+  "description": "Nested composite initial targets in the root model must resolve inside that composite.",
+  "features": ["nested", "validation"],
+  "model": {
+    "name": "InvalidNestedMissingInitialTarget",
+    "initial": "parent",
+    "states": [
+      {
+        "name": "parent",
+        "initial": "missing",
+        "states": [{"name": "a"}]
+      }
+    ]
+  },
+  "expect": {"validation": [{"code": "missing_target"}]}
+}

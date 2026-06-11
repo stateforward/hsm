@@ -1,0 +1,42 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_on_set_extraneous_timer_source",
+  "mode": "validation",
+  "description": "An on_set trigger must not declare timer source operands.",
+  "features": ["attribute", "on_set", "timer", "validation"],
+  "model": {
+    "name": "InvalidOnSetExtraneousTimerSource",
+    "initial": "idle",
+    "attributes": {
+      "flag": {
+        "type": "boolean",
+        "default": false
+      }
+    },
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "trigger": {
+              "kind": "on_set",
+              "attribute": "flag",
+              "duration_ms": 10
+            },
+            "target": "done"
+          }
+        ]
+      },
+      {
+        "name": "done"
+      }
+    ]
+  },
+  "expect": {
+    "validation": [
+      {
+        "code": "extraneous_trigger_operand"
+      }
+    ]
+  }
+}

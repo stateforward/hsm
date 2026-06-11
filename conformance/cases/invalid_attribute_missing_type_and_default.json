@@ -1,0 +1,30 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_attribute_missing_type_and_default",
+  "mode": "validation",
+  "description": "Attribute declarations must provide either an explicit type or a default value for inferred typing.",
+  "features": [
+    "attribute",
+    "validation"
+  ],
+  "model": {
+    "name": "InvalidAttributeMissingTypeAndDefault",
+    "initial": "idle",
+    "attributes": {
+      "empty": {}
+    },
+    "states": [
+      {
+        "name": "idle"
+      }
+    ]
+  },
+  "expect": {
+    "validation": [
+      {
+        "code": "invalid_attribute",
+        "message_contains": "requires type or default"
+      }
+    ]
+  }
+}

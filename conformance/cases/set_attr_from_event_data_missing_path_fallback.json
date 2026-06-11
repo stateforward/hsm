@@ -1,0 +1,48 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "set_attr_from_event_data_missing_path_fallback",
+  "description": "set_attr_from_event_data with a missing path stores an absent value through the normal attribute path.",
+  "features": ["attribute", "initial"],
+  "model": {
+    "name": "SetAttrFromEventDataMissingPath",
+    "initial": {
+      "target": "idle",
+      "effects": [
+        {
+          "behavior": "capture_missing"
+        }
+      ]
+    },
+    "attributes": {
+      "value": {
+        "type": "any",
+        "default": "present"
+      }
+    },
+    "states": [
+      {
+        "name": "idle"
+      }
+    ]
+  },
+  "behaviors": {
+    "capture_missing": [
+      {
+        "op": "set_attr_from_event_data",
+        "name": "value",
+        "path": "missing.path"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    }
+  ],
+  "expect": {
+    "state": "/SetAttrFromEventDataMissingPath/idle",
+    "attributes": {
+      "value": null
+    }
+  }
+}

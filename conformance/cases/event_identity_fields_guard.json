@@ -1,0 +1,142 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "event_identity_fields_guard",
+  "description": "Guards can read event id, source, and target fields from the dispatched event object.",
+  "features": ["event", "guard", "event_ownership"],
+  "model": {
+    "name": "EventIdentityFieldsGuard",
+    "initial": "check_id",
+    "states": [
+      {
+        "name": "check_id",
+        "transitions": [
+          {
+            "on": "submit",
+            "guard": {
+              "behavior": "id_ok"
+            },
+            "target": "check_source"
+          }
+        ]
+      },
+      {
+        "name": "check_source",
+        "transitions": [
+          {
+            "on": "submit",
+            "guard": {
+              "behavior": "source_ok"
+            },
+            "target": "check_target"
+          }
+        ]
+      },
+      {
+        "name": "check_target",
+        "transitions": [
+          {
+            "on": "submit",
+            "guard": {
+              "behavior": "target_ok"
+            },
+            "target": "accepted",
+            "effects": [
+              {
+                "behavior": "effect_accept"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "accepted"
+      }
+    ]
+  },
+  "behaviors": {
+    "id_ok": [
+      {
+        "op": "event_metadata_equals",
+        "name": "id",
+        "value": "evt-1"
+      }
+    ],
+    "source_ok": [
+      {
+        "op": "event_metadata_equals",
+        "name": "source",
+        "value": "client"
+      }
+    ],
+    "target_ok": [
+      {
+        "op": "event_metadata_equals",
+        "name": "target",
+        "value": "machine"
+      }
+    ],
+    "effect_accept": [
+      {
+        "op": "trace",
+        "value": "effect:accept"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": {
+        "name": "submit",
+        "id": "evt-1",
+        "source": "client",
+        "target": "machine"
+      }
+    },
+    {
+      "op": "dispatch",
+      "event": {
+        "name": "submit",
+        "id": "evt-1",
+        "source": "client",
+        "target": "machine"
+      }
+    },
+    {
+      "op": "dispatch",
+      "event": {
+        "name": "submit",
+        "id": "evt-1",
+        "source": "client",
+        "target": "machine"
+      }
+    }
+  ],
+  "expect": {
+    "state": "/EventIdentityFieldsGuard/accepted",
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "submit"
+      },
+      {
+        "type": "dispatch",
+        "event": "submit"
+      },
+      {
+        "type": "dispatch",
+        "event": "submit"
+      },
+      {
+        "type": "trace",
+        "value": "effect:accept"
+      },
+      {
+        "type": "stable",
+        "state": "/EventIdentityFieldsGuard/accepted"
+      }
+    ]
+  }
+}

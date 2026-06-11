@@ -1,0 +1,83 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "history_deep_default",
+  "description": "Deep history uses its default target when no prior active descendant has been recorded.",
+  "features": ["history", "deep_history", "history_default", "nested"],
+  "model": {
+    "name": "HistoryDeepDefault",
+    "initial": "outside",
+    "states": [
+      {
+        "name": "outside",
+        "transitions": [
+          {
+            "on": "enter",
+            "target": "comp/h"
+          }
+        ]
+      },
+      {
+        "name": "comp",
+        "states": [
+          {
+            "name": "h",
+            "kind": "deep_history",
+            "transitions": [
+              {
+                "target": "a/leaf"
+              }
+            ]
+          },
+          {
+            "name": "a",
+            "initial": "leaf",
+            "states": [
+              {
+                "name": "leaf",
+                "entry": [
+                  {
+                    "behavior": "entry_leaf"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "behaviors": {
+    "entry_leaf": [
+      {
+        "op": "trace",
+        "value": "entry:leaf"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "enter"
+    }
+  ],
+  "expect": {
+    "state": "/HistoryDeepDefault/comp/a/leaf",
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "enter"
+      },
+      {
+        "type": "trace",
+        "value": "entry:leaf"
+      },
+      {
+        "type": "stable",
+        "state": "/HistoryDeepDefault/comp/a/leaf"
+      }
+    ]
+  }
+}

@@ -1,0 +1,65 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "event_name_allows_slash",
+  "description": "String event names may contain path separators and still match on-event transitions.",
+  "features": [
+    "event"
+  ],
+  "model": {
+    "name": "EventNameAllowsSlash",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "on": "domain/go",
+            "target": "done",
+            "effects": [
+              {
+                "behavior": "effect_done"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "done"
+      }
+    ]
+  },
+  "behaviors": {
+    "effect_done": [
+      {
+        "op": "trace",
+        "value": "effect:done"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "domain/go"
+    }
+  ],
+  "expect": {
+    "state": "/EventNameAllowsSlash/done",
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "domain/go"
+      },
+      {
+        "type": "trace",
+        "value": "effect:done"
+      },
+      {
+        "type": "stable",
+        "state": "/EventNameAllowsSlash/done"
+      }
+    ]
+  }
+}

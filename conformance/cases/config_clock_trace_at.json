@@ -1,0 +1,80 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "config_clock_trace_at",
+  "description": "An instance config clock hook is used by at timers.",
+  "features": ["timer", "at"],
+  "model": {
+    "name": "ConfigClockTraceAt",
+    "initial": "waiting",
+    "states": [
+      {
+        "name": "waiting",
+        "transitions": [
+          {
+            "trigger": {
+              "kind": "at",
+              "time_ms": 25
+            },
+            "target": "fired",
+            "effects": [
+              {
+                "behavior": "effect_timer"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "fired"
+      }
+    ]
+  },
+  "instances": [
+    {
+      "id": "default",
+      "config": {
+        "clock": "trace_nonzero_sleep"
+      }
+    }
+  ],
+  "behaviors": {
+    "effect_timer": [
+      {
+        "op": "trace",
+        "value": "effect:timer"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "tick",
+      "millis": 10
+    }
+  ],
+  "expect": {
+    "state": "/ConfigClockTraceAt/fired",
+    "trace": [
+      {
+        "type": "timer_scheduled"
+      },
+      {
+        "type": "trace",
+        "value": "clock:sleep:nonzero"
+      },
+      {
+        "type": "timer_fired"
+      },
+      {
+        "type": "trace",
+        "value": "effect:timer"
+      },
+      {
+        "type": "stable",
+        "state": "/ConfigClockTraceAt/fired"
+      }
+    ]
+  }
+}

@@ -1,0 +1,73 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "when_attribute_false_noop",
+  "description": "A when trigger using an attribute operand does not fire when the attribute changes to a falsy value.",
+  "features": ["attribute", "when"],
+  "model": {
+    "name": "WhenAttributeFalseNoop",
+    "initial": "idle",
+    "attributes": {
+      "count": {
+        "type": "number",
+        "default": 1
+      }
+    },
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "trigger": {
+              "kind": "when",
+              "attribute": "count"
+            },
+            "target": "ready",
+            "effects": [
+              {
+                "behavior": "effect_ready"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "ready"
+      }
+    ]
+  },
+  "behaviors": {
+    "effect_ready": [
+      {
+        "op": "trace",
+        "value": "effect:ready"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "set",
+      "attribute": "count",
+      "value": 0
+    }
+  ],
+  "expect": {
+    "state": "/WhenAttributeFalseNoop/idle",
+    "attributes": {
+      "count": 0
+    },
+    "trace": [
+      {
+        "type": "set",
+        "attribute": "count",
+        "value": 0
+      },
+      {
+        "type": "stable",
+        "state": "/WhenAttributeFalseNoop/idle"
+      }
+    ]
+  }
+}

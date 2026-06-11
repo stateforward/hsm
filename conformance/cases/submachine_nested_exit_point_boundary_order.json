@@ -1,0 +1,242 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "submachine_nested_exit_point_boundary_order",
+  "description": "Nested submachine exit-point propagation preserves inner and outer boundary exit ordering.",
+  "features": [
+    "submachine",
+    "exit_point",
+    "nested",
+    "entry",
+    "exit",
+    "effect"
+  ],
+  "model": {
+    "name": "NestedExitBoundaryOrder",
+    "initial": "outer",
+    "states": [
+      {
+        "name": "outer",
+        "kind": "submachine",
+        "machine": "OuterOrderChild",
+        "exit": [
+          {
+            "behavior": "exit_outer_boundary"
+          }
+        ],
+        "transitions": [
+          {
+            "trigger": {
+              "kind": "exit_point",
+              "exit_point": "outer_done"
+            },
+            "target": "done",
+            "effects": [
+              {
+                "behavior": "effect_parent"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "done",
+        "entry": [
+          {
+            "behavior": "entry_done"
+          }
+        ]
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "InnerOrderChild",
+      "initial": "active",
+      "exit_points": [
+        {
+          "name": "inner_done",
+          "effects": [
+            {
+              "behavior": "effect_inner_exit_point"
+            }
+          ]
+        }
+      ],
+      "states": [
+        {
+          "name": "active",
+          "exit": [
+            {
+              "behavior": "exit_inner_active"
+            }
+          ],
+          "transitions": [
+            {
+              "on": "finish",
+              "target": "inner_done",
+              "effects": [
+                {
+                  "behavior": "effect_inner_finish"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "OuterOrderChild",
+      "initial": "inner",
+      "exit_points": [
+        {
+          "name": "outer_done",
+          "effects": [
+            {
+              "behavior": "effect_outer_exit_point"
+            }
+          ]
+        }
+      ],
+      "states": [
+        {
+          "name": "inner",
+          "kind": "submachine",
+          "machine": "InnerOrderChild",
+          "exit": [
+            {
+              "behavior": "exit_inner_boundary"
+            }
+          ],
+          "transitions": [
+            {
+              "trigger": {
+                "kind": "exit_point",
+                "exit_point": "inner_done"
+              },
+              "target": "outer_done",
+              "effects": [
+                {
+                  "behavior": "effect_outer_route"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "behaviors": {
+    "exit_inner_active": [
+      {
+        "op": "trace",
+        "value": "exit:inner-active"
+      }
+    ],
+    "effect_inner_finish": [
+      {
+        "op": "trace",
+        "value": "effect:inner-finish"
+      }
+    ],
+    "effect_inner_exit_point": [
+      {
+        "op": "trace",
+        "value": "effect:inner-exit-point"
+      }
+    ],
+    "exit_inner_boundary": [
+      {
+        "op": "trace",
+        "value": "exit:inner-boundary"
+      }
+    ],
+    "effect_outer_route": [
+      {
+        "op": "trace",
+        "value": "effect:outer-route"
+      }
+    ],
+    "effect_outer_exit_point": [
+      {
+        "op": "trace",
+        "value": "effect:outer-exit-point"
+      }
+    ],
+    "exit_outer_boundary": [
+      {
+        "op": "trace",
+        "value": "exit:outer-boundary"
+      }
+    ],
+    "effect_parent": [
+      {
+        "op": "trace",
+        "value": "effect:parent"
+      }
+    ],
+    "entry_done": [
+      {
+        "op": "trace",
+        "value": "enter:done"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "finish"
+    }
+  ],
+  "expect": {
+    "state": "/NestedExitBoundaryOrder/done",
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "finish"
+      },
+      {
+        "type": "trace",
+        "value": "exit:inner-active"
+      },
+      {
+        "type": "trace",
+        "value": "effect:inner-finish"
+      },
+      {
+        "type": "trace",
+        "value": "effect:inner-exit-point"
+      },
+      {
+        "type": "trace",
+        "value": "exit:inner-boundary"
+      },
+      {
+        "type": "trace",
+        "value": "effect:outer-route"
+      },
+      {
+        "type": "trace",
+        "value": "effect:outer-exit-point"
+      },
+      {
+        "type": "trace",
+        "value": "exit:outer-boundary"
+      },
+      {
+        "type": "trace",
+        "value": "effect:parent"
+      },
+      {
+        "type": "trace",
+        "value": "enter:done"
+      },
+      {
+        "type": "stable",
+        "state": "/NestedExitBoundaryOrder/done"
+      }
+    ]
+  }
+}

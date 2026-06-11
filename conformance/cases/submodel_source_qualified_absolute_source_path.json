@@ -1,0 +1,117 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "submodel_source_qualified_absolute_source_path",
+  "description": "A reusable child model can resolve an absolute source path against the child model root.",
+  "features": [
+    "submachine",
+    "source",
+    "path_resolution"
+  ],
+  "model": {
+    "name": "SubmodelSourceQualifiedAbsoluteSourcePath",
+    "initial": "drive",
+    "states": [
+      {
+        "name": "drive",
+        "kind": "submachine",
+        "machine": "ChildAbsoluteSourceQualifiedTransition"
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "ChildAbsoluteSourceQualifiedTransition",
+      "initial": "comp",
+      "states": [
+        {
+          "name": "comp",
+          "initial": "a",
+          "states": [
+            {
+              "name": "a",
+              "entry": [
+                {
+                  "behavior": "entry_a"
+                }
+              ]
+            },
+            {
+              "name": "b",
+              "entry": [
+                {
+                  "behavior": "entry_b"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "transitions": [
+        {
+          "source": "/ChildAbsoluteSourceQualifiedTransition/comp/a",
+          "on": "go",
+          "target": "comp/b",
+          "effects": [
+            {
+              "behavior": "effect_go"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "behaviors": {
+    "entry_a": [
+      {
+        "op": "trace",
+        "value": "entry:a"
+      }
+    ],
+    "effect_go": [
+      {
+        "op": "trace",
+        "value": "effect:go"
+      }
+    ],
+    "entry_b": [
+      {
+        "op": "trace",
+        "value": "entry:b"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "go"
+    }
+  ],
+  "expect": {
+    "state": "/SubmodelSourceQualifiedAbsoluteSourcePath/drive/ChildAbsoluteSourceQualifiedTransition/comp/b",
+    "trace": [
+      {
+        "type": "trace",
+        "value": "entry:a"
+      },
+      {
+        "type": "dispatch",
+        "event": "go"
+      },
+      {
+        "type": "trace",
+        "value": "effect:go"
+      },
+      {
+        "type": "trace",
+        "value": "entry:b"
+      },
+      {
+        "type": "stable",
+        "state": "/SubmodelSourceQualifiedAbsoluteSourcePath/drive/ChildAbsoluteSourceQualifiedTransition/comp/b"
+      }
+    ]
+  }
+}

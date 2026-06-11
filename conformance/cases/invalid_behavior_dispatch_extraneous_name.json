@@ -1,0 +1,18 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_behavior_dispatch_extraneous_name",
+  "mode": "validation",
+  "description": "dispatch behavior ops do not accept operation name operands.",
+  "features": ["validation"],
+  "model": {
+    "name": "InvalidBehaviorDispatchExtraneousName",
+    "initial": "idle",
+    "states": [{"name": "idle"}]
+  },
+  "behaviors": {
+    "bad": [{"op": "dispatch", "event": "go", "name": "ping"}]
+  },
+  "expect": {
+    "validation": [{"code": "invalid_behavior_op_operand"}]
+  }
+}

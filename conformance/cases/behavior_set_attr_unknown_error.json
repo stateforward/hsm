@@ -1,0 +1,77 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "behavior_set_attr_unknown_error",
+  "description": "A behavior-side set_attr of an unknown attribute produces a normalized runtime error and stops later effects.",
+  "features": ["attribute", "error", "behavior_attr"],
+  "model": {
+    "name": "BehaviorSetAttrUnknownError",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "on": "go",
+            "target": "done",
+            "effects": [
+              {
+                "behavior": "set_missing"
+              },
+              {
+                "behavior": "effect_after"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "done"
+      }
+    ]
+  },
+  "behaviors": {
+    "set_missing": [
+      {
+        "op": "set_attr",
+        "name": "missing",
+        "value": 1
+      }
+    ],
+    "effect_after": [
+      {
+        "op": "trace",
+        "value": "effect:after"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "go"
+    }
+  ],
+  "expect": {
+    "state": "/BehaviorSetAttrUnknownError/idle",
+    "error": {
+      "code": "attribute_error",
+      "message_contains": "missing"
+    },
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "go"
+      },
+      {
+        "type": "error",
+        "code": "attribute_error"
+      },
+      {
+        "type": "stable",
+        "state": "/BehaviorSetAttrUnknownError/idle"
+      }
+    ]
+  }
+}

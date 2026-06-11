@@ -1,0 +1,158 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "config_clock_timer_every_behavior_reschedule_changed_interval",
+  "description": "An every timer using a behavior interval source and configured clock recomputes the interval and reschedules through the clock after a self transition.",
+  "features": [
+    "timer",
+    "every",
+    "timer_behavior",
+    "attribute",
+    "self"
+  ],
+  "model": {
+    "name": "ConfigClockTimerEveryBehaviorRescheduleChangedInterval",
+    "initial": "waiting",
+    "attributes": {
+      "interval_value": {
+        "type": "duration_ms",
+        "default": 10
+      }
+    },
+    "states": [
+      {
+        "name": "waiting",
+        "transitions": [
+          {
+            "trigger": {
+              "kind": "every",
+              "behavior": "compute_interval"
+            },
+            "kind": "self",
+            "target": "waiting",
+            "effects": [
+              {
+                "behavior": "effect_tick"
+              }
+            ]
+          },
+          {
+            "on": "stop",
+            "target": "done"
+          }
+        ]
+      },
+      {
+        "name": "done"
+      }
+    ]
+  },
+  "instances": [
+    {
+      "id": "default",
+      "config": {
+        "clock": "trace_yield_sleep"
+      }
+    }
+  ],
+  "behaviors": {
+    "compute_interval": [
+      {
+        "op": "trace",
+        "value": "timer:compute-interval"
+      },
+      {
+        "op": "return_attr",
+        "name": "interval_value"
+      }
+    ],
+    "effect_tick": [
+      {
+        "op": "trace",
+        "value": "effect:tick"
+      },
+      {
+        "op": "set_attr",
+        "name": "interval_value",
+        "value": 50
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "tick",
+      "millis": 10
+    },
+    {
+      "op": "tick",
+      "millis": 40
+    },
+    {
+      "op": "tick",
+      "millis": 10
+    },
+    {
+      "op": "dispatch",
+      "event": "stop"
+    }
+  ],
+  "expect": {
+    "state": "/ConfigClockTimerEveryBehaviorRescheduleChangedInterval/done",
+    "attributes": {
+      "interval_value": 50
+    },
+    "trace": [
+      {
+        "type": "trace",
+        "value": "timer:compute-interval"
+      },
+      {
+        "type": "trace",
+        "value": "clock:sleep:10"
+      },
+      {
+        "type": "timer_fired"
+      },
+      {
+        "type": "trace",
+        "value": "effect:tick"
+      },
+      {
+        "type": "trace",
+        "value": "timer:compute-interval"
+      },
+      {
+        "type": "trace",
+        "value": "clock:sleep:50"
+      },
+      {
+        "type": "timer_fired"
+      },
+      {
+        "type": "trace",
+        "value": "effect:tick"
+      },
+      {
+        "type": "trace",
+        "value": "timer:compute-interval"
+      },
+      {
+        "type": "trace",
+        "value": "clock:sleep:50"
+      },
+      {
+        "type": "dispatch",
+        "event": "stop"
+      },
+      {
+        "type": "timer_cancelled"
+      },
+      {
+        "type": "stable",
+        "state": "/ConfigClockTimerEveryBehaviorRescheduleChangedInterval/done"
+      }
+    ]
+  }
+}

@@ -1,0 +1,141 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "submachine_event_priority",
+  "description": "Events are selected bottom-up: child transitions win over containing submachine transitions, and unhandled child events bubble to the submachine state.",
+  "features": [
+    "submachine",
+    "selection_order"
+  ],
+  "model": {
+    "name": "SubmachinePriority",
+    "initial": "drive",
+    "states": [
+      {
+        "name": "drive",
+        "kind": "submachine",
+        "machine": "PriorityChild",
+        "transitions": [
+          {
+            "on": "go",
+            "target": "parent_handled",
+            "effects": [
+              {
+                "behavior": "effect_parent_go"
+              }
+            ]
+          },
+          {
+            "on": "fallback",
+            "target": "parent_handled",
+            "effects": [
+              {
+                "behavior": "effect_parent_fallback"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "parent_handled",
+        "entry": [
+          {
+            "behavior": "entry_parent_handled"
+          }
+        ]
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "PriorityChild",
+      "initial": "active",
+      "states": [
+        {
+          "name": "active",
+          "transitions": [
+            {
+              "on": "go",
+              "target": "child_handled",
+              "effects": [
+                {
+                  "behavior": "effect_child_go"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "child_handled"
+        }
+      ]
+    }
+  ],
+  "behaviors": {
+    "effect_child_go": [
+      {
+        "op": "trace",
+        "value": "effect:child-go"
+      }
+    ],
+    "effect_parent_go": [
+      {
+        "op": "trace",
+        "value": "effect:parent-go"
+      }
+    ],
+    "effect_parent_fallback": [
+      {
+        "op": "trace",
+        "value": "effect:parent-fallback"
+      }
+    ],
+    "entry_parent_handled": [
+      {
+        "op": "trace",
+        "value": "enter:parent-handled"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "go"
+    },
+    {
+      "op": "dispatch",
+      "event": "fallback"
+    }
+  ],
+  "expect": {
+    "state": "/SubmachinePriority/parent_handled",
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "go"
+      },
+      {
+        "type": "trace",
+        "value": "effect:child-go"
+      },
+      {
+        "type": "dispatch",
+        "event": "fallback"
+      },
+      {
+        "type": "trace",
+        "value": "effect:parent-fallback"
+      },
+      {
+        "type": "trace",
+        "value": "enter:parent-handled"
+      },
+      {
+        "type": "stable",
+        "state": "/SubmachinePriority/parent_handled"
+      }
+    ]
+  }
+}

@@ -1,0 +1,98 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "timer_after_behavior_source",
+  "description": "An after timer can obtain its duration from a portable behavior when the state is entered.",
+  "features": [
+    "timer",
+    "after",
+    "timer_behavior"
+  ],
+  "model": {
+    "name": "TimerAfterBehavior",
+    "initial": "waiting",
+    "states": [
+      {
+        "name": "waiting",
+        "transitions": [
+          {
+            "trigger": {
+              "kind": "after",
+              "behavior": "compute_delay"
+            },
+            "target": "fired",
+            "effects": [
+              {
+                "behavior": "effect_timer"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "fired",
+        "entry": [
+          {
+            "behavior": "entry_fired"
+          }
+        ]
+      }
+    ]
+  },
+  "behaviors": {
+    "compute_delay": [
+      {
+        "op": "trace",
+        "value": "timer:compute-delay"
+      },
+      {
+        "op": "return_value",
+        "value": 10
+      }
+    ],
+    "effect_timer": [
+      {
+        "op": "trace",
+        "value": "effect:timer"
+      }
+    ],
+    "entry_fired": [
+      {
+        "op": "trace",
+        "value": "enter:fired"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "tick",
+      "millis": 100
+    }
+  ],
+  "expect": {
+    "state": "/TimerAfterBehavior/fired",
+    "trace": [
+      {
+        "type": "trace",
+        "value": "timer:compute-delay"
+      },
+      {
+        "type": "timer_fired"
+      },
+      {
+        "type": "trace",
+        "value": "effect:timer"
+      },
+      {
+        "type": "trace",
+        "value": "enter:fired"
+      },
+      {
+        "type": "stable",
+        "state": "/TimerAfterBehavior/fired"
+      }
+    ]
+  }
+}

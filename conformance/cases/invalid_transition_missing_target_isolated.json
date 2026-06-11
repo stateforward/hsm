@@ -1,0 +1,23 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_transition_missing_target_isolated",
+  "mode": "validation",
+  "description": "A transition target that does not resolve is reported independently of root initial validation.",
+  "features": ["validation"],
+  "model": {
+    "name": "InvalidTransitionMissingTargetIsolated",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "on": "go",
+            "target": "missing"
+          }
+        ]
+      }
+    ]
+  },
+  "expect": {"validation": [{"code": "missing_target"}]}
+}

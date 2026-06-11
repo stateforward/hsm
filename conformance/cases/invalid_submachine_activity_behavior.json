@@ -1,0 +1,45 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_submachine_activity_behavior",
+  "mode": "validation",
+  "description": "Activity behavior references declared directly on a submachine boundary state must resolve to portable behavior programs.",
+  "features": [
+    "submachine",
+    "activity",
+    "validation"
+  ],
+  "model": {
+    "name": "InvalidSubmachineActivityBehavior",
+    "initial": "drive",
+    "states": [
+      {
+        "name": "drive",
+        "kind": "submachine",
+        "machine": "ChildWithoutBoundaryActivity",
+        "activity": [
+          {
+            "behavior": "missing_boundary_activity"
+          }
+        ]
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "ChildWithoutBoundaryActivity",
+      "initial": "idle",
+      "states": [
+        {
+          "name": "idle"
+        }
+      ]
+    }
+  ],
+  "expect": {
+    "validation": [
+      {
+        "code": "missing_behavior"
+      }
+    ]
+  }
+}

@@ -1,0 +1,45 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "behavior_snapshot_from_entry",
+  "description": "A behavior-side snapshot taken from implicit entry observes the pre-entry state.",
+  "features": ["snapshot", "entry"],
+  "model": {
+    "name": "BehaviorSnapshotFromEntry",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle",
+        "entry": [
+          {
+            "behavior": "entry_snapshot"
+          }
+        ]
+      }
+    ]
+  },
+  "behaviors": {
+    "entry_snapshot": [
+      {
+        "op": "snapshot"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    }
+  ],
+  "expect": {
+    "state": "/BehaviorSnapshotFromEntry/idle",
+    "trace": [
+      {
+        "type": "snapshot",
+        "state": "/BehaviorSnapshotFromEntry"
+      },
+      {
+        "type": "stable",
+        "state": "/BehaviorSnapshotFromEntry/idle"
+      }
+    ]
+  }
+}

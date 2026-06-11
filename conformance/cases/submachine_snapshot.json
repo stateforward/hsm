@@ -1,0 +1,76 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "submachine_snapshot",
+  "description": "A snapshot taken while a submachine is active reports the flattened active leaf path.",
+  "features": [
+    "submachine",
+    "snapshot"
+  ],
+  "model": {
+    "name": "SubmachineSnapshot",
+    "initial": "drive",
+    "states": [
+      {
+        "name": "drive",
+        "kind": "submachine",
+        "machine": "SnapshotChild"
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "SnapshotChild",
+      "initial": "idle",
+      "states": [
+        {
+          "name": "idle",
+          "transitions": [
+            {
+              "on": "go",
+              "target": "running"
+            }
+          ]
+        },
+        {
+          "name": "running"
+        }
+      ]
+    }
+  ],
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "go"
+    },
+    {
+      "op": "snapshot"
+    }
+  ],
+  "expect": {
+    "state": "/SubmachineSnapshot/drive/SnapshotChild/running",
+    "snapshots": {
+      "last": {
+        "state": "/SubmachineSnapshot/drive/SnapshotChild/running",
+        "attributes": {},
+        "queue_len": 0
+      }
+    },
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "go"
+      },
+      {
+        "type": "snapshot",
+        "state": "/SubmachineSnapshot/drive/SnapshotChild/running"
+      },
+      {
+        "type": "stable",
+        "state": "/SubmachineSnapshot/drive/SnapshotChild/running"
+      }
+    ]
+  }
+}

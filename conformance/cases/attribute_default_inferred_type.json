@@ -1,0 +1,57 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "attribute_default_inferred_type",
+  "description": "An attribute with a default but no explicit type can be read and updated using the inferred runtime type.",
+  "features": ["attribute", "snapshot"],
+  "model": {
+    "name": "AttributeDefaultInferredType",
+    "initial": "idle",
+    "attributes": {
+      "label": {
+        "default": "old"
+      }
+    },
+    "states": [
+      {
+        "name": "idle"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "set",
+      "attribute": "label",
+      "value": "new"
+    },
+    {
+      "op": "snapshot"
+    }
+  ],
+  "expect": {
+    "state": "/AttributeDefaultInferredType/idle",
+    "snapshots": {
+      "last": {
+        "id": "default",
+        "qualified_name": "/AttributeDefaultInferredType",
+        "state": "/AttributeDefaultInferredType/idle",
+        "attributes": {
+          "label": "new"
+        },
+        "queue_len": 0
+      }
+    },
+    "trace": [
+      {
+        "type": "snapshot",
+        "state": "/AttributeDefaultInferredType/idle"
+      },
+      {
+        "type": "stable",
+        "state": "/AttributeDefaultInferredType/idle"
+      }
+    ]
+  }
+}

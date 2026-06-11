@@ -1,0 +1,27 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_final_defer",
+  "mode": "validation",
+  "description": "Final states must not declare deferred events.",
+  "features": ["final", "defer", "validation"],
+  "model": {
+    "name": "InvalidFinalDefer",
+    "initial": "done",
+    "states": [
+      {
+        "name": "done",
+        "kind": "final",
+        "defer": [
+          "work"
+        ]
+      }
+    ]
+  },
+  "expect": {
+    "validation": [
+      {
+        "code": "invalid_final_transition"
+      }
+    ]
+  }
+}

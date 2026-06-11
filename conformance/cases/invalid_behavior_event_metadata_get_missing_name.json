@@ -1,0 +1,18 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_behavior_event_metadata_get_missing_name",
+  "mode": "validation",
+  "description": "event_metadata_get behavior ops must declare the metadata field name.",
+  "features": ["validation"],
+  "model": {
+    "name": "InvalidBehaviorEventMetadataGetMissingName",
+    "initial": "idle",
+    "states": [{"name": "idle"}]
+  },
+  "behaviors": {
+    "bad": [{"op": "event_metadata_get"}]
+  },
+  "expect": {
+    "validation": [{"code": "invalid_behavior_op_operand"}]
+  }
+}

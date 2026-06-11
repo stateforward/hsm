@@ -1,0 +1,127 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "submachine_entry_point_composite",
+  "description": "An entry point can target a composite child state and enter through that composite state's default initial path.",
+  "features": [
+    "submachine",
+    "entry_point",
+    "nested",
+    "initial"
+  ],
+  "model": {
+    "name": "SubmachineEntryComposite",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "on": "go",
+            "target": "drive",
+            "entry_point": "nested"
+          }
+        ]
+      },
+      {
+        "name": "drive",
+        "kind": "submachine",
+        "machine": "CompositeChild"
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "CompositeChild",
+      "initial": "other",
+      "entry_points": [
+        {
+          "name": "nested",
+          "target": "comp",
+          "effects": [
+            {
+              "behavior": "effect_entry"
+            }
+          ]
+        }
+      ],
+      "states": [
+        {
+          "name": "other"
+        },
+        {
+          "name": "comp",
+          "initial": "leaf",
+          "entry": [
+            {
+              "behavior": "entry_comp"
+            }
+          ],
+          "states": [
+            {
+              "name": "leaf",
+              "entry": [
+                {
+                  "behavior": "entry_leaf"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "behaviors": {
+    "effect_entry": [
+      {
+        "op": "trace",
+        "value": "effect:entry"
+      }
+    ],
+    "entry_comp": [
+      {
+        "op": "trace",
+        "value": "enter:comp"
+      }
+    ],
+    "entry_leaf": [
+      {
+        "op": "trace",
+        "value": "enter:leaf"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "go"
+    }
+  ],
+  "expect": {
+    "state": "/SubmachineEntryComposite/drive/CompositeChild/comp/leaf",
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "go"
+      },
+      {
+        "type": "trace",
+        "value": "effect:entry"
+      },
+      {
+        "type": "trace",
+        "value": "enter:comp"
+      },
+      {
+        "type": "trace",
+        "value": "enter:leaf"
+      },
+      {
+        "type": "stable",
+        "state": "/SubmachineEntryComposite/drive/CompositeChild/comp/leaf"
+      }
+    ]
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_attribute_name_slash",
+  "mode": "validation",
+  "description": "Attribute names must not contain path separators.",
+  "features": ["attribute", "validation"],
+  "model": {
+    "name": "InvalidAttributeNameSlash",
+    "initial": "idle",
+    "attributes": {
+      "bad/attr": {
+        "type": "boolean",
+        "default": false
+      }
+    },
+    "states": [
+      {
+        "name": "idle"
+      }
+    ]
+  },
+  "expect": {
+    "validation": [
+      {
+        "code": "invalid_name"
+      }
+    ]
+  }
+}

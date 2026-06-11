@@ -1,0 +1,53 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "behavior_snapshot_from_operation_body",
+  "description": "A behavior-side snapshot taken from an operation body observes the current state.",
+  "features": ["operation", "snapshot"],
+  "model": {
+    "name": "BehaviorSnapshotFromOperationBody",
+    "initial": "idle",
+    "operations": {
+      "inspect": {
+        "behavior": "operation_inspect"
+      }
+    },
+    "states": [
+      {
+        "name": "idle"
+      }
+    ]
+  },
+  "behaviors": {
+    "operation_inspect": [
+      {
+        "op": "snapshot"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "call",
+      "operation": "inspect"
+    }
+  ],
+  "expect": {
+    "state": "/BehaviorSnapshotFromOperationBody/idle",
+    "trace": [
+      {
+        "type": "call",
+        "operation": "inspect"
+      },
+      {
+        "type": "snapshot",
+        "state": "/BehaviorSnapshotFromOperationBody/idle"
+      },
+      {
+        "type": "stable",
+        "state": "/BehaviorSnapshotFromOperationBody/idle"
+      }
+    ]
+  }
+}

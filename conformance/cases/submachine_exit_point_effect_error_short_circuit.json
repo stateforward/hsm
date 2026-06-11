@@ -1,0 +1,136 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "submachine_exit_point_effect_error_short_circuit",
+  "description": "A failing exit-point effect prevents later exit-point effects and parent exit-point handling effects from running.",
+  "features": ["submachine", "exit_point", "effect", "error", "selection_order"],
+  "model": {
+    "name": "SubmachineExitPointEffectErrorShortCircuit",
+    "initial": "drive",
+    "states": [
+      {
+        "name": "drive",
+        "kind": "submachine",
+        "machine": "ExitPointErrorChild",
+        "transitions": [
+          {
+            "trigger": {
+              "kind": "exit_point",
+              "exit_point": "done"
+            },
+            "target": "outside",
+            "effects": [
+              {
+                "behavior": "effect_parent"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "outside"
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "ExitPointErrorChild",
+      "initial": "active",
+      "exit_points": [
+        {
+          "name": "done",
+          "effects": [
+            {
+              "behavior": "effect_before"
+            },
+            {
+              "behavior": "effect_fail"
+            },
+            {
+              "behavior": "effect_after"
+            }
+          ]
+        }
+      ],
+      "states": [
+        {
+          "name": "active",
+          "transitions": [
+            {
+              "on": "finish",
+              "target": "done"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "behaviors": {
+    "effect_before": [
+      {
+        "op": "trace",
+        "value": "exit-point:before"
+      }
+    ],
+    "effect_fail": [
+      {
+        "op": "trace",
+        "value": "exit-point:fail"
+      },
+      {
+        "op": "raise",
+        "code": "exit_point_error",
+        "value": "exit point boom"
+      }
+    ],
+    "effect_after": [
+      {
+        "op": "trace",
+        "value": "exit-point:after"
+      }
+    ],
+    "effect_parent": [
+      {
+        "op": "trace",
+        "value": "effect:parent"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "finish"
+    }
+  ],
+  "expect": {
+    "state": "/SubmachineExitPointEffectErrorShortCircuit/drive",
+    "error": {
+      "code": "exit_point_error",
+      "message_contains": "exit point boom"
+    },
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "finish"
+      },
+      {
+        "type": "trace",
+        "value": "exit-point:before"
+      },
+      {
+        "type": "trace",
+        "value": "exit-point:fail"
+      },
+      {
+        "type": "error",
+        "code": "exit_point_error"
+      },
+      {
+        "type": "stable",
+        "state": "/SubmachineExitPointEffectErrorShortCircuit/drive"
+      }
+    ]
+  }
+}

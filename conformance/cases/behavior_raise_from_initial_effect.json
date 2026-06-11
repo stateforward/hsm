@@ -1,0 +1,95 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "behavior_raise_from_initial_effect",
+  "description": "A normal internal event raised from an initial effect is processed after initial target entry completes.",
+  "features": ["initial", "queue", "reentrancy"],
+  "model": {
+    "name": "BehaviorRaiseFromInitialEffect",
+    "initial": {
+      "target": "idle",
+      "effects": [
+        {
+          "behavior": "initial_raise"
+        }
+      ]
+    },
+    "states": [
+      {
+        "name": "idle",
+        "entry": [
+          {
+            "behavior": "entry_idle"
+          }
+        ],
+        "transitions": [
+          {
+            "on": "audit",
+            "target": "done",
+            "effects": [
+              {
+                "behavior": "effect_audit"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "done"
+      }
+    ]
+  },
+  "behaviors": {
+    "initial_raise": [
+      {
+        "op": "raise",
+        "event": "audit"
+      },
+      {
+        "op": "trace",
+        "value": "initial:effect"
+      }
+    ],
+    "entry_idle": [
+      {
+        "op": "trace",
+        "value": "entry:idle"
+      }
+    ],
+    "effect_audit": [
+      {
+        "op": "trace",
+        "value": "effect:audit"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    }
+  ],
+  "expect": {
+    "state": "/BehaviorRaiseFromInitialEffect/done",
+    "trace": [
+      {
+        "type": "raise",
+        "event": "audit"
+      },
+      {
+        "type": "trace",
+        "value": "initial:effect"
+      },
+      {
+        "type": "trace",
+        "value": "entry:idle"
+      },
+      {
+        "type": "trace",
+        "value": "effect:audit"
+      },
+      {
+        "type": "stable",
+        "state": "/BehaviorRaiseFromInitialEffect/done"
+      }
+    ]
+  }
+}

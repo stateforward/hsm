@@ -1,0 +1,33 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_submachine_entry_point_selector_without_target",
+  "mode": "validation",
+  "description": "A transition entry-point selector is valid only when the same transition targets a containing submachine state.",
+  "features": [
+    "submachine",
+    "entry_point",
+    "validation"
+  ],
+  "model": {
+    "name": "InvalidEntryPointSelectorWithoutTarget",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "on": "go",
+            "entry_point": "resume"
+          }
+        ]
+      }
+    ]
+  },
+  "expect": {
+    "validation": [
+      {
+        "code": "invalid_entry_point_usage"
+      }
+    ]
+  }
+}

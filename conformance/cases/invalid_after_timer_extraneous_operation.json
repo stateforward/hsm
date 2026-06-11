@@ -1,0 +1,36 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_after_timer_extraneous_operation",
+  "mode": "validation",
+  "description": "An after timer trigger must not declare operation operands.",
+  "features": ["timer", "after", "operation", "validation"],
+  "model": {
+    "name": "InvalidAfterTimerExtraneousOperation",
+    "initial": "waiting",
+    "states": [
+      {
+        "name": "waiting",
+        "transitions": [
+          {
+            "trigger": {
+              "kind": "after",
+              "duration_ms": 10,
+              "operation": "timeout"
+            },
+            "target": "done"
+          }
+        ]
+      },
+      {
+        "name": "done"
+      }
+    ]
+  },
+  "expect": {
+    "validation": [
+      {
+        "code": "extraneous_trigger_operand"
+      }
+    ]
+  }
+}

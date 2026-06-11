@@ -1,0 +1,180 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "submachine_entry_point_choice_to_exit_point",
+  "description": "An entry point can target a child choice pseudostate that immediately routes to an exit point handled by the containing submachine state.",
+  "features": [
+    "submachine",
+    "entry_point",
+    "exit_point",
+    "choice",
+    "guard"
+  ],
+  "model": {
+    "name": "SubmachineEntryChoiceExit",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "on": "go",
+            "target": "drive",
+            "entry_point": "select"
+          }
+        ]
+      },
+      {
+        "name": "drive",
+        "kind": "submachine",
+        "machine": "ChoiceExitChild",
+        "transitions": [
+          {
+            "trigger": {
+              "kind": "exit_point",
+              "exit_point": "selected"
+            },
+            "target": "outside",
+            "effects": [
+              {
+                "behavior": "effect_parent_exit"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "outside",
+        "entry": [
+          {
+            "behavior": "entry_outside"
+          }
+        ]
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "ChoiceExitChild",
+      "initial": "idle",
+      "entry_points": [
+        {
+          "name": "select",
+          "target": "pick",
+          "effects": [
+            {
+              "behavior": "effect_select"
+            }
+          ]
+        }
+      ],
+      "exit_points": [
+        {
+          "name": "selected",
+          "effects": [
+            {
+              "behavior": "effect_exit_point"
+            }
+          ]
+        }
+      ],
+      "states": [
+        {
+          "name": "idle"
+        },
+        {
+          "name": "pick",
+          "kind": "choice",
+          "transitions": [
+            {
+              "guard": {
+                "behavior": "guard_exit"
+              },
+              "target": "selected"
+            },
+            {
+              "target": "idle"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "behaviors": {
+    "effect_select": [
+      {
+        "op": "trace",
+        "value": "effect:select"
+      }
+    ],
+    "guard_exit": [
+      {
+        "op": "trace",
+        "value": "guard:exit"
+      },
+      {
+        "op": "return_value",
+        "value": true
+      }
+    ],
+    "effect_exit_point": [
+      {
+        "op": "trace",
+        "value": "effect:exit-point"
+      }
+    ],
+    "effect_parent_exit": [
+      {
+        "op": "trace",
+        "value": "effect:parent-exit"
+      }
+    ],
+    "entry_outside": [
+      {
+        "op": "trace",
+        "value": "enter:outside"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "go"
+    }
+  ],
+  "expect": {
+    "state": "/SubmachineEntryChoiceExit/outside",
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "go"
+      },
+      {
+        "type": "trace",
+        "value": "effect:select"
+      },
+      {
+        "type": "trace",
+        "value": "guard:exit"
+      },
+      {
+        "type": "trace",
+        "value": "effect:exit-point"
+      },
+      {
+        "type": "trace",
+        "value": "effect:parent-exit"
+      },
+      {
+        "type": "trace",
+        "value": "enter:outside"
+      },
+      {
+        "type": "stable",
+        "state": "/SubmachineEntryChoiceExit/outside"
+      }
+    ]
+  }
+}

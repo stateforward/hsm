@@ -1,0 +1,80 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "snapshot_event_details_targetless_internal_transition",
+  "description": "Snapshots include null target transition snapshots for selectable targetless internal transitions.",
+  "features": [
+    "snapshot",
+    "internal",
+    "transition_kind"
+  ],
+  "model": {
+    "name": "SnapshotEventDetailsTargetlessInternalTransition",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "on": "ping",
+            "kind": "internal",
+            "effects": [
+              {
+                "behavior": "effect_ping"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "behaviors": {
+    "effect_ping": [
+      {
+        "op": "trace",
+        "value": "effect:ping"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "snapshot"
+    }
+  ],
+  "expect": {
+    "state": "/SnapshotEventDetailsTargetlessInternalTransition/idle",
+    "snapshots": {
+      "last": {
+        "id": "default",
+        "qualified_name": "/SnapshotEventDetailsTargetlessInternalTransition",
+        "state": "/SnapshotEventDetailsTargetlessInternalTransition/idle",
+        "attributes": {},
+        "queue_len": 0,
+        "transitions": [
+          {
+            "name": "/SnapshotEventDetailsTargetlessInternalTransition/idle/transition_4",
+            "kind": 67345,
+            "source": "/SnapshotEventDetailsTargetlessInternalTransition/idle",
+            "target": null,
+            "events": [
+              "ping"
+            ],
+            "guard": false
+          }
+        ]
+      }
+    },
+    "trace": [
+      {
+        "type": "snapshot",
+        "state": "/SnapshotEventDetailsTargetlessInternalTransition/idle"
+      },
+      {
+        "type": "stable",
+        "state": "/SnapshotEventDetailsTargetlessInternalTransition/idle"
+      }
+    ]
+  }
+}

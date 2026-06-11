@@ -1,0 +1,173 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "defer_event_object_metadata_isolation_across_dispatch_to_replay",
+  "description": "A multi-target dispatch_to event object deferred by multiple recipients shares ordinary mutable metadata when replayed while preserving the immutable event envelope.",
+  "features": [
+    "defer",
+    "event_ownership",
+    "dispatch_to"
+  ],
+  "model": {
+    "name": "DeferEventObjectMetadataIsolationAcrossDispatchToReplay",
+    "initial": "hold",
+    "states": [
+      {
+        "name": "hold",
+        "defer": [
+          "audit"
+        ],
+        "transitions": [
+          {
+            "on": "release",
+            "target": "ready"
+          }
+        ]
+      },
+      {
+        "name": "ready",
+        "transitions": [
+          {
+            "on": "audit",
+            "guard": {
+              "behavior": "owner_is_caller"
+            },
+            "target": "done",
+            "effects": [
+              {
+                "behavior": "mutate_metadata"
+              }
+            ]
+          },
+          {
+            "on": "audit",
+            "target": "leaked",
+            "effects": [
+              {
+                "behavior": "effect_leaked"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "done"
+      },
+      {
+        "name": "leaked"
+      }
+    ]
+  },
+  "instances": [
+    {
+      "id": "first"
+    },
+    {
+      "id": "second"
+    }
+  ],
+  "behaviors": {
+    "owner_is_caller": [
+      {
+        "op": "trace",
+        "value": "guard:owner-caller"
+      },
+      {
+        "op": "event_metadata_equals",
+        "name": "owner",
+        "value": "caller"
+      }
+    ],
+    "mutate_metadata": [
+      {
+        "op": "event_metadata_set",
+        "name": "owner",
+        "value": "changed"
+      },
+      {
+        "op": "trace",
+        "value": "effect:isolated"
+      }
+    ],
+    "effect_leaked": [
+      {
+        "op": "trace",
+        "value": "effect:leaked"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start",
+      "instance": "first"
+    },
+    {
+      "op": "start",
+      "instance": "second"
+    },
+    {
+      "op": "dispatch_to",
+      "targets": [
+        "first",
+        "second"
+      ],
+      "event": {
+        "name": "audit",
+        "metadata": {
+          "owner": "caller"
+        }
+      }
+    },
+    {
+      "op": "dispatch_to",
+      "targets": [
+        "first",
+        "second"
+      ],
+      "event": "release"
+    }
+  ],
+  "expect": {
+    "states": {
+      "first": "/DeferEventObjectMetadataIsolationAcrossDispatchToReplay/done",
+      "second": "/DeferEventObjectMetadataIsolationAcrossDispatchToReplay/leaked"
+    },
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "audit",
+        "target": [
+          "first",
+          "second"
+        ]
+      },
+      {
+        "type": "dispatch",
+        "event": "release",
+        "target": [
+          "first",
+          "second"
+        ]
+      },
+      {
+        "type": "trace",
+        "value": "guard:owner-caller"
+      },
+      {
+        "type": "trace",
+        "value": "effect:isolated"
+      },
+      {
+        "type": "trace",
+        "value": "guard:owner-caller"
+      },
+      {
+        "type": "trace",
+        "value": "effect:leaked"
+      },
+      {
+        "type": "stable",
+        "state": "targets:first,second"
+      }
+    ]
+  }
+}

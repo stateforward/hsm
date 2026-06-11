@@ -1,0 +1,83 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "snapshot_event_details_multiple_on_events",
+  "description": "Snapshots preserve cardinality and declaration order for plural on trigger transition snapshots.",
+  "features": [
+    "snapshot",
+    "event"
+  ],
+  "model": {
+    "name": "SnapshotEventDetailsMultipleOnEvents",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "trigger": {
+              "kind": "on",
+              "events": [
+                "alpha",
+                "beta",
+                {
+                  "name": "gamma",
+                  "metadata": {
+                    "declared": true
+                  }
+                }
+              ]
+            },
+            "target": "done"
+          }
+        ]
+      },
+      {
+        "name": "done"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "snapshot"
+    }
+  ],
+  "expect": {
+    "state": "/SnapshotEventDetailsMultipleOnEvents/idle",
+    "snapshots": {
+      "last": {
+        "id": "default",
+        "qualified_name": "/SnapshotEventDetailsMultipleOnEvents",
+        "state": "/SnapshotEventDetailsMultipleOnEvents/idle",
+        "attributes": {},
+        "queue_len": 0,
+        "transitions": [
+          {
+            "name": "/SnapshotEventDetailsMultipleOnEvents/idle/transition_4",
+            "kind": 67343,
+            "source": "/SnapshotEventDetailsMultipleOnEvents/idle",
+            "target": "/SnapshotEventDetailsMultipleOnEvents/done",
+            "events": [
+              "alpha",
+              "beta",
+              "gamma"
+            ],
+            "guard": false
+          }
+        ]
+      }
+    },
+    "trace": [
+      {
+        "type": "snapshot",
+        "state": "/SnapshotEventDetailsMultipleOnEvents/idle"
+      },
+      {
+        "type": "stable",
+        "state": "/SnapshotEventDetailsMultipleOnEvents/idle"
+      }
+    ]
+  }
+}

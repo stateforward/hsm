@@ -1,0 +1,147 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "config_queue_dispatch_to_uses_recipient_queues",
+  "description": "A caller-originated multi-target dispatch_to enqueues regular events through each targeted recipient instance's configured queue.",
+  "features": [
+    "queue",
+    "dispatch_to",
+    "multi_target"
+  ],
+  "model": {
+    "name": "ConfigQueueDispatchToUsesRecipientQueues",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "on": "audit",
+            "target": "done",
+            "effects": [
+              {
+                "behavior": "effect_audit"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "done",
+        "entry": [
+          {
+            "behavior": "entry_done"
+          }
+        ]
+      }
+    ]
+  },
+  "instances": [
+    {
+      "id": "one",
+      "config": {
+        "queue": "trace_fifo"
+      }
+    },
+    {
+      "id": "two",
+      "config": {
+        "queue": "trace_fifo"
+      }
+    },
+    {
+      "id": "untargeted",
+      "config": {
+        "queue": "trace_fifo"
+      }
+    }
+  ],
+  "behaviors": {
+    "effect_audit": [
+      {
+        "op": "trace",
+        "value": "effect:audit"
+      }
+    ],
+    "entry_done": [
+      {
+        "op": "trace",
+        "value": "entry:done"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start",
+      "instance": "one"
+    },
+    {
+      "op": "start",
+      "instance": "two"
+    },
+    {
+      "op": "start",
+      "instance": "untargeted"
+    },
+    {
+      "op": "dispatch_to",
+      "targets": [
+        "two",
+        "one"
+      ],
+      "event": "audit"
+    }
+  ],
+  "expect": {
+    "states": {
+      "one": "/ConfigQueueDispatchToUsesRecipientQueues/done",
+      "two": "/ConfigQueueDispatchToUsesRecipientQueues/done",
+      "untargeted": "/ConfigQueueDispatchToUsesRecipientQueues/idle"
+    },
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "audit",
+        "target": [
+          "two",
+          "one"
+        ]
+      },
+      {
+        "type": "trace",
+        "value": "queue:push:audit"
+      },
+      {
+        "type": "trace",
+        "value": "queue:pop:audit"
+      },
+      {
+        "type": "trace",
+        "value": "effect:audit"
+      },
+      {
+        "type": "trace",
+        "value": "entry:done"
+      },
+      {
+        "type": "trace",
+        "value": "queue:push:audit"
+      },
+      {
+        "type": "trace",
+        "value": "queue:pop:audit"
+      },
+      {
+        "type": "trace",
+        "value": "effect:audit"
+      },
+      {
+        "type": "trace",
+        "value": "entry:done"
+      },
+      {
+        "type": "stable",
+        "state": "targets:two,one"
+      }
+    ]
+  }
+}

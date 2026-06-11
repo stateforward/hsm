@@ -1,0 +1,34 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_on_set_missing_operand",
+  "mode": "validation",
+  "description": "An on_set trigger must declare its attribute operand.",
+  "features": ["attribute", "on_set", "validation"],
+  "model": {
+    "name": "InvalidOnSetMissingOperand",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "trigger": {
+              "kind": "on_set"
+            },
+            "target": "done"
+          }
+        ]
+      },
+      {
+        "name": "done"
+      }
+    ]
+  },
+  "expect": {
+    "validation": [
+      {
+        "code": "missing_trigger_operand"
+      }
+    ]
+  }
+}

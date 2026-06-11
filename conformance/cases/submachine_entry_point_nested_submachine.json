@@ -1,0 +1,131 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "submachine_entry_point_nested_submachine",
+  "description": "An entry point can target a nested submachine state and enter that nested child through its default initial path.",
+  "features": [
+    "submachine",
+    "entry_point",
+    "nested"
+  ],
+  "model": {
+    "name": "SubmachineEntryNestedSubmachine",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "on": "go",
+            "target": "outer",
+            "entry_point": "enter_inner"
+          }
+        ]
+      },
+      {
+        "name": "outer",
+        "kind": "submachine",
+        "machine": "OuterWithNested"
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "InnerDefault",
+      "initial": "leaf",
+      "states": [
+        {
+          "name": "leaf",
+          "entry": [
+            {
+              "behavior": "entry_inner_leaf"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "OuterWithNested",
+      "initial": "other",
+      "entry_points": [
+        {
+          "name": "enter_inner",
+          "target": "inner",
+          "effects": [
+            {
+              "behavior": "effect_outer_entry"
+            }
+          ]
+        }
+      ],
+      "states": [
+        {
+          "name": "other"
+        },
+        {
+          "name": "inner",
+          "kind": "submachine",
+          "machine": "InnerDefault",
+          "entry": [
+            {
+              "behavior": "entry_inner_boundary"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "behaviors": {
+    "effect_outer_entry": [
+      {
+        "op": "trace",
+        "value": "effect:outer-entry"
+      }
+    ],
+    "entry_inner_boundary": [
+      {
+        "op": "trace",
+        "value": "enter:inner-boundary"
+      }
+    ],
+    "entry_inner_leaf": [
+      {
+        "op": "trace",
+        "value": "enter:inner-leaf"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "go"
+    }
+  ],
+  "expect": {
+    "state": "/SubmachineEntryNestedSubmachine/outer/OuterWithNested/inner/InnerDefault/leaf",
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "go"
+      },
+      {
+        "type": "trace",
+        "value": "effect:outer-entry"
+      },
+      {
+        "type": "trace",
+        "value": "enter:inner-boundary"
+      },
+      {
+        "type": "trace",
+        "value": "enter:inner-leaf"
+      },
+      {
+        "type": "stable",
+        "state": "/SubmachineEntryNestedSubmachine/outer/OuterWithNested/inner/InnerDefault/leaf"
+      }
+    ]
+  }
+}

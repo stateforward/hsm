@@ -1,0 +1,48 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_submachine_child_targets_parent",
+  "mode": "validation",
+  "description": "A transition inside a child machine must not target a parent-machine state path; it must escape through an exit point.",
+  "features": [
+    "submachine",
+    "validation"
+  ],
+  "model": {
+    "name": "InvalidChildTargetsParent",
+    "initial": "drive",
+    "states": [
+      {
+        "name": "drive",
+        "kind": "submachine",
+        "machine": "LeakyChild"
+      },
+      {
+        "name": "outside"
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "LeakyChild",
+      "initial": "inside",
+      "states": [
+        {
+          "name": "inside",
+          "transitions": [
+            {
+              "on": "escape",
+              "target": "/InvalidChildTargetsParent/outside"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "expect": {
+    "validation": [
+      {
+        "code": "invalid_submachine_boundary_target"
+      }
+    ]
+  }
+}

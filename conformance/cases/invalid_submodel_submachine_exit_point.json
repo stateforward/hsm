@@ -1,0 +1,64 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_submodel_submachine_exit_point",
+  "mode": "validation",
+  "description": "Submachine exit-point handlers inside child models must validate referenced exit points recursively.",
+  "features": ["submachine", "exit_point", "validation"],
+  "model": {
+    "name": "InvalidSubmodelSubmachineExitPoint",
+    "initial": "outer",
+    "states": [
+      {
+        "name": "outer",
+        "kind": "submachine",
+        "machine": "OuterExitChild"
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "InnerExitChild",
+      "initial": "ready",
+      "exit_points": [
+        {
+          "name": "done"
+        }
+      ],
+      "states": [
+        {
+          "name": "ready"
+        }
+      ]
+    },
+    {
+      "name": "OuterExitChild",
+      "initial": "inner",
+      "states": [
+        {
+          "name": "inner",
+          "kind": "submachine",
+          "machine": "InnerExitChild",
+          "transitions": [
+            {
+              "trigger": {
+                "kind": "exit_point",
+                "exit_point": "missing"
+              },
+              "target": "outside"
+            }
+          ]
+        },
+        {
+          "name": "outside"
+        }
+      ]
+    }
+  ],
+  "expect": {
+    "validation": [
+      {
+        "code": "missing_exit_point"
+      }
+    ]
+  }
+}

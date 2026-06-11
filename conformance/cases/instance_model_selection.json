@@ -1,0 +1,91 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "instance_model_selection",
+  "description": "Named instances can select different top-level models from the conformance model registry.",
+  "features": ["group", "dispatch_to"],
+  "model": {
+    "name": "PrimaryInstanceModel",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "on": "go",
+            "target": "primary_done"
+          }
+        ]
+      },
+      {
+        "name": "primary_done"
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "SecondaryInstanceModel",
+      "initial": "idle",
+      "states": [
+        {
+          "name": "idle",
+          "transitions": [
+            {
+              "on": "go",
+              "target": "secondary_done"
+            }
+          ]
+        },
+        {
+          "name": "secondary_done"
+        }
+      ]
+    }
+  ],
+  "instances": [
+    {
+      "id": "primary"
+    },
+    {
+      "id": "secondary",
+      "model": "SecondaryInstanceModel"
+    }
+  ],
+  "script": [
+    {
+      "op": "start",
+      "instance": "primary"
+    },
+    {
+      "op": "start",
+      "instance": "secondary"
+    },
+    {
+      "op": "dispatch_to",
+      "targets": [
+        "primary",
+        "secondary"
+      ],
+      "event": "go"
+    }
+  ],
+  "expect": {
+    "states": {
+      "primary": "/PrimaryInstanceModel/primary_done",
+      "secondary": "/SecondaryInstanceModel/secondary_done"
+    },
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "go",
+        "target": [
+          "primary",
+          "secondary"
+        ]
+      },
+      {
+        "type": "stable",
+        "state": "targets:primary,secondary"
+      }
+    ]
+  }
+}

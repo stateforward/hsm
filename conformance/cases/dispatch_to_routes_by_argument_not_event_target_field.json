@@ -1,0 +1,124 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "dispatch_to_routes_by_argument_not_event_target_field",
+  "description": "dispatch_to delivery is controlled by the script target argument, not by the event object's declared target field.",
+  "features": [
+    "dispatch_to",
+    "event_ownership",
+    "guard"
+  ],
+  "model": {
+    "name": "DispatchToRoutesByArgumentNotEventTargetField",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "on": "go",
+            "guard": {
+              "behavior": "declared_target_is_second"
+            },
+            "target": "done",
+            "effects": [
+              {
+                "behavior": "effect_done"
+              }
+            ]
+          },
+          {
+            "on": "go",
+            "target": "bad",
+            "effects": [
+              {
+                "behavior": "effect_bad"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "done"
+      },
+      {
+        "name": "bad"
+      }
+    ]
+  },
+  "instances": [
+    {
+      "id": "first"
+    },
+    {
+      "id": "second"
+    }
+  ],
+  "behaviors": {
+    "declared_target_is_second": [
+      {
+        "op": "trace",
+        "value": "guard:event-target"
+      },
+      {
+        "op": "event_metadata_equals",
+        "name": "target",
+        "value": "second"
+      }
+    ],
+    "effect_done": [
+      {
+        "op": "trace",
+        "value": "effect:done"
+      }
+    ],
+    "effect_bad": [
+      {
+        "op": "trace",
+        "value": "effect:bad"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start",
+      "instance": "first"
+    },
+    {
+      "op": "start",
+      "instance": "second"
+    },
+    {
+      "op": "dispatch_to",
+      "target": "first",
+      "event": {
+        "name": "go",
+        "target": "second"
+      }
+    }
+  ],
+  "expect": {
+    "states": {
+      "first": "/DispatchToRoutesByArgumentNotEventTargetField/done",
+      "second": "/DispatchToRoutesByArgumentNotEventTargetField/idle"
+    },
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "go",
+        "target": "first"
+      },
+      {
+        "type": "trace",
+        "value": "guard:event-target"
+      },
+      {
+        "type": "trace",
+        "value": "effect:done"
+      },
+      {
+        "type": "stable",
+        "state": "first"
+      }
+    ]
+  }
+}

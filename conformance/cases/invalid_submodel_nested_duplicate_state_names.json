@@ -1,0 +1,49 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_submodel_nested_duplicate_state_names",
+  "mode": "validation",
+  "description": "Sibling state names must be unique inside nested composites of reusable child models.",
+  "features": [
+    "validation",
+    "submachine",
+    "nested"
+  ],
+  "model": {
+    "name": "InvalidSubmodelNestedDuplicateStateNames",
+    "initial": "drive",
+    "states": [
+      {
+        "name": "drive",
+        "kind": "submachine",
+        "machine": "ChildNestedDuplicateStates"
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "ChildNestedDuplicateStates",
+      "initial": "outer",
+      "states": [
+        {
+          "name": "outer",
+          "initial": "idle",
+          "states": [
+            {
+              "name": "idle"
+            },
+            {
+              "name": "idle"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "expect": {
+    "validation": [
+      {
+        "code": "duplicate_state"
+      }
+    ]
+  }
+}

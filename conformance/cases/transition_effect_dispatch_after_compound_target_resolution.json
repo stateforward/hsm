@@ -1,0 +1,71 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "transition_effect_dispatch_after_compound_target_resolution",
+  "description": "A dispatch from a transition effect targeting a compound state is replayed only after the compound target reaches its nested leaf.",
+  "features": ["nested", "queue", "reentrancy"],
+  "model": {
+    "name": "TransitionEffectDispatchAfterCompoundTargetResolution",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "on": "go",
+            "target": "parent",
+            "effects": [{"behavior": "effect_dispatch"}]
+          }
+        ]
+      },
+      {
+        "name": "parent",
+        "initial": "child",
+        "entry": [{"behavior": "entry_parent"}],
+        "transitions": [
+          {
+            "on": "audit",
+            "target": "wrong",
+            "effects": [{"behavior": "effect_wrong"}]
+          }
+        ],
+        "states": [
+          {
+            "name": "child",
+            "entry": [{"behavior": "entry_child"}],
+            "transitions": [
+              {
+                "on": "audit",
+                "target": "../done",
+                "effects": [{"behavior": "effect_audit"}]
+              }
+            ]
+          },
+          {"name": "done", "entry": [{"behavior": "entry_done"}]}
+        ]
+      },
+      {"name": "wrong"}
+    ]
+  },
+  "behaviors": {
+    "effect_dispatch": [{"op": "dispatch", "event": "audit"}, {"op": "trace", "value": "effect:dispatch"}],
+    "entry_parent": [{"op": "trace", "value": "entry:parent"}],
+    "entry_child": [{"op": "trace", "value": "entry:child"}],
+    "effect_audit": [{"op": "trace", "value": "effect:audit"}],
+    "entry_done": [{"op": "trace", "value": "entry:done"}],
+    "effect_wrong": [{"op": "trace", "value": "effect:wrong"}]
+  },
+  "script": [{"op": "start"}, {"op": "dispatch", "event": "go"}],
+  "expect": {
+    "state": "/TransitionEffectDispatchAfterCompoundTargetResolution/parent/done",
+    "trace": [
+      {"type": "dispatch", "event": "go"},
+      {"type": "dispatch", "event": "audit"},
+      {"type": "trace", "value": "effect:dispatch"},
+      {"type": "trace", "value": "entry:parent"},
+      {"type": "trace", "value": "entry:child"},
+      {"type": "trace", "value": "effect:audit"},
+      {"type": "trace", "value": "entry:done"},
+      {"type": "stable", "state": "/TransitionEffectDispatchAfterCompoundTargetResolution/parent/done"}
+    ]
+  }
+}

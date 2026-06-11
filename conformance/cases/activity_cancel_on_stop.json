@@ -1,0 +1,24 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "activity_cancel_on_stop",
+  "description": "Stopping an instance cancels a running top-level activity.",
+  "features": ["activity", "async", "cancellation", "stop"],
+  "model": {
+    "name": "ActivityCancelOnStop",
+    "initial": "active",
+    "states": [{"name": "active", "activity": [{"behavior": "activity_running"}]}]
+  },
+  "behaviors": {
+    "activity_running": [{"op": "trace", "value": "activity:start"}, {"op": "sleep", "millis": 1000}, {"op": "trace", "value": "activity:done"}]
+  },
+  "script": [{"op": "start"}, {"op": "stop"}],
+  "expect": {
+    "state": "/ActivityCancelOnStop",
+    "trace": [
+      {"type": "trace", "value": "activity:start"},
+      {"type": "stop"},
+      {"type": "activity_cancel", "behavior": "activity_running"},
+      {"type": "stable", "state": "/ActivityCancelOnStop"}
+    ]
+  }
+}

@@ -1,0 +1,103 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "event_object_events_array",
+  "description": "Plural on trigger events may mix string and event-object references and still match by event name.",
+  "features": ["event", "guard"],
+  "model": {
+    "name": "EventObjectEventsArray",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "trigger": {
+              "kind": "on",
+              "events": [
+                "wrong",
+                {
+                  "name": "right",
+                  "metadata": {
+                    "declared": true
+                  }
+                }
+              ]
+            },
+            "guard": {
+              "behavior": "is_right"
+            },
+            "target": "done",
+            "effects": [
+              {
+                "behavior": "effect_done"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "done"
+      }
+    ]
+  },
+  "behaviors": {
+    "is_right": [
+      {
+        "op": "trace",
+        "value": "guard:event-name"
+      },
+      {
+        "op": "event_name_equals",
+        "value": "right"
+      }
+    ],
+    "effect_done": [
+      {
+        "op": "trace",
+        "value": "effect:done"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "wrong"
+    },
+    {
+      "op": "dispatch",
+      "event": "right"
+    }
+  ],
+  "expect": {
+    "state": "/EventObjectEventsArray/done",
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "wrong"
+      },
+      {
+        "type": "trace",
+        "value": "guard:event-name"
+      },
+      {
+        "type": "dispatch",
+        "event": "right"
+      },
+      {
+        "type": "trace",
+        "value": "guard:event-name"
+      },
+      {
+        "type": "trace",
+        "value": "effect:done"
+      },
+      {
+        "type": "stable",
+        "state": "/EventObjectEventsArray/done"
+      }
+    ]
+  }
+}

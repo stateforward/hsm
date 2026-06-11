@@ -1,0 +1,124 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "group_dispatch_after_stop_start_preserves_membership",
+  "description": "Group membership survives stop followed by start and group dispatch includes the started-again member.",
+  "features": ["group", "lifecycle", "stop"],
+  "model": {
+    "name": "GroupDispatchAfterStopStartPreservesMembership",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "on": "dirty",
+            "target": "dirty"
+          },
+          {
+            "on": "go",
+            "target": "done",
+            "effects": [
+              {
+                "behavior": "effect_go"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "dirty"
+      },
+      {
+        "name": "done"
+      }
+    ]
+  },
+  "instances": [
+    {
+      "id": "reset"
+    },
+    {
+      "id": "sibling"
+    },
+    {
+      "id": "never"
+    }
+  ],
+  "groups": [
+    {
+      "id": "fleet",
+      "members": [
+        "reset",
+        "sibling",
+        "never"
+      ]
+    }
+  ],
+  "behaviors": {
+    "effect_go": [
+      {
+        "op": "trace",
+        "value": "effect:go"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start",
+      "instance": "reset"
+    },
+    {
+      "op": "start",
+      "instance": "sibling"
+    },
+    {
+      "op": "dispatch_to",
+      "target": "reset",
+      "event": "dirty"
+    },
+    {
+      "op": "stop",
+      "instance": "reset"
+    },
+    {
+      "op": "start",
+      "instance": "reset"
+    },
+    {
+      "op": "group_dispatch",
+      "group": "fleet",
+      "event": "go"
+    }
+  ],
+  "expect": {
+    "states": {
+      "reset": "/GroupDispatchAfterStopStartPreservesMembership/done",
+      "sibling": "/GroupDispatchAfterStopStartPreservesMembership/done",
+      "never": ""
+    },
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "dirty",
+        "target": "reset"
+      },
+      {
+        "type": "dispatch",
+        "event": "go",
+        "target": "fleet"
+      },
+      {
+        "type": "trace",
+        "value": "effect:go"
+      },
+      {
+        "type": "trace",
+        "value": "effect:go"
+      },
+      {
+        "type": "stable",
+        "state": "group:fleet"
+      }
+    ]
+  }
+}

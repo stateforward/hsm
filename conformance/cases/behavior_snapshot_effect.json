@@ -1,0 +1,62 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "behavior_snapshot_effect",
+  "description": "A behavior-side snapshot taken from a transition effect observes the source state before target entry completes.",
+  "features": ["snapshot", "effect"],
+  "model": {
+    "name": "BehaviorSnapshotEffect",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "on": "go",
+            "target": "done",
+            "effects": [
+              {
+                "behavior": "snapshot_effect"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "done"
+      }
+    ]
+  },
+  "behaviors": {
+    "snapshot_effect": [
+      {
+        "op": "snapshot"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "go"
+    }
+  ],
+  "expect": {
+    "state": "/BehaviorSnapshotEffect/done",
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "go"
+      },
+      {
+        "type": "snapshot",
+        "state": "/BehaviorSnapshotEffect/idle"
+      },
+      {
+        "type": "stable",
+        "state": "/BehaviorSnapshotEffect/done"
+      }
+    ]
+  }
+}

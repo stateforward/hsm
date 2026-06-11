@@ -1,0 +1,106 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "event_name_set_visible_within_same_behavior",
+  "description": "A reserved event name write through event_metadata_set does not change the immutable event envelope.",
+  "features": [
+    "event_ownership",
+    "guard"
+  ],
+  "model": {
+    "name": "EventNameSetVisibleWithinSameBehavior",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "on": "go",
+            "guard": {
+              "behavior": "rename_then_check"
+            },
+            "target": "done",
+            "effects": [
+              {
+                "behavior": "effect_done"
+              }
+            ]
+          },
+          {
+            "on": "go",
+            "target": "fallback",
+            "effects": [
+              {
+                "behavior": "effect_fallback"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "done"
+      },
+      {
+        "name": "fallback"
+      }
+    ]
+  },
+  "behaviors": {
+    "rename_then_check": [
+      {
+        "op": "event_metadata_set",
+        "name": "name",
+        "value": "changed"
+      },
+      {
+        "op": "trace",
+        "value": "guard:name-visible"
+      },
+      {
+        "op": "event_name_equals",
+        "value": "changed"
+      }
+    ],
+    "effect_done": [
+      {
+        "op": "trace",
+        "value": "effect:done"
+      }
+    ],
+    "effect_fallback": [
+      {
+        "op": "trace",
+        "value": "effect:fallback"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "go"
+    }
+  ],
+  "expect": {
+    "state": "/EventNameSetVisibleWithinSameBehavior/fallback",
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "go"
+      },
+      {
+        "type": "trace",
+        "value": "guard:name-visible"
+      },
+      {
+        "type": "trace",
+        "value": "effect:fallback"
+      },
+      {
+        "type": "stable",
+        "state": "/EventNameSetVisibleWithinSameBehavior/fallback"
+      }
+    ]
+  }
+}

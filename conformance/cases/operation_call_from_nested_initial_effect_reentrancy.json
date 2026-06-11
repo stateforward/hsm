@@ -1,0 +1,66 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "operation_call_from_nested_initial_effect_reentrancy",
+  "description": "An operation called from a nested composite initial effect queues its on_call event until the nested target entry completes.",
+  "features": ["operation", "on_call", "nested", "initial", "queue", "reentrancy"],
+  "model": {
+    "name": "OperationCallFromNestedInitialEffectReentrancy",
+    "initial": "parent",
+    "operations": {
+      "audit": {"behavior": "operation_audit"}
+    },
+    "states": [
+      {
+        "name": "parent",
+        "entry": [{"behavior": "entry_parent"}],
+        "initial": {
+          "target": "child",
+          "effects": [{"behavior": "nested_initial_calls_audit"}]
+        },
+        "states": [
+          {
+            "name": "child",
+            "entry": [{"behavior": "entry_child"}],
+            "transitions": [
+              {
+                "trigger": {"kind": "on_call", "operation": "audit"},
+                "target": "../handled",
+                "effects": [{"behavior": "effect_audit"}]
+              }
+            ]
+          },
+          {
+            "name": "handled",
+            "entry": [{"behavior": "entry_handled"}]
+          }
+        ]
+      }
+    ]
+  },
+  "behaviors": {
+    "operation_audit": [{"op": "trace", "value": "operation:audit"}],
+    "entry_parent": [{"op": "trace", "value": "entry:parent"}],
+    "nested_initial_calls_audit": [
+      {"op": "trace", "value": "initial:before-call"},
+      {"op": "call", "name": "audit"},
+      {"op": "trace", "value": "initial:after-call"}
+    ],
+    "entry_child": [{"op": "trace", "value": "entry:child"}],
+    "effect_audit": [{"op": "trace", "value": "effect:audit"}],
+    "entry_handled": [{"op": "trace", "value": "entry:handled"}]
+  },
+  "script": [{"op": "start"}],
+  "expect": {
+    "state": "/OperationCallFromNestedInitialEffectReentrancy/parent/handled",
+    "trace": [
+      {"type": "trace", "value": "entry:parent"},
+      {"type": "trace", "value": "initial:before-call"},
+      {"type": "trace", "value": "operation:audit"},
+      {"type": "trace", "value": "initial:after-call"},
+      {"type": "trace", "value": "entry:child"},
+      {"type": "trace", "value": "effect:audit"},
+      {"type": "trace", "value": "entry:handled"},
+      {"type": "stable", "state": "/OperationCallFromNestedInitialEffectReentrancy/parent/handled"}
+    ]
+  }
+}

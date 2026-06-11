@@ -1,0 +1,45 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_submodel_top_level_history",
+  "mode": "validation",
+  "description": "History pseudostates inside child models must be owned by a composite state, not the child model root.",
+  "features": ["submachine", "history", "validation"],
+  "model": {
+    "name": "InvalidSubmodelTopLevelHistory",
+    "initial": "drive",
+    "states": [
+      {
+        "name": "drive",
+        "kind": "submachine",
+        "machine": "ChildTopLevelHistory"
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "ChildTopLevelHistory",
+      "initial": "h",
+      "states": [
+        {
+          "name": "h",
+          "kind": "shallow_history",
+          "transitions": [
+            {
+              "target": "idle"
+            }
+          ]
+        },
+        {
+          "name": "idle"
+        }
+      ]
+    }
+  ],
+  "expect": {
+    "validation": [
+      {
+        "code": "invalid_history_owner"
+      }
+    ]
+  }
+}

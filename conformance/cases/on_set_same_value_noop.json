@@ -1,0 +1,76 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "on_set_same_value_noop",
+  "description": "Setting an attribute to its current value does not emit an on_set transition.",
+  "features": [
+    "attribute",
+    "on_set"
+  ],
+  "model": {
+    "name": "OnSetSameValueNoop",
+    "initial": "idle",
+    "attributes": {
+      "flag": {
+        "type": "boolean",
+        "default": false
+      }
+    },
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "trigger": {
+              "kind": "on_set",
+              "attribute": "flag"
+            },
+            "target": "changed",
+            "effects": [
+              {
+                "behavior": "effect_changed"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "changed"
+      }
+    ]
+  },
+  "behaviors": {
+    "effect_changed": [
+      {
+        "op": "trace",
+        "value": "effect:changed"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "set",
+      "attribute": "flag",
+      "value": false
+    }
+  ],
+  "expect": {
+    "state": "/OnSetSameValueNoop/idle",
+    "attributes": {
+      "flag": false
+    },
+    "trace": [
+      {
+        "type": "set",
+        "attribute": "flag",
+        "value": false
+      },
+      {
+        "type": "stable",
+        "state": "/OnSetSameValueNoop/idle"
+      }
+    ]
+  }
+}

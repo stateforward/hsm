@@ -1,0 +1,46 @@
+---
+description: Red-green workflow — reproduce every bug or behavior change with a failing test before fixing, then leave the test green
+alwaysApply: true
+---
+
+# Red test before fix
+
+Every bug fix and behavior change follows red → green. Do not patch production code until a test proves the problem exists.
+
+## Required sequence
+
+1. **Red** — Write or extend a test that fails because of the reported behavior (not because of a typo or setup mistake).
+2. **Confirm** — Run the test; capture that it fails for the expected reason.
+3. **Green** — Make the smallest change that fixes the issue.
+4. **Verify** — Re-run the test; it must pass. Related tests must still pass.
+
+Skip the fix step if you cannot get a red test — stop and explain what blocks reproduction (missing harness, flaky env, etc.).
+
+## What counts as reproduction
+
+- The test assertion must encode the **expected** behavior or the **bug symptom** described in the task.
+- A failing type error, import error, or wrong fixture is not reproduction — fix the test setup first, then assert the real behavior.
+- Prefer the narrowest test level that proves the behavior: unit → integration → live E2E, matching project conventions (see `chat-rules.mdc` for chat proof requirements).
+
+## When changing behavior
+
+- **New feature** → test describes the new behavior first; it fails until implemented.
+- **Regression** → test locks in the previously working behavior; it fails on current code, passes after the fix.
+- **Refactor** → existing tests stay green; if none cover the area, add a characterization test before refactoring.
+
+## Do not
+
+- Fix first and add a test afterward to match the fix.
+- Merge a fix whose only evidence is manual inspection or log output.
+- Weaken or delete a red test to force green — fix the code instead.
+- Ship with a skipped or commented-out reproduction test.
+
+## Done means
+
+```
+reproduction test: FAILED (before fix)
+reproduction test: PASSED (after fix)
+regression suite:   PASSED (no new failures)
+```
+
+If the project has a scoped proof command (e.g. `./scripts/run-chat-textual-tests.sh`), run it when the change touches that surface.

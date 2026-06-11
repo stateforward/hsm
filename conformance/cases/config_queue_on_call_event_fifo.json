@@ -1,0 +1,116 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "config_queue_on_call_event_fifo",
+  "description": "A script operation call event is routed through the configured FIFO queue before on_call transition selection.",
+  "features": [
+    "queue",
+    "operation",
+    "on_call"
+  ],
+  "model": {
+    "name": "ConfigQueueOnCallEventFifo",
+    "initial": "idle",
+    "operations": {
+      "approve": {
+        "behavior": "operation_approve"
+      }
+    },
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "trigger": {
+              "kind": "on_call",
+              "operation": "approve"
+            },
+            "target": "approved",
+            "effects": [
+              {
+                "behavior": "effect_approved"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "approved",
+        "entry": [
+          {
+            "behavior": "entry_approved"
+          }
+        ]
+      }
+    ]
+  },
+  "instances": [
+    {
+      "id": "default",
+      "config": {
+        "queue": "trace_fifo"
+      }
+    }
+  ],
+  "behaviors": {
+    "operation_approve": [
+      {
+        "op": "trace",
+        "value": "operation:approve"
+      }
+    ],
+    "effect_approved": [
+      {
+        "op": "trace",
+        "value": "effect:approved"
+      }
+    ],
+    "entry_approved": [
+      {
+        "op": "trace",
+        "value": "enter:approved"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "call",
+      "operation": "approve"
+    }
+  ],
+  "expect": {
+    "state": "/ConfigQueueOnCallEventFifo/approved",
+    "trace": [
+      {
+        "type": "call",
+        "operation": "approve"
+      },
+      {
+        "type": "trace",
+        "value": "queue:push:@call:approve"
+      },
+      {
+        "type": "trace",
+        "value": "queue:pop:@call:approve"
+      },
+      {
+        "type": "trace",
+        "value": "effect:approved"
+      },
+      {
+        "type": "trace",
+        "value": "enter:approved"
+      },
+      {
+        "type": "trace",
+        "value": "operation:approve"
+      },
+      {
+        "type": "stable",
+        "state": "/ConfigQueueOnCallEventFifo/approved"
+      }
+    ]
+  }
+}

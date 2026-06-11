@@ -1,0 +1,55 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_submachine_entry_point",
+  "mode": "validation",
+  "features": [
+    "validation",
+    "submachine",
+    "entry_point"
+  ],
+  "model": {
+    "name": "InvalidSubmachineEntryPoint",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "on": "go",
+            "target": "drive",
+            "entry_point": "missing"
+          }
+        ]
+      },
+      {
+        "name": "drive",
+        "kind": "submachine",
+        "machine": "Child"
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "Child",
+      "initial": "ready",
+      "entry_points": [
+        {
+          "name": "known",
+          "target": "ready"
+        }
+      ],
+      "states": [
+        {
+          "name": "ready"
+        }
+      ]
+    }
+  ],
+  "expect": {
+    "validation": [
+      {
+        "code": "missing_entry_point"
+      }
+    ]
+  }
+}

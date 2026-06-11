@@ -1,0 +1,173 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "submachine_exit_point_guard_fallthrough_to_ancestor",
+  "description": "A guard-disabled local exit-point handler falls through to an ancestor source-qualified handler for the same exit-point outcome.",
+  "features": [
+    "submachine",
+    "exit_point",
+    "guard",
+    "source",
+    "selection_order"
+  ],
+  "model": {
+    "name": "SubmachineExitGuardFallthrough",
+    "initial": "outer",
+    "states": [
+      {
+        "name": "outer",
+        "initial": "drive",
+        "states": [
+          {
+            "name": "drive",
+            "kind": "submachine",
+            "machine": "GuardFallthroughChild",
+            "transitions": [
+              {
+                "trigger": {
+                  "kind": "exit_point",
+                  "exit_point": "done"
+                },
+                "guard": {
+                  "behavior": "guard_local"
+                },
+                "target": "../local_done",
+                "effects": [
+                  {
+                    "behavior": "effect_local"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "name": "local_done"
+          }
+        ]
+      },
+      {
+        "name": "ancestor_done",
+        "entry": [
+          {
+            "behavior": "entry_ancestor"
+          }
+        ]
+      }
+    ],
+    "transitions": [
+      {
+        "source": "outer/drive",
+        "trigger": {
+          "kind": "exit_point",
+          "exit_point": "done"
+        },
+        "target": "ancestor_done",
+        "effects": [
+          {
+            "behavior": "effect_ancestor"
+          }
+        ]
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "GuardFallthroughChild",
+      "initial": "active",
+      "exit_points": [
+        {
+          "name": "done"
+        }
+      ],
+      "states": [
+        {
+          "name": "active",
+          "transitions": [
+            {
+              "on": "finish",
+              "target": "done",
+              "effects": [
+                {
+                  "behavior": "effect_child"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "behaviors": {
+    "effect_child": [
+      {
+        "op": "trace",
+        "value": "effect:child"
+      }
+    ],
+    "guard_local": [
+      {
+        "op": "trace",
+        "value": "guard:local"
+      },
+      {
+        "op": "return_value",
+        "value": false
+      }
+    ],
+    "effect_local": [
+      {
+        "op": "trace",
+        "value": "effect:local"
+      }
+    ],
+    "effect_ancestor": [
+      {
+        "op": "trace",
+        "value": "effect:ancestor"
+      }
+    ],
+    "entry_ancestor": [
+      {
+        "op": "trace",
+        "value": "enter:ancestor"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "finish"
+    }
+  ],
+  "expect": {
+    "state": "/SubmachineExitGuardFallthrough/ancestor_done",
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "finish"
+      },
+      {
+        "type": "trace",
+        "value": "effect:child"
+      },
+      {
+        "type": "trace",
+        "value": "guard:local"
+      },
+      {
+        "type": "trace",
+        "value": "effect:ancestor"
+      },
+      {
+        "type": "trace",
+        "value": "enter:ancestor"
+      },
+      {
+        "type": "stable",
+        "state": "/SubmachineExitGuardFallthrough/ancestor_done"
+      }
+    ]
+  }
+}

@@ -1,0 +1,74 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "behavior_dispatch_to_stopped_target_noop",
+  "description": "A behavior-originated dispatch to a stopped target is a no-op and does not interrupt the sender's transition.",
+  "features": ["dispatch_to", "lifecycle", "stop", "queue"],
+  "model": {
+    "name": "BehaviorDispatchToStoppedTargetProducer",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "on": "go",
+            "target": "sent",
+            "effects": [
+              {"behavior": "dispatch_stopped"},
+              {"behavior": "effect_after"}
+            ]
+          }
+        ]
+      },
+      {"name": "sent", "entry": [{"behavior": "entry_sent"}]}
+    ]
+  },
+  "models": [
+    {
+      "name": "BehaviorDispatchToStoppedTargetWorker",
+      "initial": "idle",
+      "states": [
+        {
+          "name": "idle",
+          "transitions": [
+            {
+              "on": "audit",
+              "target": "done",
+              "effects": [{"behavior": "effect_audit"}]
+            }
+          ]
+        },
+        {"name": "done"}
+      ]
+    }
+  ],
+  "instances": [
+    {"id": "producer"},
+    {"id": "stopped", "model": "BehaviorDispatchToStoppedTargetWorker"}
+  ],
+  "behaviors": {
+    "dispatch_stopped": [{"op": "dispatch", "event": "audit", "target": "stopped"}],
+    "effect_after": [{"op": "trace", "value": "effect:after"}],
+    "entry_sent": [{"op": "trace", "value": "entry:sent"}],
+    "effect_audit": [{"op": "trace", "value": "effect:audit"}]
+  },
+  "script": [
+    {"op": "start", "instance": "producer"},
+    {"op": "start", "instance": "stopped"},
+    {"op": "stop", "instance": "stopped"},
+    {"op": "dispatch_to", "target": "producer", "event": "go"}
+  ],
+  "expect": {
+    "states": {
+      "producer": "/BehaviorDispatchToStoppedTargetProducer/sent",
+      "stopped": "/BehaviorDispatchToStoppedTargetWorker"
+    },
+    "trace": [
+      {"type": "dispatch", "event": "go", "target": "producer"},
+      {"type": "dispatch", "event": "audit", "target": "stopped"},
+      {"type": "trace", "value": "effect:after"},
+      {"type": "trace", "value": "entry:sent"},
+      {"type": "stable", "state": "producer"}
+    ]
+  }
+}

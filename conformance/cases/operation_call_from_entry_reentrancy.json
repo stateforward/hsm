@@ -1,0 +1,124 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "operation_call_from_entry_reentrancy",
+  "description": "An operation called from entry behavior queues its on_call event until entry completes, then processes it from the entered state.",
+  "features": [
+    "operation",
+    "on_call",
+    "entry",
+    "queue",
+    "reentrancy"
+  ],
+  "model": {
+    "name": "OperationCallFromEntryReentrancy",
+    "initial": "idle",
+    "operations": {
+      "audit": {
+        "behavior": "operation_audit"
+      }
+    },
+    "states": [
+      {
+        "name": "idle",
+        "entry": [
+          {
+            "behavior": "entry_calls_audit"
+          }
+        ],
+        "transitions": [
+          {
+            "trigger": {
+              "kind": "on_call",
+              "operation": "audit"
+            },
+            "target": "handled",
+            "effects": [
+              {
+                "behavior": "effect_audit"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "handled",
+        "entry": [
+          {
+            "behavior": "entry_handled"
+          }
+        ]
+      }
+    ]
+  },
+  "behaviors": {
+    "operation_audit": [
+      {
+        "op": "trace",
+        "value": "operation:audit"
+      }
+    ],
+    "entry_calls_audit": [
+      {
+        "op": "trace",
+        "value": "entry:before-call"
+      },
+      {
+        "op": "call",
+        "name": "audit"
+      },
+      {
+        "op": "trace",
+        "value": "entry:after-call"
+      }
+    ],
+    "effect_audit": [
+      {
+        "op": "trace",
+        "value": "effect:audit"
+      }
+    ],
+    "entry_handled": [
+      {
+        "op": "trace",
+        "value": "entry:handled"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    }
+  ],
+  "expect": {
+    "state": "/OperationCallFromEntryReentrancy/handled",
+    "queue": {
+      "operation_call_from_entry": "queued_until_entry_completes"
+    },
+    "trace": [
+      {
+        "type": "trace",
+        "value": "entry:before-call"
+      },
+      {
+        "type": "trace",
+        "value": "operation:audit"
+      },
+      {
+        "type": "trace",
+        "value": "entry:after-call"
+      },
+      {
+        "type": "trace",
+        "value": "effect:audit"
+      },
+      {
+        "type": "trace",
+        "value": "entry:handled"
+      },
+      {
+        "type": "stable",
+        "state": "/OperationCallFromEntryReentrancy/handled"
+      }
+    ]
+  }
+}

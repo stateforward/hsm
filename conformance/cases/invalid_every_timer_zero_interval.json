@@ -1,0 +1,32 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_every_timer_zero_interval",
+  "mode": "validation",
+  "description": "A repeating every timer must reject a zero interval to avoid an unbounded immediate firing loop.",
+  "features": ["timer", "every", "validation"],
+  "model": {
+    "name": "InvalidEveryTimerZeroInterval",
+    "initial": "waiting",
+    "states": [
+      {
+        "name": "waiting",
+        "transitions": [
+          {
+            "trigger": {
+              "kind": "every",
+              "duration_ms": 0
+            },
+            "target": "waiting"
+          }
+        ]
+      }
+    ]
+  },
+  "expect": {
+    "validation": [
+      {
+        "code": "invalid_timer_source"
+      }
+    ]
+  }
+}

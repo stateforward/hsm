@@ -1,0 +1,89 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "behavior_snapshot_from_entry_point_effect",
+  "description": "A behavior-side snapshot from an entry-point effect observes the source state before submachine entry completes.",
+  "features": [
+    "submachine",
+    "entry_point",
+    "snapshot"
+  ],
+  "model": {
+    "name": "BehaviorSnapshotFromEntryPointEffect",
+    "initial": "outside",
+    "states": [
+      {
+        "name": "outside",
+        "transitions": [
+          {
+            "on": "go",
+            "target": "drive",
+            "entry_point": "warm"
+          }
+        ]
+      },
+      {
+        "name": "drive",
+        "kind": "submachine",
+        "machine": "SnapshotFromEntryPointChild"
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "SnapshotFromEntryPointChild",
+      "initial": "cold",
+      "entry_points": [
+        {
+          "name": "warm",
+          "target": "running",
+          "effects": [
+            {
+              "behavior": "entry_point_snapshot"
+            }
+          ]
+        }
+      ],
+      "states": [
+        {
+          "name": "cold"
+        },
+        {
+          "name": "running"
+        }
+      ]
+    }
+  ],
+  "behaviors": {
+    "entry_point_snapshot": [
+      {
+        "op": "snapshot"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "go"
+    }
+  ],
+  "expect": {
+    "state": "/BehaviorSnapshotFromEntryPointEffect/drive/SnapshotFromEntryPointChild/running",
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "go"
+      },
+      {
+        "type": "snapshot",
+        "state": "/BehaviorSnapshotFromEntryPointEffect/outside"
+      },
+      {
+        "type": "stable",
+        "state": "/BehaviorSnapshotFromEntryPointEffect/drive/SnapshotFromEntryPointChild/running"
+      }
+    ]
+  }
+}

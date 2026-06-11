@@ -1,0 +1,41 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_submodel_activity_behavior",
+  "mode": "validation",
+  "description": "Activity behavior references inside child models must be validated recursively.",
+  "features": ["submachine", "activity", "validation"],
+  "model": {
+    "name": "InvalidSubmodelActivityBehavior",
+    "initial": "drive",
+    "states": [
+      {
+        "name": "drive",
+        "kind": "submachine",
+        "machine": "ChildWithMissingActivityBehavior"
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "ChildWithMissingActivityBehavior",
+      "initial": "idle",
+      "states": [
+        {
+          "name": "idle",
+          "activity": [
+            {
+              "behavior": "missing_child_activity"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "expect": {
+    "validation": [
+      {
+        "code": "missing_behavior"
+      }
+    ]
+  }
+}

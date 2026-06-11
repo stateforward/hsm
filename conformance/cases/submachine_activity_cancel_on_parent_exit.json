@@ -1,0 +1,108 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "submachine_activity_cancel_on_parent_exit",
+  "description": "Activities running inside a child submachine state are cancelled when a parent transition exits the containing submachine state.",
+  "features": [
+    "submachine",
+    "activity",
+    "async",
+    "cancellation"
+  ],
+  "model": {
+    "name": "SubmachineActivityCancel",
+    "initial": "drive",
+    "states": [
+      {
+        "name": "drive",
+        "kind": "submachine",
+        "machine": "ActivityChild",
+        "transitions": [
+          {
+            "on": "stop",
+            "target": "done"
+          }
+        ]
+      },
+      {
+        "name": "done",
+        "entry": [
+          {
+            "behavior": "entry_done"
+          }
+        ]
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "ActivityChild",
+      "initial": "active",
+      "states": [
+        {
+          "name": "active",
+          "activity": [
+            {
+              "behavior": "activity_running"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "behaviors": {
+    "activity_running": [
+      {
+        "op": "trace",
+        "value": "activity:start"
+      },
+      {
+        "op": "sleep",
+        "millis": 1000
+      },
+      {
+        "op": "trace",
+        "value": "activity:done"
+      }
+    ],
+    "entry_done": [
+      {
+        "op": "trace",
+        "value": "enter:done"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "stop"
+    }
+  ],
+  "expect": {
+    "state": "/SubmachineActivityCancel/done",
+    "trace": [
+      {
+        "type": "trace",
+        "value": "activity:start"
+      },
+      {
+        "type": "dispatch",
+        "event": "stop"
+      },
+      {
+        "type": "activity_cancel",
+        "behavior": "activity_running"
+      },
+      {
+        "type": "trace",
+        "value": "enter:done"
+      },
+      {
+        "type": "stable",
+        "state": "/SubmachineActivityCancel/done"
+      }
+    ]
+  }
+}

@@ -1,0 +1,137 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "submachine_guarded_exit_point",
+  "description": "Guarded parent exit-point transitions are evaluated in order and can fall back to an unguarded matching exit-point transition.",
+  "features": [
+    "submachine",
+    "exit_point",
+    "guard",
+    "selection_order"
+  ],
+  "model": {
+    "name": "SubmachineGuardedExit",
+    "initial": "drive",
+    "states": [
+      {
+        "name": "drive",
+        "kind": "submachine",
+        "machine": "GuardedExitChild",
+        "transitions": [
+          {
+            "trigger": {
+              "kind": "exit_point",
+              "exit_point": "done"
+            },
+            "guard": {
+              "behavior": "guard_first"
+            },
+            "target": "first"
+          },
+          {
+            "trigger": {
+              "kind": "exit_point",
+              "exit_point": "done"
+            },
+            "target": "fallback",
+            "effects": [
+              {
+                "behavior": "effect_fallback"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "first"
+      },
+      {
+        "name": "fallback",
+        "entry": [
+          {
+            "behavior": "entry_fallback"
+          }
+        ]
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "GuardedExitChild",
+      "initial": "running",
+      "exit_points": [
+        {
+          "name": "done"
+        }
+      ],
+      "states": [
+        {
+          "name": "running",
+          "transitions": [
+            {
+              "on": "done",
+              "target": "done"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "behaviors": {
+    "guard_first": [
+      {
+        "op": "trace",
+        "value": "guard:first"
+      },
+      {
+        "op": "return_value",
+        "value": false
+      }
+    ],
+    "effect_fallback": [
+      {
+        "op": "trace",
+        "value": "effect:fallback"
+      }
+    ],
+    "entry_fallback": [
+      {
+        "op": "trace",
+        "value": "enter:fallback"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "done"
+    }
+  ],
+  "expect": {
+    "state": "/SubmachineGuardedExit/fallback",
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "done"
+      },
+      {
+        "type": "trace",
+        "value": "guard:first"
+      },
+      {
+        "type": "trace",
+        "value": "effect:fallback"
+      },
+      {
+        "type": "trace",
+        "value": "enter:fallback"
+      },
+      {
+        "type": "stable",
+        "state": "/SubmachineGuardedExit/fallback"
+      }
+    ]
+  }
+}

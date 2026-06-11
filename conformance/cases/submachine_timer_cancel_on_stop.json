@@ -1,0 +1,32 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "submachine_timer_cancel_on_stop",
+  "description": "Stopping a parent instance cancels a pending timer scheduled inside its active child submachine.",
+  "features": ["submachine", "timer", "after", "cancellation", "stop"],
+  "model": {
+    "name": "SubmachineTimerCancelOnStop",
+    "initial": "drive",
+    "states": [{"name": "drive", "kind": "submachine", "machine": "TimerStopChild"}]
+  },
+  "models": [
+    {
+      "name": "TimerStopChild",
+      "initial": "waiting",
+      "states": [
+        {"name": "waiting", "transitions": [{"trigger": {"kind": "after", "duration_ms": 100}, "target": "timeout", "effects": [{"behavior": "effect_timeout"}]}]},
+        {"name": "timeout"}
+      ]
+    }
+  ],
+  "behaviors": {"effect_timeout": [{"op": "trace", "value": "effect:timeout"}]},
+  "script": [{"op": "start"}, {"op": "stop"}, {"op": "tick", "millis": 200}],
+  "expect": {
+    "state": "/SubmachineTimerCancelOnStop",
+    "trace": [
+      {"type": "timer_scheduled"},
+      {"type": "stop"},
+      {"type": "timer_cancelled"},
+      {"type": "stable", "state": "/SubmachineTimerCancelOnStop"}
+    ]
+  }
+}

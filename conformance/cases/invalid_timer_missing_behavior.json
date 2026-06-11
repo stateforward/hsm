@@ -1,0 +1,38 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_timer_missing_behavior",
+  "mode": "validation",
+  "description": "A timer trigger behavior source must resolve to a declared portable behavior program.",
+  "features": [
+    "timer",
+    "validation"
+  ],
+  "model": {
+    "name": "InvalidTimerMissingBehavior",
+    "initial": "waiting",
+    "states": [
+      {
+        "name": "waiting",
+        "transitions": [
+          {
+            "trigger": {
+              "kind": "after",
+              "behavior": "missing_timer_behavior"
+            },
+            "target": "done"
+          }
+        ]
+      },
+      {
+        "name": "done"
+      }
+    ]
+  },
+  "expect": {
+    "validation": [
+      {
+        "code": "missing_behavior"
+      }
+    ]
+  }
+}

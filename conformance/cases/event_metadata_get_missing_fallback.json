@@ -1,0 +1,112 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "event_metadata_get_missing_fallback",
+  "description": "Missing metadata read with event_metadata_get disables a guarded transition and allows a fallback transition to run.",
+  "features": [
+    "event_ownership",
+    "guard",
+    "selection_order"
+  ],
+  "model": {
+    "name": "EventMetadataMissing",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "trigger": {
+              "kind": "on",
+              "event": "submit"
+            },
+            "guard": {
+              "behavior": "has_owner"
+            },
+            "target": "accepted"
+          },
+          {
+            "trigger": {
+              "kind": "on",
+              "event": "submit"
+            },
+            "target": "fallback",
+            "effects": [
+              {
+                "behavior": "effect_fallback"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "accepted"
+      },
+      {
+        "name": "fallback",
+        "entry": [
+          {
+            "behavior": "entry_fallback"
+          }
+        ]
+      }
+    ]
+  },
+  "behaviors": {
+    "has_owner": [
+      {
+        "op": "trace",
+        "value": "guard:metadata-get"
+      },
+      {
+        "op": "event_metadata_get",
+        "name": "owner"
+      }
+    ],
+    "effect_fallback": [
+      {
+        "op": "trace",
+        "value": "effect:fallback"
+      }
+    ],
+    "entry_fallback": [
+      {
+        "op": "trace",
+        "value": "enter:fallback"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "submit"
+    }
+  ],
+  "expect": {
+    "state": "/EventMetadataMissing/fallback",
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "submit"
+      },
+      {
+        "type": "trace",
+        "value": "guard:metadata-get"
+      },
+      {
+        "type": "trace",
+        "value": "effect:fallback"
+      },
+      {
+        "type": "trace",
+        "value": "enter:fallback"
+      },
+      {
+        "type": "stable",
+        "state": "/EventMetadataMissing/fallback"
+      }
+    ]
+  }
+}

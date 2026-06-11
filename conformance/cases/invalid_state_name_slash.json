@@ -1,0 +1,23 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_state_name_slash",
+  "mode": "validation",
+  "description": "State names must not contain path separators.",
+  "features": ["validation"],
+  "model": {
+    "name": "InvalidStateNameSlash",
+    "initial": "bad/state",
+    "states": [
+      {
+        "name": "bad/state"
+      }
+    ]
+  },
+  "expect": {
+    "validation": [
+      {
+        "code": "invalid_name"
+      }
+    ]
+  }
+}

@@ -1,0 +1,98 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "submachine_child_transition_precedes_parent_defer",
+  "description": "An enabled child-model transition handles an event before the containing submachine state's defer can capture it.",
+  "features": [
+    "submachine",
+    "defer",
+    "selection_order"
+  ],
+  "model": {
+    "name": "SubmachineChildTransitionPrecedesParentDefer",
+    "initial": "drive",
+    "states": [
+      {
+        "name": "drive",
+        "kind": "submachine",
+        "machine": "ChildHandlesDeferredName",
+        "defer": [
+          "work"
+        ]
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "ChildHandlesDeferredName",
+      "initial": "idle",
+      "states": [
+        {
+          "name": "idle",
+          "transitions": [
+            {
+              "on": "work",
+              "target": "handled",
+              "effects": [
+                {
+                  "behavior": "effect_child_work"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "handled",
+          "entry": [
+            {
+              "behavior": "entry_handled"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "behaviors": {
+    "effect_child_work": [
+      {
+        "op": "trace",
+        "value": "effect:child-work"
+      }
+    ],
+    "entry_handled": [
+      {
+        "op": "trace",
+        "value": "entry:handled"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "work"
+    }
+  ],
+  "expect": {
+    "state": "/SubmachineChildTransitionPrecedesParentDefer/drive/ChildHandlesDeferredName/handled",
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "work"
+      },
+      {
+        "type": "trace",
+        "value": "effect:child-work"
+      },
+      {
+        "type": "trace",
+        "value": "entry:handled"
+      },
+      {
+        "type": "stable",
+        "state": "/SubmachineChildTransitionPrecedesParentDefer/drive/ChildHandlesDeferredName/handled"
+      }
+    ]
+  }
+}

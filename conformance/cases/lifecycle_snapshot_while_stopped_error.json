@@ -1,0 +1,43 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "lifecycle_snapshot_while_stopped_error",
+  "description": "Taking a snapshot after stop produces a normalized lifecycle error instead of reporting stale live state.",
+  "features": ["lifecycle", "stop", "snapshot", "error"],
+  "model": {
+    "name": "LifecycleSnapshotWhileStoppedError",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "stop"
+    },
+    {
+      "op": "snapshot"
+    }
+  ],
+  "expect": {
+    "state": "/LifecycleSnapshotWhileStoppedError",
+    "error": {
+      "code": "lifecycle_error",
+      "message_contains": "started"
+    },
+    "trace": [
+      {
+        "type": "error",
+        "code": "lifecycle_error"
+      },
+      {
+        "type": "stable",
+        "state": "/LifecycleSnapshotWhileStoppedError"
+      }
+    ]
+  }
+}

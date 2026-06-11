@@ -1,0 +1,145 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "submachine_nested_exit_point",
+  "description": "A transition from inside a nested child state can target an exit point and be handled by the containing submachine state.",
+  "features": [
+    "submachine",
+    "exit_point",
+    "nested"
+  ],
+  "model": {
+    "name": "SubmachineNestedExit",
+    "initial": "drive",
+    "states": [
+      {
+        "name": "drive",
+        "kind": "submachine",
+        "machine": "NestedExitChild",
+        "transitions": [
+          {
+            "trigger": {
+              "kind": "exit_point",
+              "exit_point": "escaped"
+            },
+            "target": "outside",
+            "effects": [
+              {
+                "behavior": "effect_parent_escape"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "outside",
+        "entry": [
+          {
+            "behavior": "entry_outside"
+          }
+        ]
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "NestedExitChild",
+      "initial": "container",
+      "exit_points": [
+        {
+          "name": "escaped",
+          "effects": [
+            {
+              "behavior": "effect_exit_point"
+            }
+          ]
+        }
+      ],
+      "states": [
+        {
+          "name": "container",
+          "initial": "leaf",
+          "states": [
+            {
+              "name": "leaf",
+              "transitions": [
+                {
+                  "on": "escape",
+                  "target": "../../escaped",
+                  "effects": [
+                    {
+                      "behavior": "effect_child_escape"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "behaviors": {
+    "effect_child_escape": [
+      {
+        "op": "trace",
+        "value": "effect:child-escape"
+      }
+    ],
+    "effect_exit_point": [
+      {
+        "op": "trace",
+        "value": "effect:exit-point"
+      }
+    ],
+    "effect_parent_escape": [
+      {
+        "op": "trace",
+        "value": "effect:parent-escape"
+      }
+    ],
+    "entry_outside": [
+      {
+        "op": "trace",
+        "value": "enter:outside"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "escape"
+    }
+  ],
+  "expect": {
+    "state": "/SubmachineNestedExit/outside",
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "escape"
+      },
+      {
+        "type": "trace",
+        "value": "effect:child-escape"
+      },
+      {
+        "type": "trace",
+        "value": "effect:exit-point"
+      },
+      {
+        "type": "trace",
+        "value": "effect:parent-escape"
+      },
+      {
+        "type": "trace",
+        "value": "enter:outside"
+      },
+      {
+        "type": "stable",
+        "state": "/SubmachineNestedExit/outside"
+      }
+    ]
+  }
+}

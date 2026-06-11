@@ -1,0 +1,61 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "lifecycle_call_while_stopped_error",
+  "description": "Calling an operation after stop produces a normalized lifecycle error.",
+  "features": ["lifecycle", "stop", "operation", "error"],
+  "model": {
+    "name": "LifecycleCallWhileStoppedError",
+    "initial": "idle",
+    "operations": {
+      "ping": {
+        "behavior": "operation_ping"
+      }
+    },
+    "states": [
+      {
+        "name": "idle"
+      }
+    ]
+  },
+  "behaviors": {
+    "operation_ping": [
+      {
+        "op": "trace",
+        "value": "operation:ping"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "stop"
+    },
+    {
+      "op": "call",
+      "operation": "ping"
+    }
+  ],
+  "expect": {
+    "state": "/LifecycleCallWhileStoppedError",
+    "error": {
+      "code": "lifecycle_error",
+      "message_contains": "started"
+    },
+    "trace": [
+      {
+        "type": "call",
+        "operation": "ping"
+      },
+      {
+        "type": "error",
+        "code": "lifecycle_error"
+      },
+      {
+        "type": "stable",
+        "state": "/LifecycleCallWhileStoppedError"
+      }
+    ]
+  }
+}

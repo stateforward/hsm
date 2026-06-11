@@ -1,0 +1,233 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "submachine_entry_exit_points",
+  "description": "Submachine state enters a child through a named entry point, evaluates events bottom-up inside the child, and exits through a named exit point handled by the parent.",
+  "features": [
+    "submachine",
+    "entry_point",
+    "exit_point",
+    "completion",
+    "final"
+  ],
+  "model": {
+    "name": "Controller",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "on": "enable",
+            "target": "drive",
+            "entry_point": "resume",
+            "effects": [
+              {
+                "behavior": "effect_enable"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "drive",
+        "kind": "submachine",
+        "machine": "Motor",
+        "transitions": [
+          {
+            "trigger": {
+              "kind": "exit_point",
+              "exit_point": "faulted"
+            },
+            "target": "fault",
+            "effects": [
+              {
+                "behavior": "effect_faulted"
+              }
+            ]
+          },
+          {
+            "trigger": {
+              "kind": "completion"
+            },
+            "target": "idle",
+            "effects": [
+              {
+                "behavior": "effect_done"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "fault",
+        "entry": [
+          {
+            "behavior": "entry_fault"
+          }
+        ]
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "Motor",
+      "initial": "off",
+      "entry_points": [
+        {
+          "name": "cold",
+          "target": "off"
+        },
+        {
+          "name": "resume",
+          "target": "running",
+          "effects": [
+            {
+              "behavior": "effect_resume"
+            }
+          ]
+        }
+      ],
+      "exit_points": [
+        {
+          "name": "faulted",
+          "effects": [
+            {
+              "behavior": "effect_child_faulted"
+            }
+          ]
+        }
+      ],
+      "states": [
+        {
+          "name": "off",
+          "transitions": [
+            {
+              "on": "start",
+              "target": "running"
+            }
+          ]
+        },
+        {
+          "name": "running",
+          "entry": [
+            {
+              "behavior": "entry_running"
+            }
+          ],
+          "transitions": [
+            {
+              "on": "fault",
+              "target": "faulted"
+            },
+            {
+              "on": "finish",
+              "target": "done"
+            }
+          ]
+        },
+        {
+          "name": "done",
+          "kind": "final"
+        }
+      ]
+    }
+  ],
+  "behaviors": {
+    "effect_enable": [
+      {
+        "op": "trace",
+        "value": "effect:enable"
+      }
+    ],
+    "effect_resume": [
+      {
+        "op": "trace",
+        "value": "effect:motor-resume"
+      }
+    ],
+    "entry_running": [
+      {
+        "op": "trace",
+        "value": "enter:/Motor/running"
+      }
+    ],
+    "effect_child_faulted": [
+      {
+        "op": "trace",
+        "value": "effect:motor-faulted"
+      }
+    ],
+    "effect_faulted": [
+      {
+        "op": "trace",
+        "value": "effect:controller-faulted"
+      }
+    ],
+    "entry_fault": [
+      {
+        "op": "trace",
+        "value": "enter:/Controller/fault"
+      }
+    ],
+    "effect_done": [
+      {
+        "op": "trace",
+        "value": "effect:controller-done"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "enable"
+    },
+    {
+      "op": "dispatch",
+      "event": "fault"
+    }
+  ],
+  "expect": {
+    "state": "/Controller/fault",
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "enable"
+      },
+      {
+        "type": "trace",
+        "value": "effect:enable"
+      },
+      {
+        "type": "trace",
+        "value": "effect:motor-resume"
+      },
+      {
+        "type": "trace",
+        "value": "enter:/Motor/running"
+      },
+      {
+        "type": "dispatch",
+        "event": "fault"
+      },
+      {
+        "type": "trace",
+        "value": "effect:motor-faulted"
+      },
+      {
+        "type": "trace",
+        "value": "effect:controller-faulted"
+      },
+      {
+        "type": "trace",
+        "value": "enter:/Controller/fault"
+      },
+      {
+        "type": "stable",
+        "state": "/Controller/fault"
+      }
+    ]
+  }
+}

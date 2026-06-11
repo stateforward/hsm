@@ -1,0 +1,53 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "nested_child_transition_precedence",
+  "description": "An active nested child transition is selected before an unqualified parent transition for the same event.",
+  "features": ["nested", "selection_order"],
+  "model": {
+    "name": "NestedChildTransitionPrecedence",
+    "initial": "parent",
+    "states": [
+      {
+        "name": "parent",
+        "initial": "child",
+        "transitions": [
+          {
+            "on": "go",
+            "target": "parent/parent_handled",
+            "effects": [{"behavior": "effect_parent"}]
+          }
+        ],
+        "states": [
+          {
+            "name": "child",
+            "transitions": [
+              {
+                "on": "go",
+                "target": "../child_handled",
+                "effects": [{"behavior": "effect_child"}]
+              }
+            ]
+          },
+          {"name": "child_handled", "entry": [{"behavior": "entry_child"}]},
+          {"name": "parent_handled", "entry": [{"behavior": "entry_parent"}]}
+        ]
+      }
+    ]
+  },
+  "behaviors": {
+    "effect_child": [{"op": "trace", "value": "effect:child"}],
+    "effect_parent": [{"op": "trace", "value": "effect:parent"}],
+    "entry_child": [{"op": "trace", "value": "entry:child"}],
+    "entry_parent": [{"op": "trace", "value": "entry:parent"}]
+  },
+  "script": [{"op": "start"}, {"op": "dispatch", "event": "go"}],
+  "expect": {
+    "state": "/NestedChildTransitionPrecedence/parent/child_handled",
+    "trace": [
+      {"type": "dispatch", "event": "go"},
+      {"type": "trace", "value": "effect:child"},
+      {"type": "trace", "value": "entry:child"},
+      {"type": "stable", "state": "/NestedChildTransitionPrecedence/parent/child_handled"}
+    ]
+  }
+}

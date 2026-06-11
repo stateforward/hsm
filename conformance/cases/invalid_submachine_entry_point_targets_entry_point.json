@@ -1,0 +1,50 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_submachine_entry_point_targets_entry_point",
+  "mode": "validation",
+  "description": "An entry-point declaration must target an internal state or supported pseudostate, not another entry point.",
+  "features": [
+    "submachine",
+    "entry_point",
+    "validation"
+  ],
+  "model": {
+    "name": "InvalidEntryPointTargetsEntryPoint",
+    "initial": "drive",
+    "states": [
+      {
+        "name": "drive",
+        "kind": "submachine",
+        "machine": "EntryToEntryChild"
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "EntryToEntryChild",
+      "initial": "idle",
+      "entry_points": [
+        {
+          "name": "first",
+          "target": "second"
+        },
+        {
+          "name": "second",
+          "target": "idle"
+        }
+      ],
+      "states": [
+        {
+          "name": "idle"
+        }
+      ]
+    }
+  ],
+  "expect": {
+    "validation": [
+      {
+        "code": "invalid_entry_point_target"
+      }
+    ]
+  }
+}

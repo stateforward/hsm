@@ -1,0 +1,133 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "submachine_stop_lifecycle_order",
+  "description": "Stopping a parent machine while a submachine is active exits the active child leaf before the containing submachine state boundary.",
+  "features": [
+    "submachine",
+    "lifecycle",
+    "stop",
+    "entry",
+    "exit"
+  ],
+  "model": {
+    "name": "SubmachineStopLifecycle",
+    "initial": "drive",
+    "states": [
+      {
+        "name": "drive",
+        "kind": "submachine",
+        "machine": "StopChild",
+        "entry": [
+          {
+            "behavior": "entry_drive"
+          }
+        ],
+        "exit": [
+          {
+            "behavior": "exit_drive"
+          }
+        ]
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "StopChild",
+      "initial": "active",
+      "states": [
+        {
+          "name": "active",
+          "entry": [
+            {
+              "behavior": "entry_active"
+            }
+          ],
+          "exit": [
+            {
+              "behavior": "exit_active"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "behaviors": {
+    "entry_drive": [
+      {
+        "op": "trace",
+        "value": "enter:drive"
+      }
+    ],
+    "exit_drive": [
+      {
+        "op": "trace",
+        "value": "exit:drive"
+      }
+    ],
+    "entry_active": [
+      {
+        "op": "trace",
+        "value": "enter:active"
+      }
+    ],
+    "exit_active": [
+      {
+        "op": "trace",
+        "value": "exit:active"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "stop"
+    },
+    {
+      "op": "start"
+    }
+  ],
+  "expect": {
+    "state": "/SubmachineStopLifecycle/drive/StopChild/active",
+    "trace": [
+      {
+        "type": "start"
+      },
+      {
+        "type": "trace",
+        "value": "enter:drive"
+      },
+      {
+        "type": "trace",
+        "value": "enter:active"
+      },
+      {
+        "type": "stop"
+      },
+      {
+        "type": "trace",
+        "value": "exit:active"
+      },
+      {
+        "type": "trace",
+        "value": "exit:drive"
+      },
+      {
+        "type": "start"
+      },
+      {
+        "type": "trace",
+        "value": "enter:drive"
+      },
+      {
+        "type": "trace",
+        "value": "enter:active"
+      },
+      {
+        "type": "stable",
+        "state": "/SubmachineStopLifecycle/drive/StopChild/active"
+      }
+    ]
+  }
+}

@@ -1,0 +1,78 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "guard_get_attr_truthy",
+  "description": "A portable get_attr behavior op can supply a guard result from the current attribute value.",
+  "features": ["attribute", "guard", "behavior_attr"],
+  "model": {
+    "name": "GuardGetAttrTruthy",
+    "initial": "idle",
+    "attributes": {
+      "enabled": {
+        "type": "boolean",
+        "default": true
+      }
+    },
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "on": "go",
+            "guard": {
+              "behavior": "enabled_guard"
+            },
+            "target": "done",
+            "effects": [
+              {
+                "behavior": "effect_done"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "done"
+      }
+    ]
+  },
+  "behaviors": {
+    "enabled_guard": [
+      {
+        "op": "get_attr",
+        "name": "enabled"
+      }
+    ],
+    "effect_done": [
+      {
+        "op": "trace",
+        "value": "effect:done"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "go"
+    }
+  ],
+  "expect": {
+    "state": "/GuardGetAttrTruthy/done",
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "go"
+      },
+      {
+        "type": "trace",
+        "value": "effect:done"
+      },
+      {
+        "type": "stable",
+        "state": "/GuardGetAttrTruthy/done"
+      }
+    ]
+  }
+}

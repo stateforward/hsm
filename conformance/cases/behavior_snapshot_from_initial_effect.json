@@ -1,0 +1,47 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "behavior_snapshot_from_initial_effect",
+  "description": "A behavior-side snapshot taken from an initial effect observes the model root before target entry.",
+  "features": ["snapshot", "initial"],
+  "model": {
+    "name": "BehaviorSnapshotFromInitialEffect",
+    "initial": {
+      "target": "idle",
+      "effects": [
+        {
+          "behavior": "snapshot_initial"
+        }
+      ]
+    },
+    "states": [
+      {
+        "name": "idle"
+      }
+    ]
+  },
+  "behaviors": {
+    "snapshot_initial": [
+      {
+        "op": "snapshot"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    }
+  ],
+  "expect": {
+    "state": "/BehaviorSnapshotFromInitialEffect/idle",
+    "trace": [
+      {
+        "type": "snapshot",
+        "state": "/BehaviorSnapshotFromInitialEffect"
+      },
+      {
+        "type": "stable",
+        "state": "/BehaviorSnapshotFromInitialEffect/idle"
+      }
+    ]
+  }
+}

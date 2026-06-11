@@ -1,0 +1,45 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_choice_entry_behavior",
+  "mode": "validation",
+  "description": "Choice pseudostates must not declare state entry behaviors.",
+  "features": ["choice", "entry", "validation"],
+  "model": {
+    "name": "InvalidChoiceEntryBehavior",
+    "initial": "choice",
+    "states": [
+      {
+        "name": "choice",
+        "kind": "choice",
+        "entry": [
+          {
+            "behavior": "entry_choice"
+          }
+        ],
+        "transitions": [
+          {
+            "target": "done"
+          }
+        ]
+      },
+      {
+        "name": "done"
+      }
+    ]
+  },
+  "behaviors": {
+    "entry_choice": [
+      {
+        "op": "trace",
+        "value": "entry:choice"
+      }
+    ]
+  },
+  "expect": {
+    "validation": [
+      {
+        "code": "invalid_pseudostate_contents"
+      }
+    ]
+  }
+}

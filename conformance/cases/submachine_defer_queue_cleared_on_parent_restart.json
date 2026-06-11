@@ -1,0 +1,108 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "submachine_defer_queue_cleared_on_parent_restart",
+  "description": "Restarting a parent instance clears deferred events queued inside an active child submachine state.",
+  "features": [
+    "submachine",
+    "defer",
+    "queue",
+    "lifecycle",
+    "restart"
+  ],
+  "model": {
+    "name": "SubmachineDeferQueueClearedOnParentRestart",
+    "initial": "drive",
+    "states": [
+      {
+        "name": "drive",
+        "kind": "submachine",
+        "machine": "ChildSubmachineDeferCleanupOnRestart"
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "ChildSubmachineDeferCleanupOnRestart",
+      "initial": "blocked",
+      "states": [
+        {
+          "name": "blocked",
+          "defer": [
+            "work"
+          ],
+          "transitions": [
+            {
+              "on": "release",
+              "target": "ready"
+            }
+          ]
+        },
+        {
+          "name": "ready",
+          "transitions": [
+            {
+              "on": "work",
+              "target": "done",
+              "effects": [
+                {
+                  "behavior": "effect_work"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "done"
+        }
+      ]
+    }
+  ],
+  "behaviors": {
+    "effect_work": [
+      {
+        "op": "trace",
+        "value": "effect:work"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "work"
+    },
+    {
+      "op": "restart"
+    },
+    {
+      "op": "dispatch",
+      "event": "release"
+    }
+  ],
+  "expect": {
+    "state": "/SubmachineDeferQueueClearedOnParentRestart/drive/ChildSubmachineDeferCleanupOnRestart/ready",
+    "queue": {
+      "lifecycle_cleanup": "child_deferred_events_cleared_on_parent_restart"
+    },
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "work"
+      },
+      {
+        "type": "defer",
+        "event": "work"
+      },
+      {
+        "type": "dispatch",
+        "event": "release"
+      },
+      {
+        "type": "stable",
+        "state": "/SubmachineDeferQueueClearedOnParentRestart/drive/ChildSubmachineDeferCleanupOnRestart/ready"
+      }
+    ]
+  }
+}

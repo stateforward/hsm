@@ -1,0 +1,43 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "lifecycle_restart_while_stopped_error",
+  "description": "Restarting an instance after it has stopped produces a normalized lifecycle error.",
+  "features": ["lifecycle", "restart", "stop", "error"],
+  "model": {
+    "name": "LifecycleRestartWhileStoppedError",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "stop"
+    },
+    {
+      "op": "restart"
+    }
+  ],
+  "expect": {
+    "state": "/LifecycleRestartWhileStoppedError",
+    "error": {
+      "code": "lifecycle_error",
+      "message_contains": "started"
+    },
+    "trace": [
+      {
+        "type": "error",
+        "code": "lifecycle_error"
+      },
+      {
+        "type": "stable",
+        "state": "/LifecycleRestartWhileStoppedError"
+      }
+    ]
+  }
+}

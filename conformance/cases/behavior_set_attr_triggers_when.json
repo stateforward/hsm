@@ -1,0 +1,102 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "behavior_set_attr_triggers_when",
+  "description": "A behavior-side set_attr change evaluates when transitions through the same runtime path as script set.",
+  "features": ["attribute", "when", "behavior_attr"],
+  "model": {
+    "name": "BehaviorSetAttrWhen",
+    "initial": "idle",
+    "attributes": {
+      "ready": {
+        "type": "boolean",
+        "default": false
+      }
+    },
+    "states": [
+      {
+        "name": "idle",
+        "entry": [
+          {
+            "behavior": "entry_set_ready"
+          }
+        ],
+        "transitions": [
+          {
+            "trigger": {
+              "kind": "when",
+              "behavior": "when_ready"
+            },
+            "target": "ready"
+          }
+        ]
+      },
+      {
+        "name": "ready",
+        "entry": [
+          {
+            "behavior": "entry_ready"
+          }
+        ]
+      }
+    ]
+  },
+  "behaviors": {
+    "entry_set_ready": [
+      {
+        "op": "trace",
+        "value": "entry:set-ready"
+      },
+      {
+        "op": "set_attr",
+        "name": "ready",
+        "value": true
+      }
+    ],
+    "when_ready": [
+      {
+        "op": "trace",
+        "value": "when:ready"
+      },
+      {
+        "op": "return_equals",
+        "name": "ready",
+        "value": true
+      }
+    ],
+    "entry_ready": [
+      {
+        "op": "trace",
+        "value": "enter:ready"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    }
+  ],
+  "expect": {
+    "state": "/BehaviorSetAttrWhen/ready",
+    "attributes": {
+      "ready": true
+    },
+    "trace": [
+      {
+        "type": "trace",
+        "value": "entry:set-ready"
+      },
+      {
+        "type": "trace",
+        "value": "when:ready"
+      },
+      {
+        "type": "trace",
+        "value": "enter:ready"
+      },
+      {
+        "type": "stable",
+        "state": "/BehaviorSetAttrWhen/ready"
+      }
+    ]
+  }
+}

@@ -1,0 +1,39 @@
+---
+description: Don't Repeat Yourself — one source of truth, reuse before copy-paste
+alwaysApply: true
+---
+
+# DRY
+
+Each fact, name, and behavior should exist in **one authoritative place**. Copy-paste is a smell; extract or import instead.
+
+## Rules
+
+- **DRY-01:** Constants, event names, bucket names, subject prefixes, and key/path helpers MUST be defined once (e.g. `events.py`) and imported everywhere else — never re-declared inline.
+- **DRY-02:** If the same non-trivial logic appears in two or more call sites, extract a shared function or method unless the duplication is intentionally divergent.
+- **DRY-03:** Parallel packages (e.g. `conversation`, `notification`) MUST share JetStream primitives via `agent.memory` — `EventStream`, `KVStore`, `ObjectStoreBucket`, `encode`/`decode` — not forked copies of the same code.
+- **DRY-04:** Package `__init__.py` MUST re-export from implementation modules; it MUST NOT duplicate class definitions, event declarations, or connect/stream wiring that already lives elsewhere.
+- **DRY-05:** Tests MUST import production helpers (`events`, key functions, sanitizers) instead of re-implementing key formats or subject names.
+- **DRY-06:** Do NOT extract one-off helpers, speculative abstractions, or indirection that hides behavior without removing real duplication.
+
+## Examples
+
+```python
+# ✅ GOOD — single source of truth
+from .events import message_blob_key, ParticipantJoinedEvent
+
+# ❌ BAD — duplicated key format
+key = f"conversation/{cid}/messages/{mid}"
+
+# ✅ GOOD — shared notify path
+await self._notify_participants(event_name, event_id, event_data, ...)
+
+# ❌ BAD — copy-pasted fan-out loop in add_message and add_reaction
+for entry in await self._participants_store().list(...):
+    ...
+```
+
+## When duplication is acceptable
+
+- Symmetric but independent domain types (separate stream classes per agent vs conversation) when behavior may diverge
+- Test fixtures that only mirror production shape for setup, not re-implement production logic

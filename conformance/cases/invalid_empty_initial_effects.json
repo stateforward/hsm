@@ -1,0 +1,26 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_empty_initial_effects",
+  "mode": "validation",
+  "description": "Initial transition effects arrays must not be empty when present.",
+  "features": ["initial", "validation"],
+  "model": {
+    "name": "InvalidEmptyInitialEffects",
+    "initial": {
+      "target": "idle",
+      "effects": []
+    },
+    "states": [
+      {
+        "name": "idle"
+      }
+    ]
+  },
+  "expect": {
+    "validation": [
+      {
+        "code": "empty_behavior_array"
+      }
+    ]
+  }
+}

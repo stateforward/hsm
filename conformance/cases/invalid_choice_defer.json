@@ -1,0 +1,35 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_choice_defer",
+  "mode": "validation",
+  "description": "Choice pseudostates must not declare deferred events.",
+  "features": ["choice", "defer", "validation"],
+  "model": {
+    "name": "InvalidChoiceDefer",
+    "initial": "choice",
+    "states": [
+      {
+        "name": "choice",
+        "kind": "choice",
+        "defer": [
+          "work"
+        ],
+        "transitions": [
+          {
+            "target": "done"
+          }
+        ]
+      },
+      {
+        "name": "done"
+      }
+    ]
+  },
+  "expect": {
+    "validation": [
+      {
+        "code": "invalid_pseudostate_contents"
+      }
+    ]
+  }
+}

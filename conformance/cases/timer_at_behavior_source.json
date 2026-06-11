@@ -1,0 +1,98 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "timer_at_behavior_source",
+  "description": "An at timer can obtain its absolute deadline from a portable behavior when the state is entered.",
+  "features": [
+    "timer",
+    "at",
+    "timer_behavior"
+  ],
+  "model": {
+    "name": "TimerAtBehavior",
+    "initial": "waiting",
+    "states": [
+      {
+        "name": "waiting",
+        "transitions": [
+          {
+            "trigger": {
+              "kind": "at",
+              "behavior": "compute_deadline"
+            },
+            "target": "fired",
+            "effects": [
+              {
+                "behavior": "effect_timer"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "fired",
+        "entry": [
+          {
+            "behavior": "entry_fired"
+          }
+        ]
+      }
+    ]
+  },
+  "behaviors": {
+    "compute_deadline": [
+      {
+        "op": "trace",
+        "value": "timer:compute-deadline"
+      },
+      {
+        "op": "return_value",
+        "value": 10
+      }
+    ],
+    "effect_timer": [
+      {
+        "op": "trace",
+        "value": "effect:timer"
+      }
+    ],
+    "entry_fired": [
+      {
+        "op": "trace",
+        "value": "enter:fired"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "tick",
+      "millis": 100
+    }
+  ],
+  "expect": {
+    "state": "/TimerAtBehavior/fired",
+    "trace": [
+      {
+        "type": "trace",
+        "value": "timer:compute-deadline"
+      },
+      {
+        "type": "timer_fired"
+      },
+      {
+        "type": "trace",
+        "value": "effect:timer"
+      },
+      {
+        "type": "trace",
+        "value": "enter:fired"
+      },
+      {
+        "type": "stable",
+        "state": "/TimerAtBehavior/fired"
+      }
+    ]
+  }
+}

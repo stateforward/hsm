@@ -1,0 +1,78 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "instance_initial_data_isolation",
+  "description": "Per-instance initial data is delivered through the initial event and remains isolated between instances.",
+  "features": ["attribute", "initial"],
+  "model": {
+    "name": "InstanceInitialDataIsolation",
+    "initial": {
+      "target": "idle",
+      "effects": [
+        {
+          "behavior": "capture_seed"
+        }
+      ]
+    },
+    "attributes": {
+      "seed": {
+        "type": "number",
+        "default": 0
+      }
+    },
+    "states": [
+      {
+        "name": "idle"
+      }
+    ]
+  },
+  "instances": [
+    {
+      "id": "one",
+      "data": {
+        "seed": 1
+      }
+    },
+    {
+      "id": "two",
+      "config": {
+        "name": "custom-two",
+        "data": {
+          "seed": 2
+        }
+      }
+    }
+  ],
+  "behaviors": {
+    "capture_seed": [
+      {
+        "op": "set_attr_from_event_data",
+        "name": "seed",
+        "path": "seed"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start",
+      "instance": "one"
+    },
+    {
+      "op": "start",
+      "instance": "two"
+    }
+  ],
+  "expect": {
+    "states": {
+      "one": "/InstanceInitialDataIsolation/idle",
+      "two": "/InstanceInitialDataIsolation/idle"
+    },
+    "instance_attributes": {
+      "one": {
+        "seed": 1
+      },
+      "two": {
+        "seed": 2
+      }
+    }
+  }
+}

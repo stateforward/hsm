@@ -1,0 +1,112 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "config_clock_submachine_at_timer_fires",
+  "description": "An at timer scheduled inside an active child submachine uses the parent instance configured clock.",
+  "features": [
+    "submachine",
+    "timer",
+    "at"
+  ],
+  "model": {
+    "name": "ConfigClockSubmachineAtTimerFires",
+    "initial": "drive",
+    "states": [
+      {
+        "name": "drive",
+        "kind": "submachine",
+        "machine": "ClockAtTimerChild"
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "ClockAtTimerChild",
+      "initial": "waiting",
+      "states": [
+        {
+          "name": "waiting",
+          "transitions": [
+            {
+              "trigger": {
+                "kind": "at",
+                "time_ms": 25
+              },
+              "target": "timeout",
+              "effects": [
+                {
+                  "behavior": "effect_timeout"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "timeout",
+          "entry": [
+            {
+              "behavior": "entry_timeout"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "instances": [
+    {
+      "id": "default",
+      "config": {
+        "clock": "trace_nonzero_sleep"
+      }
+    }
+  ],
+  "behaviors": {
+    "effect_timeout": [
+      {
+        "op": "trace",
+        "value": "effect:timeout"
+      }
+    ],
+    "entry_timeout": [
+      {
+        "op": "trace",
+        "value": "entry:timeout"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "tick",
+      "millis": 10
+    }
+  ],
+  "expect": {
+    "state": "/ConfigClockSubmachineAtTimerFires/drive/ClockAtTimerChild/timeout",
+    "trace": [
+      {
+        "type": "timer_scheduled"
+      },
+      {
+        "type": "trace",
+        "value": "clock:sleep:nonzero"
+      },
+      {
+        "type": "timer_fired"
+      },
+      {
+        "type": "trace",
+        "value": "effect:timeout"
+      },
+      {
+        "type": "trace",
+        "value": "entry:timeout"
+      },
+      {
+        "type": "stable",
+        "state": "/ConfigClockSubmachineAtTimerFires/drive/ClockAtTimerChild/timeout"
+      }
+    ]
+  }
+}

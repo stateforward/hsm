@@ -1,0 +1,10 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "completion_guard_raise_reentrancy",
+  "description": "A normal internal event raised from a completion transition guard is processed after completion routing reaches its target.",
+  "features": ["completion", "final", "guard", "queue", "reentrancy"],
+  "model": {"name": "CompletionGuardRaiseReentrancy", "initial": "work", "states": [{"name": "work", "transitions": [{"on": "finish", "target": "done"}]}, {"name": "done", "kind": "final"}, {"name": "complete", "entry": [{"behavior": "entry_complete"}], "transitions": [{"on": "audit", "target": "audited", "effects": [{"behavior": "effect_audit"}]}]}, {"name": "audited"}], "transitions": [{"trigger": {"kind": "completion"}, "guard": {"behavior": "guard_raise"}, "target": "complete"}]},
+  "behaviors": {"guard_raise": [{"op": "trace", "value": "guard:completion"}, {"op": "raise", "event": "audit"}, {"op": "return_value", "value": true}], "entry_complete": [{"op": "trace", "value": "entry:complete"}], "effect_audit": [{"op": "trace", "value": "effect:audit"}]},
+  "script": [{"op": "start"}, {"op": "dispatch", "event": "finish"}],
+  "expect": {"state": "/CompletionGuardRaiseReentrancy/audited", "trace": [{"type": "dispatch", "event": "finish"}, {"type": "trace", "value": "guard:completion"}, {"type": "raise", "event": "audit"}, {"type": "trace", "value": "entry:complete"}, {"type": "trace", "value": "effect:audit"}, {"type": "stable", "state": "/CompletionGuardRaiseReentrancy/audited"}]}
+}

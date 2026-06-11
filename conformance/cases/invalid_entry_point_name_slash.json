@@ -1,0 +1,42 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_entry_point_name_slash",
+  "mode": "validation",
+  "description": "Entry point names must not contain path separators.",
+  "features": ["submachine", "entry_point", "validation"],
+  "model": {
+    "name": "InvalidEntryPointNameSlash",
+    "initial": "drive",
+    "states": [
+      {
+        "name": "drive",
+        "kind": "submachine",
+        "machine": "BadEntryNameChild"
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "BadEntryNameChild",
+      "initial": "idle",
+      "entry_points": [
+        {
+          "name": "bad/entry",
+          "target": "idle"
+        }
+      ],
+      "states": [
+        {
+          "name": "idle"
+        }
+      ]
+    }
+  ],
+  "expect": {
+    "validation": [
+      {
+        "code": "invalid_name"
+      }
+    ]
+  }
+}

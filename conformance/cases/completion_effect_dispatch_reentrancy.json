@@ -1,0 +1,10 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "completion_effect_dispatch_reentrancy",
+  "description": "A dispatch behavior op from a completion transition effect is queued until completion routing reaches its target.",
+  "features": ["completion", "final", "queue", "reentrancy"],
+  "model": {"name": "CompletionEffectDispatchReentrancy", "initial": "work", "states": [{"name": "work", "transitions": [{"on": "finish", "target": "done"}]}, {"name": "done", "kind": "final"}, {"name": "complete", "entry": [{"behavior": "entry_complete"}], "transitions": [{"on": "audit", "target": "audited", "effects": [{"behavior": "effect_audit"}]}]}, {"name": "audited"}], "transitions": [{"trigger": {"kind": "completion"}, "target": "complete", "effects": [{"behavior": "completion_dispatch"}]}]},
+  "behaviors": {"completion_dispatch": [{"op": "dispatch", "event": "audit"}, {"op": "trace", "value": "effect:completion"}], "entry_complete": [{"op": "trace", "value": "entry:complete"}], "effect_audit": [{"op": "trace", "value": "effect:audit"}]},
+  "script": [{"op": "start"}, {"op": "dispatch", "event": "finish"}],
+  "expect": {"state": "/CompletionEffectDispatchReentrancy/audited", "trace": [{"type": "dispatch", "event": "finish"}, {"type": "dispatch", "event": "audit"}, {"type": "trace", "value": "effect:completion"}, {"type": "trace", "value": "entry:complete"}, {"type": "trace", "value": "effect:audit"}, {"type": "stable", "state": "/CompletionEffectDispatchReentrancy/audited"}]}
+}

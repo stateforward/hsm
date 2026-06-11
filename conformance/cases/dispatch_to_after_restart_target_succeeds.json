@@ -1,0 +1,106 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "dispatch_to_after_restart_target_succeeds",
+  "description": "caller-originated dispatch_to delivers to a named target after that target has been restarted.",
+  "features": [
+    "dispatch_to",
+    "lifecycle",
+    "restart"
+  ],
+  "model": {
+    "name": "DispatchToAfterRestartTargetSucceeds",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "on": "dirty",
+            "target": "dirty"
+          },
+          {
+            "on": "go",
+            "target": "done",
+            "effects": [
+              {
+                "behavior": "effect_go"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "dirty"
+      },
+      {
+        "name": "done"
+      }
+    ]
+  },
+  "instances": [
+    {
+      "id": "target"
+    },
+    {
+      "id": "sibling"
+    }
+  ],
+  "behaviors": {
+    "effect_go": [
+      {
+        "op": "trace",
+        "value": "effect:go"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start",
+      "instance": "target"
+    },
+    {
+      "op": "start",
+      "instance": "sibling"
+    },
+    {
+      "op": "dispatch_to",
+      "target": "target",
+      "event": "dirty"
+    },
+    {
+      "op": "restart",
+      "instance": "target"
+    },
+    {
+      "op": "dispatch_to",
+      "target": "target",
+      "event": "go"
+    }
+  ],
+  "expect": {
+    "states": {
+      "target": "/DispatchToAfterRestartTargetSucceeds/done",
+      "sibling": "/DispatchToAfterRestartTargetSucceeds/idle"
+    },
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "dirty",
+        "target": "target"
+      },
+      {
+        "type": "dispatch",
+        "event": "go",
+        "target": "target"
+      },
+      {
+        "type": "trace",
+        "value": "effect:go"
+      },
+      {
+        "type": "stable",
+        "state": "target"
+      }
+    ]
+  }
+}

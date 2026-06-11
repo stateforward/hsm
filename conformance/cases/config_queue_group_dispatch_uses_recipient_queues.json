@@ -1,0 +1,138 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "config_queue_group_dispatch_uses_recipient_queues",
+  "description": "A caller-originated group dispatch enqueues each regular event through the recipient instances' configured queues.",
+  "features": [
+    "queue",
+    "group"
+  ],
+  "model": {
+    "name": "ConfigQueueGroupDispatchUsesRecipientQueues",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "on": "audit",
+            "target": "done",
+            "effects": [
+              {
+                "behavior": "effect_audit"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "done",
+        "entry": [
+          {
+            "behavior": "entry_done"
+          }
+        ]
+      }
+    ]
+  },
+  "instances": [
+    {
+      "id": "worker_a",
+      "config": {
+        "queue": "trace_fifo"
+      }
+    },
+    {
+      "id": "worker_b",
+      "config": {
+        "queue": "trace_fifo"
+      }
+    }
+  ],
+  "groups": [
+    {
+      "id": "workers",
+      "members": [
+        "worker_a",
+        "worker_b"
+      ]
+    }
+  ],
+  "behaviors": {
+    "effect_audit": [
+      {
+        "op": "trace",
+        "value": "effect:audit"
+      }
+    ],
+    "entry_done": [
+      {
+        "op": "trace",
+        "value": "entry:done"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start",
+      "instance": "worker_a"
+    },
+    {
+      "op": "start",
+      "instance": "worker_b"
+    },
+    {
+      "op": "group_dispatch",
+      "group": "workers",
+      "event": "audit"
+    }
+  ],
+  "expect": {
+    "states": {
+      "worker_a": "/ConfigQueueGroupDispatchUsesRecipientQueues/done",
+      "worker_b": "/ConfigQueueGroupDispatchUsesRecipientQueues/done"
+    },
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "audit",
+        "target": "workers"
+      },
+      {
+        "type": "trace",
+        "value": "queue:push:audit"
+      },
+      {
+        "type": "trace",
+        "value": "queue:pop:audit"
+      },
+      {
+        "type": "trace",
+        "value": "effect:audit"
+      },
+      {
+        "type": "trace",
+        "value": "entry:done"
+      },
+      {
+        "type": "trace",
+        "value": "queue:push:audit"
+      },
+      {
+        "type": "trace",
+        "value": "queue:pop:audit"
+      },
+      {
+        "type": "trace",
+        "value": "effect:audit"
+      },
+      {
+        "type": "trace",
+        "value": "entry:done"
+      },
+      {
+        "type": "stable",
+        "state": "group:workers"
+      }
+    ]
+  }
+}

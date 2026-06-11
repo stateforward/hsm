@@ -1,0 +1,70 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "script_sleep_allows_activity_progress",
+  "description": "A script sleep step yields long enough for an asynchronous activity to make observable progress before dispatch.",
+  "features": ["activity", "async"],
+  "model": {
+    "name": "ScriptSleepAllowsActivityProgress",
+    "initial": "active",
+    "states": [
+      {
+        "name": "active",
+        "activity": [
+          {
+            "behavior": "activity_progress"
+          }
+        ],
+        "transitions": [
+          {
+            "on": "stop",
+            "target": "done"
+          }
+        ]
+      },
+      {
+        "name": "done"
+      }
+    ]
+  },
+  "behaviors": {
+    "activity_progress": [
+      {
+        "op": "yield"
+      },
+      {
+        "op": "trace",
+        "value": "activity:progress"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "sleep",
+      "millis": 0
+    },
+    {
+      "op": "dispatch",
+      "event": "stop"
+    }
+  ],
+  "expect": {
+    "state": "/ScriptSleepAllowsActivityProgress/done",
+    "trace": [
+      {
+        "type": "trace",
+        "value": "activity:progress"
+      },
+      {
+        "type": "dispatch",
+        "event": "stop"
+      },
+      {
+        "type": "stable",
+        "state": "/ScriptSleepAllowsActivityProgress/done"
+      }
+    ]
+  }
+}

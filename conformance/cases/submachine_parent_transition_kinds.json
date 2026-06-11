@@ -1,0 +1,219 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "submachine_parent_transition_kinds",
+  "description": "Parent internal, self, and local transitions interact with active flattened submachine child states using ordinary transition-kind semantics.",
+  "features": [
+    "submachine",
+    "transition_kind",
+    "internal",
+    "self",
+    "local"
+  ],
+  "model": {
+    "name": "SubmachineParentKinds",
+    "initial": "drive",
+    "states": [
+      {
+        "name": "drive",
+        "kind": "submachine",
+        "machine": "KindsChild",
+        "entry": [
+          {
+            "behavior": "entry_drive"
+          }
+        ],
+        "exit": [
+          {
+            "behavior": "exit_drive"
+          }
+        ],
+        "transitions": [
+          {
+            "on": "parent_internal",
+            "kind": "internal",
+            "effects": [
+              {
+                "behavior": "effect_internal"
+              }
+            ]
+          },
+          {
+            "on": "parent_self",
+            "kind": "self",
+            "target": "drive",
+            "effects": [
+              {
+                "behavior": "effect_self"
+              }
+            ]
+          },
+          {
+            "on": "parent_local",
+            "kind": "local",
+            "target": "drive",
+            "effects": [
+              {
+                "behavior": "effect_local"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "KindsChild",
+      "initial": "active",
+      "states": [
+        {
+          "name": "active",
+          "entry": [
+            {
+              "behavior": "entry_active"
+            }
+          ],
+          "exit": [
+            {
+              "behavior": "exit_active"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "behaviors": {
+    "entry_drive": [
+      {
+        "op": "trace",
+        "value": "enter:drive"
+      }
+    ],
+    "exit_drive": [
+      {
+        "op": "trace",
+        "value": "exit:drive"
+      }
+    ],
+    "entry_active": [
+      {
+        "op": "trace",
+        "value": "enter:active"
+      }
+    ],
+    "exit_active": [
+      {
+        "op": "trace",
+        "value": "exit:active"
+      }
+    ],
+    "effect_internal": [
+      {
+        "op": "trace",
+        "value": "effect:internal"
+      }
+    ],
+    "effect_self": [
+      {
+        "op": "trace",
+        "value": "effect:self"
+      }
+    ],
+    "effect_local": [
+      {
+        "op": "trace",
+        "value": "effect:local"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "parent_internal"
+    },
+    {
+      "op": "dispatch",
+      "event": "parent_self"
+    },
+    {
+      "op": "dispatch",
+      "event": "parent_local"
+    }
+  ],
+  "expect": {
+    "state": "/SubmachineParentKinds/drive/KindsChild/active",
+    "trace": [
+      {
+        "type": "trace",
+        "value": "enter:drive"
+      },
+      {
+        "type": "trace",
+        "value": "enter:active"
+      },
+      {
+        "type": "dispatch",
+        "event": "parent_internal"
+      },
+      {
+        "type": "trace",
+        "value": "effect:internal"
+      },
+      {
+        "type": "dispatch",
+        "event": "parent_self"
+      },
+      {
+        "type": "trace",
+        "value": "exit:active"
+      },
+      {
+        "type": "trace",
+        "value": "exit:drive"
+      },
+      {
+        "type": "trace",
+        "value": "effect:self"
+      },
+      {
+        "type": "trace",
+        "value": "enter:drive"
+      },
+      {
+        "type": "trace",
+        "value": "enter:active"
+      },
+      {
+        "type": "dispatch",
+        "event": "parent_local"
+      },
+      {
+        "type": "trace",
+        "value": "exit:active"
+      },
+      {
+        "type": "trace",
+        "value": "exit:drive"
+      },
+      {
+        "type": "trace",
+        "value": "effect:local"
+      },
+      {
+        "type": "trace",
+        "value": "enter:drive"
+      },
+      {
+        "type": "trace",
+        "value": "enter:active"
+      },
+      {
+        "type": "stable",
+        "state": "/SubmachineParentKinds/drive/KindsChild/active"
+      }
+    ]
+  }
+}

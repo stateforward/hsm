@@ -1,0 +1,48 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "lifecycle_dispatch_while_stopped_error",
+  "description": "Dispatching to an instance after it has stopped produces a normalized lifecycle error.",
+  "features": ["lifecycle", "stop", "error"],
+  "model": {
+    "name": "LifecycleDispatchWhileStoppedError",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "stop"
+    },
+    {
+      "op": "dispatch",
+      "event": "go"
+    }
+  ],
+  "expect": {
+    "state": "/LifecycleDispatchWhileStoppedError",
+    "error": {
+      "code": "lifecycle_error",
+      "message_contains": "started"
+    },
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "go"
+      },
+      {
+        "type": "error",
+        "code": "lifecycle_error"
+      },
+      {
+        "type": "stable",
+        "state": "/LifecycleDispatchWhileStoppedError"
+      }
+    ]
+  }
+}

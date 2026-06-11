@@ -1,0 +1,183 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "submachine_child_defer_queue_per_instance_cleanup_on_parent_exit",
+  "description": "Exiting one parent submachine boundary clears only that instance's child deferred queue while a sibling parent can still replay its child-deferred event.",
+  "features": [
+    "submachine",
+    "defer",
+    "queue",
+    "exit",
+    "dispatch_to",
+    "multi_target"
+  ],
+  "model": {
+    "name": "SubmachineChildDeferQueuePerInstanceCleanupOnParentExit",
+    "initial": "drive",
+    "states": [
+      {
+        "name": "drive",
+        "kind": "submachine",
+        "machine": "ChildSubmachinePerInstanceDeferParentExit",
+        "transitions": [
+          {
+            "on": "leave",
+            "target": "outside"
+          }
+        ]
+      },
+      {
+        "name": "outside",
+        "transitions": [
+          {
+            "on": "work",
+            "target": "wrong",
+            "effects": [
+              {
+                "behavior": "effect_wrong"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "wrong"
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "ChildSubmachinePerInstanceDeferParentExit",
+      "initial": "blocked",
+      "states": [
+        {
+          "name": "blocked",
+          "defer": [
+            "work"
+          ],
+          "transitions": [
+            {
+              "on": "release",
+              "target": "ready"
+            }
+          ]
+        },
+        {
+          "name": "ready",
+          "transitions": [
+            {
+              "on": "work",
+              "target": "done",
+              "effects": [
+                {
+                  "behavior": "effect_work"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "done"
+        }
+      ]
+    }
+  ],
+  "instances": [
+    {
+      "id": "exited"
+    },
+    {
+      "id": "running"
+    }
+  ],
+  "behaviors": {
+    "effect_work": [
+      {
+        "op": "trace",
+        "value": "effect:work"
+      }
+    ],
+    "effect_wrong": [
+      {
+        "op": "trace",
+        "value": "effect:wrong"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start",
+      "instance": "exited"
+    },
+    {
+      "op": "start",
+      "instance": "running"
+    },
+    {
+      "op": "dispatch_to",
+      "targets": [
+        "exited",
+        "running"
+      ],
+      "event": "work"
+    },
+    {
+      "op": "dispatch_to",
+      "target": "exited",
+      "event": "leave"
+    },
+    {
+      "op": "dispatch_to",
+      "target": "running",
+      "event": "release"
+    }
+  ],
+  "expect": {
+    "states": {
+      "exited": "/SubmachineChildDeferQueuePerInstanceCleanupOnParentExit/outside",
+      "running": "/SubmachineChildDeferQueuePerInstanceCleanupOnParentExit/drive/ChildSubmachinePerInstanceDeferParentExit/done"
+    },
+    "queue": {
+      "lifecycle_cleanup": "child_deferred_events_cleared_only_for_parent_exit_instance"
+    },
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "work",
+        "target": [
+          "exited",
+          "running"
+        ]
+      },
+      {
+        "type": "defer",
+        "event": "work"
+      },
+      {
+        "type": "defer",
+        "event": "work"
+      },
+      {
+        "type": "dispatch",
+        "event": "leave",
+        "target": "exited"
+      },
+      {
+        "type": "dispatch",
+        "event": "release",
+        "target": "running"
+      },
+      {
+        "type": "undefer",
+        "event": "work"
+      },
+      {
+        "type": "trace",
+        "value": "effect:work"
+      },
+      {
+        "type": "stable",
+        "state": "running"
+      }
+    ]
+  }
+}

@@ -1,0 +1,155 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "submachine_defer_queue_per_instance_cleanup_on_parent_restart",
+  "description": "Restarting one parent instance clears only that instance's child-submachine deferred queue while a sibling parent can still replay its deferred event.",
+  "features": [
+    "submachine",
+    "defer",
+    "queue",
+    "lifecycle",
+    "restart",
+    "dispatch_to",
+    "multi_target"
+  ],
+  "model": {
+    "name": "SubmachineDeferQueuePerInstanceCleanupOnParentRestart",
+    "initial": "drive",
+    "states": [
+      {
+        "name": "drive",
+        "kind": "submachine",
+        "machine": "ChildSubmachinePerInstanceDeferRestart"
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "ChildSubmachinePerInstanceDeferRestart",
+      "initial": "blocked",
+      "states": [
+        {
+          "name": "blocked",
+          "defer": [
+            "work"
+          ],
+          "transitions": [
+            {
+              "on": "release",
+              "target": "ready"
+            }
+          ]
+        },
+        {
+          "name": "ready",
+          "transitions": [
+            {
+              "on": "work",
+              "target": "done",
+              "effects": [
+                {
+                  "behavior": "effect_work"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "done"
+        }
+      ]
+    }
+  ],
+  "instances": [
+    {
+      "id": "reset"
+    },
+    {
+      "id": "running"
+    }
+  ],
+  "behaviors": {
+    "effect_work": [
+      {
+        "op": "trace",
+        "value": "effect:work"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start",
+      "instance": "reset"
+    },
+    {
+      "op": "start",
+      "instance": "running"
+    },
+    {
+      "op": "dispatch_to",
+      "targets": [
+        "reset",
+        "running"
+      ],
+      "event": "work"
+    },
+    {
+      "op": "restart",
+      "instance": "reset"
+    },
+    {
+      "op": "dispatch_to",
+      "targets": [
+        "reset",
+        "running"
+      ],
+      "event": "release"
+    }
+  ],
+  "expect": {
+    "states": {
+      "reset": "/SubmachineDeferQueuePerInstanceCleanupOnParentRestart/drive/ChildSubmachinePerInstanceDeferRestart/ready",
+      "running": "/SubmachineDeferQueuePerInstanceCleanupOnParentRestart/drive/ChildSubmachinePerInstanceDeferRestart/done"
+    },
+    "queue": {
+      "lifecycle_cleanup": "child_deferred_events_cleared_only_for_restarted_parent"
+    },
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "work",
+        "target": [
+          "reset",
+          "running"
+        ]
+      },
+      {
+        "type": "defer",
+        "event": "work"
+      },
+      {
+        "type": "defer",
+        "event": "work"
+      },
+      {
+        "type": "dispatch",
+        "event": "release",
+        "target": [
+          "reset",
+          "running"
+        ]
+      },
+      {
+        "type": "undefer",
+        "event": "work"
+      },
+      {
+        "type": "trace",
+        "value": "effect:work"
+      },
+      {
+        "type": "stable",
+        "state": "targets:reset,running"
+      }
+    ]
+  }
+}

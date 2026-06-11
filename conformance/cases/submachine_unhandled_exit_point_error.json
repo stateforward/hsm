@@ -1,0 +1,108 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "submachine_unhandled_exit_point_error",
+  "description": "A child exit point that has no enabled containing or ancestor handler produces a normalized runtime error and leaves the parent in the containing submachine state.",
+  "features": [
+    "submachine",
+    "exit_point",
+    "error"
+  ],
+  "model": {
+    "name": "SubmachineUnhandledExitPoint",
+    "initial": "drive",
+    "states": [
+      {
+        "name": "drive",
+        "kind": "submachine",
+        "machine": "UnhandledExitChild"
+      },
+      {
+        "name": "outside"
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "UnhandledExitChild",
+      "initial": "inside",
+      "exit_points": [
+        {
+          "name": "escaped",
+          "effects": [
+            {
+              "behavior": "effect_exit_point"
+            }
+          ]
+        }
+      ],
+      "states": [
+        {
+          "name": "inside",
+          "transitions": [
+            {
+              "on": "escape",
+              "target": "escaped",
+              "effects": [
+                {
+                  "behavior": "effect_escape"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "behaviors": {
+    "effect_escape": [
+      {
+        "op": "trace",
+        "value": "effect:escape"
+      }
+    ],
+    "effect_exit_point": [
+      {
+        "op": "trace",
+        "value": "effect:exit-point"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "escape"
+    }
+  ],
+  "expect": {
+    "state": "/SubmachineUnhandledExitPoint/drive/UnhandledExitChild/inside",
+    "error": {
+      "code": "unhandled_exit_point",
+      "message_contains": "escaped"
+    },
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "escape"
+      },
+      {
+        "type": "trace",
+        "value": "effect:escape"
+      },
+      {
+        "type": "trace",
+        "value": "effect:exit-point"
+      },
+      {
+        "type": "error",
+        "code": "unhandled_exit_point"
+      },
+      {
+        "type": "stable",
+        "state": "/SubmachineUnhandledExitPoint/drive/UnhandledExitChild/inside"
+      }
+    ]
+  }
+}

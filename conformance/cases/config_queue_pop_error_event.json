@@ -1,0 +1,101 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "config_queue_pop_error_event",
+  "description": "A custom queue Pop failure is converted to a runtime ErrorEvent that bypasses the custom queue hook.",
+  "features": ["queue", "error"],
+  "model": {
+    "name": "ConfigQueuePopErrorEvent",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "on": "hsm_error",
+            "target": "failed",
+            "effects": [
+              {
+                "behavior": "effect_error"
+              }
+            ]
+          },
+          {
+            "on": "go",
+            "target": "done",
+            "effects": [
+              {
+                "behavior": "effect_go"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "failed"
+      },
+      {
+        "name": "done"
+      }
+    ]
+  },
+  "instances": [
+    {
+      "id": "default",
+      "config": {
+        "queue": "pop_error_once"
+      }
+    }
+  ],
+  "behaviors": {
+    "effect_error": [
+      {
+        "op": "trace",
+        "value": "effect:error"
+      }
+    ],
+    "effect_go": [
+      {
+        "op": "trace",
+        "value": "effect:go"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "go"
+    }
+  ],
+  "expect": {
+    "state": "/ConfigQueuePopErrorEvent/failed",
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "go"
+      },
+      {
+        "type": "trace",
+        "value": "queue:push:go"
+      },
+      {
+        "type": "trace",
+        "value": "queue:pop-error"
+      },
+      {
+        "type": "trace",
+        "value": "effect:error"
+      },
+      {
+        "type": "trace",
+        "value": "queue:pop:go"
+      },
+      {
+        "type": "stable",
+        "state": "/ConfigQueuePopErrorEvent/failed"
+      }
+    ]
+  }
+}

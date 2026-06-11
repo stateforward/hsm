@@ -1,0 +1,90 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "root_transition_absolute_source_path",
+  "description": "A root-owned source-qualified transition can use an absolute source path that resolves inside the root model.",
+  "features": [
+    "root_transition",
+    "source",
+    "paths",
+    "nested"
+  ],
+  "model": {
+    "name": "RootTransitionAbsoluteSourcePath",
+    "initial": "parent",
+    "states": [
+      {
+        "name": "parent",
+        "initial": "child",
+        "states": [
+          {
+            "name": "child"
+          }
+        ]
+      },
+      {
+        "name": "done",
+        "entry": [
+          {
+            "behavior": "entry_done"
+          }
+        ]
+      }
+    ],
+    "transitions": [
+      {
+        "source": "/RootTransitionAbsoluteSourcePath/parent/child",
+        "on": "go",
+        "target": "done",
+        "effects": [
+          {
+            "behavior": "effect_go"
+          }
+        ]
+      }
+    ]
+  },
+  "behaviors": {
+    "effect_go": [
+      {
+        "op": "trace",
+        "value": "effect:go"
+      }
+    ],
+    "entry_done": [
+      {
+        "op": "trace",
+        "value": "entry:done"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "go"
+    }
+  ],
+  "expect": {
+    "state": "/RootTransitionAbsoluteSourcePath/done",
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "go"
+      },
+      {
+        "type": "trace",
+        "value": "effect:go"
+      },
+      {
+        "type": "trace",
+        "value": "entry:done"
+      },
+      {
+        "type": "stable",
+        "state": "/RootTransitionAbsoluteSourcePath/done"
+      }
+    ]
+  }
+}

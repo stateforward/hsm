@@ -1,0 +1,44 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_on_extraneous_behavior",
+  "mode": "validation",
+  "description": "An on trigger must not declare behavior operands from when or timer triggers.",
+  "features": ["validation"],
+  "model": {
+    "name": "InvalidOnExtraneousBehavior",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "trigger": {
+              "kind": "on",
+              "event": "go",
+              "behavior": "guard_like"
+            },
+            "target": "done"
+          }
+        ]
+      },
+      {
+        "name": "done"
+      }
+    ]
+  },
+  "behaviors": {
+    "guard_like": [
+      {
+        "op": "return_value",
+        "value": true
+      }
+    ]
+  },
+  "expect": {
+    "validation": [
+      {
+        "code": "extraneous_trigger_operand"
+      }
+    ]
+  }
+}

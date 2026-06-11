@@ -1,0 +1,100 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "submachine_timer_after_fires",
+  "description": "An after timer scheduled by an active child submachine state fires while the containing submachine remains active.",
+  "features": [
+    "submachine",
+    "timer",
+    "after"
+  ],
+  "model": {
+    "name": "SubmachineTimerAfter",
+    "initial": "drive",
+    "states": [
+      {
+        "name": "drive",
+        "kind": "submachine",
+        "machine": "TimerAfterChild"
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "TimerAfterChild",
+      "initial": "waiting",
+      "states": [
+        {
+          "name": "waiting",
+          "transitions": [
+            {
+              "trigger": {
+                "kind": "after",
+                "duration_ms": 10
+              },
+              "target": "fired",
+              "effects": [
+                {
+                  "behavior": "effect_timer"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "fired",
+          "entry": [
+            {
+              "behavior": "entry_fired"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "behaviors": {
+    "effect_timer": [
+      {
+        "op": "trace",
+        "value": "effect:child-timer"
+      }
+    ],
+    "entry_fired": [
+      {
+        "op": "trace",
+        "value": "enter:child-fired"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "tick",
+      "millis": 100
+    }
+  ],
+  "expect": {
+    "state": "/SubmachineTimerAfter/drive/TimerAfterChild/fired",
+    "trace": [
+      {
+        "type": "timer_scheduled"
+      },
+      {
+        "type": "timer_fired"
+      },
+      {
+        "type": "trace",
+        "value": "effect:child-timer"
+      },
+      {
+        "type": "trace",
+        "value": "enter:child-fired"
+      },
+      {
+        "type": "stable",
+        "state": "/SubmachineTimerAfter/drive/TimerAfterChild/fired"
+      }
+    ]
+  }
+}

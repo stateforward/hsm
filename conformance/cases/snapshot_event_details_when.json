@@ -1,0 +1,81 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "snapshot_event_details_when",
+  "description": "Snapshots include transition snapshot triggers for when transitions selectable from the current state.",
+  "features": [
+    "snapshot",
+    "when",
+    "attribute"
+  ],
+  "model": {
+    "name": "SnapshotEventDetailsWhen",
+    "initial": "idle",
+    "attributes": {
+      "ready": {
+        "type": "boolean",
+        "default": false
+      }
+    },
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "trigger": {
+              "kind": "when",
+              "attribute": "ready"
+            },
+            "target": "ready"
+          }
+        ]
+      },
+      {
+        "name": "ready"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "snapshot"
+    }
+  ],
+  "expect": {
+    "state": "/SnapshotEventDetailsWhen/idle",
+    "snapshots": {
+      "last": {
+        "id": "default",
+        "qualified_name": "/SnapshotEventDetailsWhen",
+        "state": "/SnapshotEventDetailsWhen/idle",
+        "attributes": {
+          "ready": false
+        },
+        "queue_len": 0,
+        "transitions": [
+          {
+            "name": "/SnapshotEventDetailsWhen/idle/transition_4",
+            "kind": 67343,
+            "source": "/SnapshotEventDetailsWhen/idle",
+            "target": "/SnapshotEventDetailsWhen/ready",
+            "events": [
+              "/SnapshotEventDetailsWhen/ready"
+            ],
+            "guard": false
+          }
+        ]
+      }
+    },
+    "trace": [
+      {
+        "type": "snapshot",
+        "state": "/SnapshotEventDetailsWhen/idle"
+      },
+      {
+        "type": "stable",
+        "state": "/SnapshotEventDetailsWhen/idle"
+      }
+    ]
+  }
+}

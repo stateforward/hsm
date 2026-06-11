@@ -1,0 +1,51 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_missing_entry_point_effect_behavior",
+  "mode": "validation",
+  "description": "Entry-point effect behavior references must resolve to declared portable behavior programs.",
+  "features": [
+    "submachine",
+    "entry_point",
+    "validation"
+  ],
+  "model": {
+    "name": "InvalidMissingEntryPointEffectBehavior",
+    "initial": "drive",
+    "states": [
+      {
+        "name": "drive",
+        "kind": "submachine",
+        "machine": "EntryPointEffectChild"
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "EntryPointEffectChild",
+      "initial": "idle",
+      "entry_points": [
+        {
+          "name": "resume",
+          "target": "idle",
+          "effects": [
+            {
+              "behavior": "missing_entry_point_effect"
+            }
+          ]
+        }
+      ],
+      "states": [
+        {
+          "name": "idle"
+        }
+      ]
+    }
+  ],
+  "expect": {
+    "validation": [
+      {
+        "code": "missing_behavior"
+      }
+    ]
+  }
+}

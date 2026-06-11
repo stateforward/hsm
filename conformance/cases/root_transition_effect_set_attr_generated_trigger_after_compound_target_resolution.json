@@ -1,0 +1,89 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "root_transition_effect_set_attr_generated_trigger_after_compound_target_resolution",
+  "description": "Attribute generated work from a root-owned transition effect targeting a compound state replays only after the compound target reaches its nested leaf.",
+  "features": ["root_transition", "attribute", "on_set", "when", "nested", "queue", "reentrancy"],
+  "model": {
+    "name": "RootTransitionEffectSetAttrGeneratedTriggerAfterCompoundTargetResolution",
+    "initial": "idle",
+    "attributes": {
+      "flag": {"type": "boolean", "default": false},
+      "ready": {"type": "boolean", "default": false}
+    },
+    "states": [
+      {"name": "idle"},
+      {
+        "name": "parent",
+        "initial": "child",
+        "entry": [{"behavior": "entry_parent"}],
+        "transitions": [
+          {
+            "trigger": {"kind": "on_set", "attribute": "flag"},
+            "target": "wrong",
+            "effects": [{"behavior": "effect_wrong"}]
+          }
+        ],
+        "states": [
+          {
+            "name": "child",
+            "entry": [{"behavior": "entry_child"}],
+            "transitions": [
+              {
+                "trigger": {"kind": "on_set", "attribute": "flag"},
+                "target": "../flag_seen",
+                "effects": [{"behavior": "effect_flag"}]
+              }
+            ]
+          },
+          {
+            "name": "flag_seen",
+            "entry": [{"behavior": "entry_flag"}],
+            "transitions": [
+              {
+                "trigger": {"kind": "when", "behavior": "ready_when"},
+                "target": "../all_seen",
+                "effects": [{"behavior": "effect_ready"}]
+              }
+            ]
+          },
+          {"name": "all_seen", "entry": [{"behavior": "entry_all"}]}
+        ]
+      },
+      {"name": "wrong"}
+    ],
+    "transitions": [
+      {"on": "go", "target": "parent", "effects": [{"behavior": "effect_set"}]}
+    ]
+  },
+  "behaviors": {
+    "effect_set": [
+      {"op": "set_attr", "name": "flag", "value": true},
+      {"op": "set_attr", "name": "ready", "value": true},
+      {"op": "trace", "value": "effect:set"}
+    ],
+    "ready_when": [{"op": "return_equals", "name": "ready", "value": true}],
+    "entry_parent": [{"op": "trace", "value": "entry:parent"}],
+    "entry_child": [{"op": "trace", "value": "entry:child"}],
+    "effect_flag": [{"op": "trace", "value": "effect:flag"}],
+    "entry_flag": [{"op": "trace", "value": "entry:flag"}],
+    "effect_ready": [{"op": "trace", "value": "effect:ready"}],
+    "entry_all": [{"op": "trace", "value": "entry:all"}],
+    "effect_wrong": [{"op": "trace", "value": "effect:wrong"}]
+  },
+  "script": [{"op": "start"}, {"op": "dispatch", "event": "go"}],
+  "expect": {
+    "state": "/RootTransitionEffectSetAttrGeneratedTriggerAfterCompoundTargetResolution/parent/all_seen",
+    "attributes": {"flag": true, "ready": true},
+    "trace": [
+      {"type": "dispatch", "event": "go"},
+      {"type": "trace", "value": "effect:set"},
+      {"type": "trace", "value": "entry:parent"},
+      {"type": "trace", "value": "entry:child"},
+      {"type": "trace", "value": "effect:flag"},
+      {"type": "trace", "value": "entry:flag"},
+      {"type": "trace", "value": "effect:ready"},
+      {"type": "trace", "value": "entry:all"},
+      {"type": "stable", "state": "/RootTransitionEffectSetAttrGeneratedTriggerAfterCompoundTargetResolution/parent/all_seen"}
+    ]
+  }
+}

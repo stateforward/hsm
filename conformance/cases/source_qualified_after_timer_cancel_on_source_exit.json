@@ -1,0 +1,124 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "source_qualified_after_timer_cancel_on_source_exit",
+  "description": "A source-qualified after timer is cancelled when its active source state exits before the deadline.",
+  "features": [
+    "source",
+    "timer",
+    "after",
+    "cancellation",
+    "nested"
+  ],
+  "model": {
+    "name": "SourceQualifiedAfterTimerCancelOnSourceExit",
+    "initial": "parent",
+    "states": [
+      {
+        "name": "parent",
+        "initial": "a",
+        "states": [
+          {
+            "name": "a",
+            "transitions": [
+              {
+                "on": "leave",
+                "target": "../b",
+                "effects": [
+                  {
+                    "behavior": "effect_leave"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "name": "b",
+            "entry": [
+              {
+                "behavior": "entry_b"
+              }
+            ]
+          }
+        ],
+        "transitions": [
+          {
+            "source": "parent/a",
+            "trigger": {
+              "kind": "after",
+              "duration_ms": 100
+            },
+            "target": "../timeout",
+            "effects": [
+              {
+                "behavior": "effect_timeout"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "timeout"
+      }
+    ]
+  },
+  "behaviors": {
+    "effect_leave": [
+      {
+        "op": "trace",
+        "value": "effect:leave"
+      }
+    ],
+    "entry_b": [
+      {
+        "op": "trace",
+        "value": "entry:b"
+      }
+    ],
+    "effect_timeout": [
+      {
+        "op": "trace",
+        "value": "effect:timeout"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "leave"
+    },
+    {
+      "op": "tick",
+      "millis": 200
+    }
+  ],
+  "expect": {
+    "state": "/SourceQualifiedAfterTimerCancelOnSourceExit/parent/b",
+    "trace": [
+      {
+        "type": "timer_scheduled"
+      },
+      {
+        "type": "dispatch",
+        "event": "leave"
+      },
+      {
+        "type": "timer_cancelled"
+      },
+      {
+        "type": "trace",
+        "value": "effect:leave"
+      },
+      {
+        "type": "trace",
+        "value": "entry:b"
+      },
+      {
+        "type": "stable",
+        "state": "/SourceQualifiedAfterTimerCancelOnSourceExit/parent/b"
+      }
+    ]
+  }
+}

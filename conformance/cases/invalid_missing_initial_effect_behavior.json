@@ -1,0 +1,33 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_missing_initial_effect_behavior",
+  "mode": "validation",
+  "description": "Initial transition effect behavior references must resolve to declared portable behavior programs.",
+  "features": [
+    "initial",
+    "validation"
+  ],
+  "model": {
+    "name": "InvalidMissingInitialEffectBehavior",
+    "initial": {
+      "target": "idle",
+      "effects": [
+        {
+          "behavior": "missing_initial_effect"
+        }
+      ]
+    },
+    "states": [
+      {
+        "name": "idle"
+      }
+    ]
+  },
+  "expect": {
+    "validation": [
+      {
+        "code": "missing_behavior"
+      }
+    ]
+  }
+}

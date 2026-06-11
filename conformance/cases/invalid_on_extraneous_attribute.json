@@ -1,0 +1,36 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_on_extraneous_attribute",
+  "mode": "validation",
+  "description": "An on trigger must not declare attribute operands from attribute-change triggers.",
+  "features": ["validation"],
+  "model": {
+    "name": "InvalidOnExtraneousAttribute",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "trigger": {
+              "kind": "on",
+              "event": "go",
+              "attribute": "flag"
+            },
+            "target": "done"
+          }
+        ]
+      },
+      {
+        "name": "done"
+      }
+    ]
+  },
+  "expect": {
+    "validation": [
+      {
+        "code": "extraneous_trigger_operand"
+      }
+    ]
+  }
+}

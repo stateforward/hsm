@@ -1,0 +1,68 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "config_queue_behavior_set_attr_when_event_fifo",
+  "description": "A behavior-side set_attr generated attribute-change event is routed through the configured FIFO queue before behavior-source when transition selection.",
+  "features": ["queue", "attribute", "when", "behavior_attr", "reentrancy"],
+  "model": {
+    "name": "ConfigQueueBehaviorSetAttrWhenEventFifo",
+    "initial": "idle",
+    "attributes": {
+      "ready": {"type": "boolean", "default": false}
+    },
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "on": "go",
+            "target": "ready_state",
+            "effects": [{"behavior": "set_ready"}]
+          }
+        ]
+      },
+      {
+        "name": "ready_state",
+        "entry": [{"behavior": "entry_ready"}],
+        "transitions": [
+          {
+            "trigger": {"kind": "when", "behavior": "when_ready"},
+            "target": "changed",
+            "effects": [{"behavior": "effect_changed"}]
+          }
+        ]
+      },
+      {"name": "changed", "entry": [{"behavior": "entry_changed"}]}
+    ]
+  },
+  "instances": [{"id": "default", "config": {"queue": "trace_fifo"}}],
+  "behaviors": {
+    "set_ready": [
+      {"op": "set_attr", "name": "ready", "value": true},
+      {"op": "trace", "value": "effect:set-ready"}
+    ],
+    "when_ready": [{"op": "return_equals", "name": "ready", "value": true}],
+    "entry_ready": [{"op": "trace", "value": "entry:ready"}],
+    "effect_changed": [{"op": "trace", "value": "effect:changed"}],
+    "entry_changed": [{"op": "trace", "value": "entry:changed"}]
+  },
+  "script": [
+    {"op": "start"},
+    {"op": "dispatch", "event": "go"}
+  ],
+  "expect": {
+    "state": "/ConfigQueueBehaviorSetAttrWhenEventFifo/changed",
+    "attributes": {"ready": true},
+    "trace": [
+      {"type": "dispatch", "event": "go"},
+      {"type": "trace", "value": "queue:push:go"},
+      {"type": "trace", "value": "queue:pop:go"},
+      {"type": "trace", "value": "queue:push:/ConfigQueueBehaviorSetAttrWhenEventFifo/ready"},
+      {"type": "trace", "value": "effect:set-ready"},
+      {"type": "trace", "value": "entry:ready"},
+      {"type": "trace", "value": "queue:pop:/ConfigQueueBehaviorSetAttrWhenEventFifo/ready"},
+      {"type": "trace", "value": "effect:changed"},
+      {"type": "trace", "value": "entry:changed"},
+      {"type": "stable", "state": "/ConfigQueueBehaviorSetAttrWhenEventFifo/changed"}
+    ]
+  }
+}

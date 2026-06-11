@@ -1,0 +1,261 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "submachine_child_deep_history_cleared_on_parent_lifecycle_reset",
+  "description": "Restart and stop/start of a parent instance clear child-model deep-history memory under a submachine.",
+  "features": [
+    "submachine",
+    "entry_point",
+    "history",
+    "deep_history",
+    "lifecycle",
+    "restart",
+    "stop",
+    "nested"
+  ],
+  "model": {
+    "name": "SubmachineChildDeepHistoryClearedOnParentLifecycleReset",
+    "initial": "outside",
+    "states": [
+      {
+        "name": "outside",
+        "transitions": [
+          {
+            "on": "enter",
+            "target": "drive"
+          },
+          {
+            "on": "resume",
+            "target": "drive",
+            "entry_point": "history"
+          }
+        ]
+      },
+      {
+        "name": "drive",
+        "kind": "submachine",
+        "machine": "LifecycleResetDeepHistoryChild",
+        "transitions": [
+          {
+            "on": "leave",
+            "target": "outside"
+          }
+        ]
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "LifecycleResetDeepHistoryChild",
+      "initial": "comp",
+      "entry_points": [
+        {
+          "name": "history",
+          "target": "comp/h",
+          "effects": [
+            {
+              "behavior": "effect_history"
+            }
+          ]
+        }
+      ],
+      "states": [
+        {
+          "name": "comp",
+          "initial": "a",
+          "states": [
+            {
+              "name": "a",
+              "entry": [
+                {
+                  "behavior": "entry_a"
+                }
+              ],
+              "transitions": [
+                {
+                  "on": "to_b",
+                  "target": "../b/nested/deep"
+                }
+              ]
+            },
+            {
+              "name": "b",
+              "initial": "nested",
+              "states": [
+                {
+                  "name": "nested",
+                  "initial": "deep",
+                  "states": [
+                    {
+                      "name": "deep",
+                      "entry": [
+                        {
+                          "behavior": "entry_deep"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "h",
+              "kind": "deep_history",
+              "transitions": [
+                {
+                  "target": "a"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "behaviors": {
+    "effect_history": [
+      {
+        "op": "trace",
+        "value": "effect:history"
+      }
+    ],
+    "entry_a": [
+      {
+        "op": "trace",
+        "value": "entry:a"
+      }
+    ],
+    "entry_deep": [
+      {
+        "op": "trace",
+        "value": "entry:deep"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "enter"
+    },
+    {
+      "op": "dispatch",
+      "event": "to_b"
+    },
+    {
+      "op": "dispatch",
+      "event": "leave"
+    },
+    {
+      "op": "restart"
+    },
+    {
+      "op": "dispatch",
+      "event": "resume"
+    },
+    {
+      "op": "dispatch",
+      "event": "leave"
+    },
+    {
+      "op": "dispatch",
+      "event": "enter"
+    },
+    {
+      "op": "dispatch",
+      "event": "to_b"
+    },
+    {
+      "op": "dispatch",
+      "event": "leave"
+    },
+    {
+      "op": "stop"
+    },
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "resume"
+    }
+  ],
+  "expect": {
+    "state": "/SubmachineChildDeepHistoryClearedOnParentLifecycleReset/drive/LifecycleResetDeepHistoryChild/comp/a",
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "enter"
+      },
+      {
+        "type": "trace",
+        "value": "entry:a"
+      },
+      {
+        "type": "dispatch",
+        "event": "to_b"
+      },
+      {
+        "type": "trace",
+        "value": "entry:deep"
+      },
+      {
+        "type": "dispatch",
+        "event": "leave"
+      },
+      {
+        "type": "dispatch",
+        "event": "resume"
+      },
+      {
+        "type": "trace",
+        "value": "effect:history"
+      },
+      {
+        "type": "trace",
+        "value": "entry:a"
+      },
+      {
+        "type": "dispatch",
+        "event": "leave"
+      },
+      {
+        "type": "dispatch",
+        "event": "enter"
+      },
+      {
+        "type": "trace",
+        "value": "entry:a"
+      },
+      {
+        "type": "dispatch",
+        "event": "to_b"
+      },
+      {
+        "type": "trace",
+        "value": "entry:deep"
+      },
+      {
+        "type": "dispatch",
+        "event": "leave"
+      },
+      {
+        "type": "dispatch",
+        "event": "resume"
+      },
+      {
+        "type": "trace",
+        "value": "effect:history"
+      },
+      {
+        "type": "trace",
+        "value": "entry:a"
+      },
+      {
+        "type": "stable",
+        "state": "/SubmachineChildDeepHistoryClearedOnParentLifecycleReset/drive/LifecycleResetDeepHistoryChild/comp/a"
+      }
+    ]
+  }
+}

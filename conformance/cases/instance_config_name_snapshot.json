@@ -1,0 +1,58 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "instance_config_name_snapshot",
+  "description": "Instance config name changes runtime qualified-name observability without changing model state paths.",
+  "features": ["snapshot"],
+  "model": {
+    "name": "InstanceConfigNameSnapshot",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle"
+      }
+    ]
+  },
+  "instances": [
+    {
+      "id": "custom",
+      "config": {
+        "name": "runtime-name"
+      }
+    }
+  ],
+  "script": [
+    {
+      "op": "start",
+      "instance": "custom"
+    },
+    {
+      "op": "snapshot",
+      "instance": "custom",
+      "id": "custom_snapshot"
+    }
+  ],
+  "expect": {
+    "states": {
+      "custom": "/InstanceConfigNameSnapshot/idle"
+    },
+    "snapshots": {
+      "custom_snapshot": {
+        "id": "custom",
+        "qualified_name": "runtime-name",
+        "state": "/InstanceConfigNameSnapshot/idle",
+        "attributes": {},
+        "queue_len": 0
+      }
+    },
+    "trace": [
+      {
+        "type": "snapshot",
+        "state": "/InstanceConfigNameSnapshot/idle"
+      },
+      {
+        "type": "stable",
+        "state": "/InstanceConfigNameSnapshot/idle"
+      }
+    ]
+  }
+}

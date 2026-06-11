@@ -1,0 +1,85 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "snapshot_event_details_completion",
+  "description": "Snapshots taken while a final state remains active include transition snapshots for selectable completion transitions.",
+  "features": [
+    "snapshot",
+    "completion",
+    "final",
+    "guard"
+  ],
+  "model": {
+    "name": "SnapshotEventDetailsCompletion",
+    "initial": "done",
+    "states": [
+      {
+        "name": "done",
+        "kind": "final"
+      },
+      {
+        "name": "wrong"
+      }
+    ],
+    "transitions": [
+      {
+        "trigger": {
+          "kind": "completion"
+        },
+        "guard": {
+          "behavior": "deny"
+        },
+        "target": "wrong"
+      }
+    ]
+  },
+  "behaviors": {
+    "deny": [
+      {
+        "op": "return_value",
+        "value": false
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "snapshot"
+    }
+  ],
+  "expect": {
+    "state": "/SnapshotEventDetailsCompletion/done",
+    "snapshots": {
+      "last": {
+        "id": "default",
+        "qualified_name": "/SnapshotEventDetailsCompletion",
+        "state": "/SnapshotEventDetailsCompletion/done",
+        "attributes": {},
+        "queue_len": 0,
+        "transitions": [
+          {
+            "name": "/SnapshotEventDetailsCompletion/transition_5",
+            "kind": 67346,
+            "source": "/SnapshotEventDetailsCompletion",
+            "target": "/SnapshotEventDetailsCompletion/wrong",
+            "events": [
+              "hsm/final"
+            ],
+            "guard": true
+          }
+        ]
+      }
+    },
+    "trace": [
+      {
+        "type": "snapshot",
+        "state": "/SnapshotEventDetailsCompletion/done"
+      },
+      {
+        "type": "stable",
+        "state": "/SnapshotEventDetailsCompletion/done"
+      }
+    ]
+  }
+}

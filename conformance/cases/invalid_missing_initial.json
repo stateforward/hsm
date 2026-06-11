@@ -1,0 +1,27 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_missing_initial",
+  "mode": "validation",
+  "description": "A model with multiple ordinary states must declare a root initial target.",
+  "features": [
+    "validation"
+  ],
+  "model": {
+    "name": "InvalidMissingInitial",
+    "states": [
+      {
+        "name": "a"
+      },
+      {
+        "name": "b"
+      }
+    ]
+  },
+  "expect": {
+    "validation": [
+      {
+        "code": "missing_initial"
+      }
+    ]
+  }
+}

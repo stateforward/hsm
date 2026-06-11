@@ -1,0 +1,168 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "behavior_dispatch_to_after_restart_target_succeeds",
+  "description": "A behavior-originated dispatch to a named target delivers after that target has been restarted.",
+  "features": ["dispatch_to", "lifecycle", "restart", "queue"],
+  "model": {
+    "name": "BehaviorDispatchToAfterRestartProducer",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "on": "go",
+            "target": "sent",
+            "effects": [
+              {
+                "behavior": "dispatch_peer"
+              },
+              {
+                "behavior": "effect_after"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "sent",
+        "entry": [
+          {
+            "behavior": "entry_sent"
+          }
+        ]
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "BehaviorDispatchToAfterRestartPeer",
+      "initial": "idle",
+      "states": [
+        {
+          "name": "idle",
+          "transitions": [
+            {
+              "on": "dirty",
+              "target": "dirty"
+            },
+            {
+              "on": "audit",
+              "target": "done",
+              "effects": [
+                {
+                  "behavior": "effect_audit"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "dirty"
+        },
+        {
+          "name": "done"
+        }
+      ]
+    }
+  ],
+  "instances": [
+    {
+      "id": "producer"
+    },
+    {
+      "id": "peer",
+      "model": "BehaviorDispatchToAfterRestartPeer"
+    }
+  ],
+  "behaviors": {
+    "dispatch_peer": [
+      {
+        "op": "dispatch",
+        "event": "audit",
+        "target": "peer"
+      }
+    ],
+    "effect_after": [
+      {
+        "op": "trace",
+        "value": "effect:after"
+      }
+    ],
+    "entry_sent": [
+      {
+        "op": "trace",
+        "value": "entry:sent"
+      }
+    ],
+    "effect_audit": [
+      {
+        "op": "trace",
+        "value": "effect:audit"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start",
+      "instance": "producer"
+    },
+    {
+      "op": "start",
+      "instance": "peer"
+    },
+    {
+      "op": "dispatch_to",
+      "target": "peer",
+      "event": "dirty"
+    },
+    {
+      "op": "restart",
+      "instance": "peer"
+    },
+    {
+      "op": "dispatch_to",
+      "target": "producer",
+      "event": "go"
+    }
+  ],
+  "expect": {
+    "states": {
+      "producer": "/BehaviorDispatchToAfterRestartProducer/sent",
+      "peer": "/BehaviorDispatchToAfterRestartPeer/done"
+    },
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "dirty",
+        "target": "peer"
+      },
+      {
+        "type": "dispatch",
+        "event": "go",
+        "target": "producer"
+      },
+      {
+        "type": "dispatch",
+        "event": "audit",
+        "target": "peer"
+      },
+      {
+        "type": "trace",
+        "value": "effect:audit"
+      },
+      {
+        "type": "trace",
+        "value": "effect:after"
+      },
+      {
+        "type": "trace",
+        "value": "entry:sent"
+      },
+      {
+        "type": "stable",
+        "state": "producer"
+      }
+    ]
+  }
+}

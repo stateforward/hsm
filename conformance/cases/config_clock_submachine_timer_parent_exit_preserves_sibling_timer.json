@@ -1,0 +1,155 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "config_clock_submachine_timer_parent_exit_preserves_sibling_timer",
+  "description": "Exiting one parent submachine boundary cancels only that child timer while a sibling instance's child timer can still fire.",
+  "features": [
+    "submachine",
+    "timer",
+    "after",
+    "cancellation",
+    "exit",
+    "dispatch_to"
+  ],
+  "model": {
+    "name": "ConfigClockSubmachineTimerParentExitPreservesSiblingTimer",
+    "initial": "drive",
+    "states": [
+      {
+        "name": "drive",
+        "kind": "submachine",
+        "machine": "ConfigClockSubmachineSiblingTimerChild",
+        "transitions": [
+          {
+            "on": "leave",
+            "target": "outside",
+            "effects": [
+              {
+                "behavior": "effect_leave"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "outside"
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "ConfigClockSubmachineSiblingTimerChild",
+      "initial": "waiting",
+      "states": [
+        {
+          "name": "waiting",
+          "transitions": [
+            {
+              "trigger": {
+                "kind": "after",
+                "duration_ms": 100
+              },
+              "target": "timeout",
+              "effects": [
+                {
+                  "behavior": "effect_timeout"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "timeout"
+        }
+      ]
+    }
+  ],
+  "instances": [
+    {
+      "id": "exited",
+      "config": {
+        "clock": "trace_nonzero_sleep"
+      }
+    },
+    {
+      "id": "running",
+      "config": {
+        "clock": "trace_nonzero_sleep"
+      }
+    }
+  ],
+  "behaviors": {
+    "effect_leave": [
+      {
+        "op": "trace",
+        "value": "effect:leave"
+      }
+    ],
+    "effect_timeout": [
+      {
+        "op": "trace",
+        "value": "effect:timeout"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start",
+      "instance": "exited"
+    },
+    {
+      "op": "start",
+      "instance": "running"
+    },
+    {
+      "op": "dispatch_to",
+      "target": "exited",
+      "event": "leave"
+    },
+    {
+      "op": "tick",
+      "millis": 200
+    }
+  ],
+  "expect": {
+    "states": {
+      "exited": "/ConfigClockSubmachineTimerParentExitPreservesSiblingTimer/outside",
+      "running": "/ConfigClockSubmachineTimerParentExitPreservesSiblingTimer/drive/ConfigClockSubmachineSiblingTimerChild/timeout"
+    },
+    "trace": [
+      {
+        "type": "timer_scheduled"
+      },
+      {
+        "type": "trace",
+        "value": "clock:sleep:nonzero"
+      },
+      {
+        "type": "timer_scheduled"
+      },
+      {
+        "type": "trace",
+        "value": "clock:sleep:nonzero"
+      },
+      {
+        "type": "dispatch",
+        "event": "leave",
+        "target": "exited"
+      },
+      {
+        "type": "trace",
+        "value": "effect:leave"
+      },
+      {
+        "type": "timer_fired"
+      },
+      {
+        "type": "trace",
+        "value": "effect:timeout"
+      },
+      {
+        "type": "stable",
+        "state": "exited"
+      }
+    ]
+  }
+}

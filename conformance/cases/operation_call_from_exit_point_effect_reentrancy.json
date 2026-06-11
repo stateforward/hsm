@@ -1,0 +1,169 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "operation_call_from_exit_point_effect_reentrancy",
+  "description": "An operation called from an exit-point effect queues its on_call event behind the parent exit-point transition.",
+  "features": [
+    "operation",
+    "on_call",
+    "submachine",
+    "exit_point",
+    "queue",
+    "reentrancy"
+  ],
+  "model": {
+    "name": "OperationCallFromExitPointEffectReentrancy",
+    "initial": "drive",
+    "operations": {
+      "audit": {
+        "behavior": "operation_audit"
+      }
+    },
+    "states": [
+      {
+        "name": "drive",
+        "kind": "submachine",
+        "machine": "CallFromExitPointChild",
+        "transitions": [
+          {
+            "trigger": {
+              "kind": "exit_point",
+              "exit_point": "done"
+            },
+            "target": "waiting"
+          }
+        ]
+      },
+      {
+        "name": "waiting",
+        "transitions": [
+          {
+            "trigger": {
+              "kind": "on_call",
+              "operation": "audit"
+            },
+            "target": "handled",
+            "effects": [
+              {
+                "behavior": "effect_audit"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "handled",
+        "entry": [
+          {
+            "behavior": "entry_handled"
+          }
+        ]
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "CallFromExitPointChild",
+      "initial": "active",
+      "exit_points": [
+        {
+          "name": "done",
+          "effects": [
+            {
+              "behavior": "exit_point_calls_audit"
+            }
+          ]
+        }
+      ],
+      "states": [
+        {
+          "name": "active",
+          "transitions": [
+            {
+              "on": "finish",
+              "target": "done"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "behaviors": {
+    "operation_audit": [
+      {
+        "op": "trace",
+        "value": "operation:audit"
+      }
+    ],
+    "exit_point_calls_audit": [
+      {
+        "op": "trace",
+        "value": "exit-point:before-call"
+      },
+      {
+        "op": "call",
+        "name": "audit"
+      },
+      {
+        "op": "trace",
+        "value": "exit-point:after-call"
+      }
+    ],
+    "effect_audit": [
+      {
+        "op": "trace",
+        "value": "effect:audit"
+      }
+    ],
+    "entry_handled": [
+      {
+        "op": "trace",
+        "value": "entry:handled"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "finish"
+    }
+  ],
+  "expect": {
+    "state": "/OperationCallFromExitPointEffectReentrancy/handled",
+    "queue": {
+      "operation_call_from_exit_point_effect": "queued_after_parent_exit_point_transition"
+    },
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "finish"
+      },
+      {
+        "type": "trace",
+        "value": "exit-point:before-call"
+      },
+      {
+        "type": "trace",
+        "value": "operation:audit"
+      },
+      {
+        "type": "trace",
+        "value": "exit-point:after-call"
+      },
+      {
+        "type": "trace",
+        "value": "effect:audit"
+      },
+      {
+        "type": "trace",
+        "value": "entry:handled"
+      },
+      {
+        "type": "stable",
+        "state": "/OperationCallFromExitPointEffectReentrancy/handled"
+      }
+    ]
+  }
+}

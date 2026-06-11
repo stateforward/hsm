@@ -1,0 +1,34 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_when_missing_operand",
+  "mode": "validation",
+  "description": "A when trigger must declare exactly one attribute or behavior operand.",
+  "features": ["when", "validation"],
+  "model": {
+    "name": "InvalidWhenMissingOperand",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "trigger": {
+              "kind": "when"
+            },
+            "target": "done"
+          }
+        ]
+      },
+      {
+        "name": "done"
+      }
+    ]
+  },
+  "expect": {
+    "validation": [
+      {
+        "code": "missing_trigger_operand"
+      }
+    ]
+  }
+}

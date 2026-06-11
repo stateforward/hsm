@@ -1,0 +1,33 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_duplicate_instance_ids",
+  "mode": "validation",
+  "description": "Runtime instance declarations must not reuse the same id.",
+  "features": [
+    "validation"
+  ],
+  "model": {
+    "name": "InvalidDuplicateInstanceIDs",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle"
+      }
+    ]
+  },
+  "instances": [
+    {
+      "id": "same"
+    },
+    {
+      "id": "same"
+    }
+  ],
+  "expect": {
+    "validation": [
+      {
+        "code": "duplicate_instance"
+      }
+    ]
+  }
+}

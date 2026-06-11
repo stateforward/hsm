@@ -1,0 +1,39 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_on_call_missing_operation",
+  "mode": "validation",
+  "description": "An on_call trigger must reference a declared model operation.",
+  "features": [
+    "operation",
+    "on_call",
+    "validation"
+  ],
+  "model": {
+    "name": "InvalidOnCallMissingOperation",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "trigger": {
+              "kind": "on_call",
+              "operation": "missing"
+            },
+            "target": "done"
+          }
+        ]
+      },
+      {
+        "name": "done"
+      }
+    ]
+  },
+  "expect": {
+    "validation": [
+      {
+        "code": "missing_operation"
+      }
+    ]
+  }
+}

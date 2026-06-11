@@ -1,0 +1,236 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "submachine_completion_priority_over_nested_dispatch",
+  "description": "Completion produced inside a submachine is handled before a regular event dispatched by the transition that reached the child final state.",
+  "features": [
+    "submachine",
+    "completion",
+    "final",
+    "queue",
+    "reentrancy"
+  ],
+  "model": {
+    "name": "SubmachineCompletionPriority",
+    "initial": "drive",
+    "states": [
+      {
+        "name": "drive",
+        "kind": "submachine",
+        "machine": "CompletionPriorityChild",
+        "transitions": [
+          {
+            "on": "noise",
+            "target": "noise_before_completion",
+            "effects": [
+              {
+                "behavior": "effect_noise_before"
+              }
+            ]
+          },
+          {
+            "trigger": {
+              "kind": "exit_point",
+              "exit_point": "completed"
+            },
+            "target": "complete",
+            "effects": [
+              {
+                "behavior": "effect_parent_completed"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "complete",
+        "entry": [
+          {
+            "behavior": "entry_complete"
+          }
+        ],
+        "transitions": [
+          {
+            "on": "noise",
+            "target": "noise_after_completion",
+            "effects": [
+              {
+                "behavior": "effect_noise_after"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "noise_before_completion"
+      },
+      {
+        "name": "noise_after_completion",
+        "entry": [
+          {
+            "behavior": "entry_noise_after"
+          }
+        ]
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "CompletionPriorityChild",
+      "initial": "work",
+      "exit_points": [
+        {
+          "name": "completed",
+          "effects": [
+            {
+              "behavior": "effect_exit_point"
+            }
+          ]
+        }
+      ],
+      "states": [
+        {
+          "name": "work",
+          "transitions": [
+            {
+              "on": "finish",
+              "target": "done",
+              "effects": [
+                {
+                  "behavior": "dispatch_noise"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "done",
+          "kind": "final"
+        }
+      ],
+      "transitions": [
+        {
+          "trigger": {
+            "kind": "completion"
+          },
+          "target": "completed",
+          "effects": [
+            {
+              "behavior": "effect_child_completed"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "behaviors": {
+    "dispatch_noise": [
+      {
+        "op": "trace",
+        "value": "effect:child-finish"
+      },
+      {
+        "op": "dispatch",
+        "event": "noise"
+      }
+    ],
+    "effect_child_completed": [
+      {
+        "op": "trace",
+        "value": "effect:child-completion"
+      }
+    ],
+    "effect_exit_point": [
+      {
+        "op": "trace",
+        "value": "effect:exit-point"
+      }
+    ],
+    "effect_parent_completed": [
+      {
+        "op": "trace",
+        "value": "effect:parent-completion"
+      }
+    ],
+    "entry_complete": [
+      {
+        "op": "trace",
+        "value": "enter:complete"
+      }
+    ],
+    "effect_noise_before": [
+      {
+        "op": "trace",
+        "value": "effect:noise-before"
+      }
+    ],
+    "effect_noise_after": [
+      {
+        "op": "trace",
+        "value": "effect:noise-after"
+      }
+    ],
+    "entry_noise_after": [
+      {
+        "op": "trace",
+        "value": "enter:noise-after"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "finish"
+    }
+  ],
+  "expect": {
+    "state": "/SubmachineCompletionPriority/noise_after_completion",
+    "queue": {
+      "completion_priority": "before_regular_events"
+    },
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "finish"
+      },
+      {
+        "type": "trace",
+        "value": "effect:child-finish"
+      },
+      {
+        "type": "dispatch",
+        "event": "noise"
+      },
+      {
+        "type": "trace",
+        "value": "effect:child-completion"
+      },
+      {
+        "type": "trace",
+        "value": "effect:exit-point"
+      },
+      {
+        "type": "trace",
+        "value": "effect:parent-completion"
+      },
+      {
+        "type": "trace",
+        "value": "enter:complete"
+      },
+      {
+        "type": "trace",
+        "value": "effect:noise-after"
+      },
+      {
+        "type": "trace",
+        "value": "enter:noise-after"
+      },
+      {
+        "type": "stable",
+        "state": "/SubmachineCompletionPriority/noise_after_completion"
+      }
+    ]
+  }
+}

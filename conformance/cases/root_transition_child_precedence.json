@@ -1,0 +1,119 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "root_transition_child_precedence",
+  "description": "An active nested child transition is selected before a source-less root-owned transition for the same event.",
+  "features": [
+    "root_transition",
+    "nested",
+    "selection_order"
+  ],
+  "model": {
+    "name": "RootTransitionChildPrecedence",
+    "initial": "parent",
+    "states": [
+      {
+        "name": "parent",
+        "initial": "child",
+        "states": [
+          {
+            "name": "child",
+            "transitions": [
+              {
+                "on": "go",
+                "target": "../child_handled",
+                "effects": [
+                  {
+                    "behavior": "effect_child"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "name": "child_handled",
+            "entry": [
+              {
+                "behavior": "entry_child"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "root_handled",
+        "entry": [
+          {
+            "behavior": "entry_root"
+          }
+        ]
+      }
+    ],
+    "transitions": [
+      {
+        "on": "go",
+        "target": "root_handled",
+        "effects": [
+          {
+            "behavior": "effect_root"
+          }
+        ]
+      }
+    ]
+  },
+  "behaviors": {
+    "effect_child": [
+      {
+        "op": "trace",
+        "value": "effect:child"
+      }
+    ],
+    "entry_child": [
+      {
+        "op": "trace",
+        "value": "entry:child"
+      }
+    ],
+    "effect_root": [
+      {
+        "op": "trace",
+        "value": "effect:root"
+      }
+    ],
+    "entry_root": [
+      {
+        "op": "trace",
+        "value": "entry:root"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "go"
+    }
+  ],
+  "expect": {
+    "state": "/RootTransitionChildPrecedence/parent/child_handled",
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "go"
+      },
+      {
+        "type": "trace",
+        "value": "effect:child"
+      },
+      {
+        "type": "trace",
+        "value": "entry:child"
+      },
+      {
+        "type": "stable",
+        "state": "/RootTransitionChildPrecedence/parent/child_handled"
+      }
+    ]
+  }
+}

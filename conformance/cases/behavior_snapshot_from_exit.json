@@ -1,0 +1,62 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "behavior_snapshot_from_exit",
+  "description": "A behavior-side snapshot taken from exit observes the source state while exit effects are running.",
+  "features": ["snapshot", "exit"],
+  "model": {
+    "name": "BehaviorSnapshotFromExit",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle",
+        "exit": [
+          {
+            "behavior": "exit_snapshot"
+          }
+        ],
+        "transitions": [
+          {
+            "on": "go",
+            "target": "done"
+          }
+        ]
+      },
+      {
+        "name": "done"
+      }
+    ]
+  },
+  "behaviors": {
+    "exit_snapshot": [
+      {
+        "op": "snapshot"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "go"
+    }
+  ],
+  "expect": {
+    "state": "/BehaviorSnapshotFromExit/done",
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "go"
+      },
+      {
+        "type": "snapshot",
+        "state": "/BehaviorSnapshotFromExit/idle"
+      },
+      {
+        "type": "stable",
+        "state": "/BehaviorSnapshotFromExit/done"
+      }
+    ]
+  }
+}

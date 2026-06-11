@@ -1,0 +1,49 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_submodel_transition_on_and_trigger",
+  "mode": "validation",
+  "description": "Transitions inside child models must not declare both shorthand on and explicit trigger.",
+  "features": ["submachine", "validation"],
+  "model": {
+    "name": "InvalidSubmodelTransitionOnAndTrigger",
+    "initial": "drive",
+    "states": [
+      {
+        "name": "drive",
+        "kind": "submachine",
+        "machine": "ChildTransitionOnAndTrigger"
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "ChildTransitionOnAndTrigger",
+      "initial": "idle",
+      "states": [
+        {
+          "name": "idle",
+          "transitions": [
+            {
+              "on": "go",
+              "trigger": {
+                "kind": "on",
+                "event": "go"
+              },
+              "target": "done"
+            }
+          ]
+        },
+        {
+          "name": "done"
+        }
+      ]
+    }
+  ],
+  "expect": {
+    "validation": [
+      {
+        "code": "multiple_transition_triggers"
+      }
+    ]
+  }
+}

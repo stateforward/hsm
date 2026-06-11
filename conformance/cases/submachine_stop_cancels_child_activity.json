@@ -1,0 +1,83 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "submachine_stop_cancels_child_activity",
+  "description": "Stopping a parent machine cancels activities running inside the active child submachine state before completing stop.",
+  "features": [
+    "submachine",
+    "activity",
+    "async",
+    "cancellation",
+    "stop"
+  ],
+  "model": {
+    "name": "SubmachineStopCancelsActivity",
+    "initial": "drive",
+    "states": [
+      {
+        "name": "drive",
+        "kind": "submachine",
+        "machine": "StopActivityChild"
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "StopActivityChild",
+      "initial": "active",
+      "states": [
+        {
+          "name": "active",
+          "activity": [
+            {
+              "behavior": "activity_running"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "behaviors": {
+    "activity_running": [
+      {
+        "op": "trace",
+        "value": "activity:start"
+      },
+      {
+        "op": "sleep",
+        "millis": 1000
+      },
+      {
+        "op": "trace",
+        "value": "activity:done"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "stop"
+    }
+  ],
+  "expect": {
+    "state": "/SubmachineStopCancelsActivity",
+    "trace": [
+      {
+        "type": "trace",
+        "value": "activity:start"
+      },
+      {
+        "type": "stop"
+      },
+      {
+        "type": "activity_cancel",
+        "behavior": "activity_running"
+      },
+      {
+        "type": "stable",
+        "state": "/SubmachineStopCancelsActivity"
+      }
+    ]
+  }
+}

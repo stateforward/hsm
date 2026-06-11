@@ -1,0 +1,30 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_missing_exit_behavior",
+  "mode": "validation",
+  "description": "State exit behavior references must resolve to declared portable behavior programs.",
+  "features": [
+    "validation"
+  ],
+  "model": {
+    "name": "InvalidMissingExitBehavior",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle",
+        "exit": [
+          {
+            "behavior": "missing_exit"
+          }
+        ]
+      }
+    ]
+  },
+  "expect": {
+    "validation": [
+      {
+        "code": "missing_behavior"
+      }
+    ]
+  }
+}

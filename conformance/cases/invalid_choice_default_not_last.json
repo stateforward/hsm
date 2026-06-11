@@ -1,0 +1,52 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_choice_default_not_last",
+  "mode": "validation",
+  "description": "A guardless choice default branch must be the final choice transition.",
+  "features": [
+    "choice",
+    "validation"
+  ],
+  "model": {
+    "name": "InvalidChoiceDefaultNotLast",
+    "initial": "choice",
+    "states": [
+      {
+        "name": "choice",
+        "kind": "choice",
+        "transitions": [
+          {
+            "target": "fallback"
+          },
+          {
+            "guard": {
+              "behavior": "guard_true"
+            },
+            "target": "done"
+          }
+        ]
+      },
+      {
+        "name": "fallback"
+      },
+      {
+        "name": "done"
+      }
+    ]
+  },
+  "behaviors": {
+    "guard_true": [
+      {
+        "op": "return_value",
+        "value": true
+      }
+    ]
+  },
+  "expect": {
+    "validation": [
+      {
+        "code": "choice_default_not_last"
+      }
+    ]
+  }
+}

@@ -1,0 +1,83 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "behavior_set_attr_same_value_when_noop",
+  "description": "A behavior-side set_attr to the current value does not evaluate when transitions.",
+  "features": ["attribute", "when", "behavior_attr"],
+  "model": {
+    "name": "BehaviorSetAttrSameValueWhen",
+    "initial": "idle",
+    "attributes": {
+      "ready": {
+        "type": "boolean",
+        "default": false
+      }
+    },
+    "states": [
+      {
+        "name": "idle",
+        "entry": [
+          {
+            "behavior": "entry_set_same"
+          }
+        ],
+        "transitions": [
+          {
+            "trigger": {
+              "kind": "when",
+              "behavior": "when_ready"
+            },
+            "target": "ready"
+          }
+        ]
+      },
+      {
+        "name": "ready"
+      }
+    ]
+  },
+  "behaviors": {
+    "entry_set_same": [
+      {
+        "op": "trace",
+        "value": "entry:set-same"
+      },
+      {
+        "op": "set_attr",
+        "name": "ready",
+        "value": false
+      }
+    ],
+    "when_ready": [
+      {
+        "op": "trace",
+        "value": "when:ready"
+      },
+      {
+        "op": "return_equals",
+        "name": "ready",
+        "value": true
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    }
+  ],
+  "expect": {
+    "state": "/BehaviorSetAttrSameValueWhen/idle",
+    "attributes": {
+      "ready": false
+    },
+    "trace": [
+      {
+        "type": "trace",
+        "value": "entry:set-same"
+      },
+      {
+        "type": "stable",
+        "state": "/BehaviorSetAttrSameValueWhen/idle"
+      }
+    ]
+  }
+}

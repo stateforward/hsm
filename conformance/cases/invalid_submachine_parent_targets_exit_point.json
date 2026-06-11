@@ -1,0 +1,53 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_submachine_parent_targets_exit_point",
+  "mode": "validation",
+  "features": [
+    "submachine",
+    "exit_point",
+    "validation"
+  ],
+  "model": {
+    "name": "InvalidParentTargetsExitPoint",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "on": "go",
+            "target": "drive/done"
+          }
+        ]
+      },
+      {
+        "name": "drive",
+        "kind": "submachine",
+        "machine": "Child"
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "Child",
+      "initial": "ready",
+      "exit_points": [
+        {
+          "name": "done"
+        }
+      ],
+      "states": [
+        {
+          "name": "ready"
+        }
+      ]
+    }
+  ],
+  "expect": {
+    "validation": [
+      {
+        "code": "invalid_submachine_internal_target"
+      }
+    ]
+  }
+}

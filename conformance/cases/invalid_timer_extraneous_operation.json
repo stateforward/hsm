@@ -1,0 +1,36 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_timer_extraneous_operation",
+  "mode": "validation",
+  "description": "A timer trigger must not declare operation operands from on_call triggers.",
+  "features": ["timer", "every", "validation"],
+  "model": {
+    "name": "InvalidTimerExtraneousOperation",
+    "initial": "waiting",
+    "states": [
+      {
+        "name": "waiting",
+        "transitions": [
+          {
+            "trigger": {
+              "kind": "every",
+              "duration_ms": 10,
+              "operation": "tick"
+            },
+            "target": "done"
+          }
+        ]
+      },
+      {
+        "name": "done"
+      }
+    ]
+  },
+  "expect": {
+    "validation": [
+      {
+        "code": "extraneous_trigger_operand"
+      }
+    ]
+  }
+}

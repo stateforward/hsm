@@ -85,7 +85,7 @@
     }
   ],
   "expect": {
-    "state": "/SubmachineDeferQueueClearedOnParentStopStart/drive/ChildSubmachineDeferCleanupOnStopStart/ready",
+    "state": "/SubmachineDeferQueueClearedOnParentStopStart/drive/ready",
     "queue": {
       "lifecycle_cleanup": "child_deferred_events_cleared_on_parent_stop_start"
     },
@@ -104,7 +104,7 @@
       },
       {
         "type": "stable",
-        "state": "/SubmachineDeferQueueClearedOnParentStopStart/drive/ChildSubmachineDeferCleanupOnStopStart/ready"
+        "state": "/SubmachineDeferQueueClearedOnParentStopStart/drive/ready"
       }
     ]
   }

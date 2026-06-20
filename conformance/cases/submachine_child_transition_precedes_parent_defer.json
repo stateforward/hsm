@@ -75,7 +75,7 @@
     }
   ],
   "expect": {
-    "state": "/SubmachineChildTransitionPrecedesParentDefer/drive/ChildHandlesDeferredName/handled",
+    "state": "/SubmachineChildTransitionPrecedesParentDefer/drive/handled",
     "trace": [
       {
         "type": "dispatch",
@@ -91,7 +91,7 @@
       },
       {
         "type": "stable",
-        "state": "/SubmachineChildTransitionPrecedesParentDefer/drive/ChildHandlesDeferredName/handled"
+        "state": "/SubmachineChildTransitionPrecedesParentDefer/drive/handled"
       }
     ]
   }

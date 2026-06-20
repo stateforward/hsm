@@ -156,7 +156,7 @@
     }
   ],
   "expect": {
-    "state": "/EntryPointEffectDispatchAfterCompositeTargetResolution/drive/EntryPointDispatchCompositeChild/comp/done",
+    "state": "/EntryPointEffectDispatchAfterCompositeTargetResolution/drive/comp/done",
     "trace": [
       {
         "type": "dispatch",
@@ -188,7 +188,7 @@
       },
       {
         "type": "stable",
-        "state": "/EntryPointEffectDispatchAfterCompositeTargetResolution/drive/EntryPointDispatchCompositeChild/comp/done"
+        "state": "/EntryPointEffectDispatchAfterCompositeTargetResolution/drive/comp/done"
       }
     ]
   }

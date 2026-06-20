@@ -216,7 +216,7 @@
     }
   ],
   "expect": {
-    "state": "/SubmodelInitialEffectSetAttrFromEventDataGeneratedTriggerReplay/drive/InitialEventDataChild/parent/all_seen",
+    "state": "/SubmodelInitialEffectSetAttrFromEventDataGeneratedTriggerReplay/drive/parent/all_seen",
     "attributes": {
       "flag": true,
       "ready": true
@@ -252,7 +252,7 @@
       },
       {
         "type": "stable",
-        "state": "/SubmodelInitialEffectSetAttrFromEventDataGeneratedTriggerReplay/drive/InitialEventDataChild/parent/all_seen"
+        "state": "/SubmodelInitialEffectSetAttrFromEventDataGeneratedTriggerReplay/drive/parent/all_seen"
       }
     ]
   }

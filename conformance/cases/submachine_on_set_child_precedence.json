@@ -106,7 +106,7 @@
     }
   ],
   "expect": {
-    "state": "/SubmachineOnSetPrecedence/drive/OnSetChild/changed",
+    "state": "/SubmachineOnSetPrecedence/drive/changed",
     "attributes": {
       "flag": true
     },
@@ -126,7 +126,7 @@
       },
       {
         "type": "stable",
-        "state": "/SubmachineOnSetPrecedence/drive/OnSetChild/changed"
+        "state": "/SubmachineOnSetPrecedence/drive/changed"
       }
     ]
   }

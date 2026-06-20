@@ -23,12 +23,15 @@ All DSL functions are **namespace/module-level functions** (not methods on objec
 9. [State Behaviors](#state-behaviors)
 10. [Guards & Deferral](#guards--deferral)
 11. [Model Metadata](#model-metadata)
-12. [Group Operations](#group-operations)
-13. [Type Utilities](#type-utilities)
-14. [Runtime Attribute Access](#runtime-attribute-access)
-15. [Runtime Configuration](#runtime-configuration)
-16. [Snapshotting](#snapshotting)
-17. [Runtime Constants](#runtime-constants)
+12. [Observability](#observability)
+13. [Group Operations](#group-operations)
+14. [Type Utilities](#type-utilities)
+15. [Runtime Lifecycle](#runtime-lifecycle)
+16. [Runtime Dispatch](#runtime-dispatch)
+17. [Runtime Attribute And Operation Access](#runtime-attribute-and-operation-access)
+18. [Runtime Configuration](#runtime-configuration)
+19. [Snapshotting](#snapshotting)
+20. [Runtime Constants](#runtime-constants)
 
 ---
 
@@ -50,6 +53,61 @@ Declares a hierarchical state machine model with a name and zero or more child e
 
 **Description:**
 The top-level DSL entry point for constructing a state machine. Accepts a name and any combination of states, initial transitions, attributes, and operations to build the model structure.
+
+### `hsm.Redefine(model, partials...)`
+
+Replays an existing model with additional child elements.
+
+### `hsm.Redefine(model, name, partials...)`
+
+Replays an existing model under a new root name with additional child elements.
+
+**Parameters:**
+
+* `model` Existing complete state machine model.
+* `name` Optional replacement model name. Cannot contain the character `/`.
+* `partials...` Zero or more additional state/initial/transition/operation/attribute/group declarations.
+
+**Constraints:**
+
+* The source model must already be a valid model.
+* Replacement model names must not contain `/`.
+* Compile-time function.
+
+**Description:**
+Creates a new model by replaying the source model's owned definition elements and appending any supplied partials. When `name` is supplied, all relative model-owned elements are re-rooted under that replacement model name. `Redefine` must not mutate the source model; it returns the redefined, validated, finalized model.
+
+### `hsm.Validator(validator)`
+
+Overrides the model validator used while defining or redefining a model.
+
+**Parameters:**
+
+* `validator` Validator object or callable accepted by the host language binding.
+
+**Constraints:**
+
+* Compile-time/redefinition-time function.
+* The validator must not mutate the model.
+
+**Description:**
+Validation runs after all model elements have been redefined and before finalization. When multiple validator elements are present during replay, the last validator wins. This lets tooling or tests attach stricter validation without mutating the source model.
+
+### `hsm.Finalizer(finalizer)`
+
+Overrides the model finalizer used while defining or redefining a model.
+
+**Parameters:**
+
+* `finalizer` Finalizer object or callable accepted by the host language binding.
+
+**Constraints:**
+
+* Compile-time/redefinition-time function.
+* The finalizer receives a valid model after validation.
+
+**Description:**
+Finalization runs after validation and prepares the model for runtime use, including implementation-specific derived indexes such as transition maps, deferred-event maps, transition paths, and history paths. When multiple finalizer elements are present during replay, the last finalizer wins.
 
 ---
 
@@ -115,6 +173,8 @@ Declares a state whose active behavior is provided by a referenced state machine
 **Description:**
 Represents a reusable state machine as a state in another state machine. Entering the submachine state activates the referenced child machine. Exiting the submachine state exits the active child configuration before executing the submachine state's exit behavior.
 
+When a reusable child model is composed into a `SubmachineState`, the child model root name is stripped. The child machine's states, pseudostates, transitions, and behaviors are redefined under the containing submachine state name, so a child state `/Child/running` composed as parent state `/Parent/drive` becomes `/Parent/drive/running`.
+
 While a `SubmachineState` is active, incoming events are evaluated using the same bottom-up transition selection used for ordinary hierarchical states. Selection begins at the deepest active state of the child machine. If no enabled transition is found in the child machine, selection continues at the containing `SubmachineState` and then outward through the parent hierarchy. A selected child transition does not exit the containing `SubmachineState` unless the child reaches a `Final` state or an `hsm.ExitPoint(...)`.
 
 If a transition targets a `SubmachineState` directly, the child machine enters through its normal `hsm.Initial(...)` transition. If a transition targets one of the child machine's `hsm.EntryPoint(...)` declarations, the child machine enters through that named entry point.
@@ -141,6 +201,8 @@ Defines a public boundary through which a parent machine may enter a child machi
 
 When used as a transition partial with no target partials, `hsm.EntryPoint(name)` selects the named child entry point for a transition whose target is a `hsm.SubmachineState(...)`. In that context, the entry point name must resolve in the target submachine's referenced model.
 
+Entry points are transient pseudostates. Entering an entry point immediately follows its transition to the exposed internal target as part of the same run-to-completion step; the machine must not settle at the entry point.
+
 ### `hsm.ExitPoint(name, partials...)`
 
 Declares a named public exit point for a state machine model.
@@ -161,6 +223,8 @@ Declares a named public exit point for a state machine model.
 Defines a public boundary through which a child machine may complete with a named outcome. When an active child machine reaches an exit point, the containing submachine state handles the exit-point outcome as part of normal run-to-completion processing. Parent transitions may use the named exit point to decide the next parent state without the child machine directly targeting parent states.
 
 When used as a transition partial with no target partials inside a `hsm.SubmachineState(...)`, `hsm.ExitPoint(name)` matches the named exit-point outcome from the active child machine. In that context, the exit point name must resolve in the submachine state's referenced model.
+
+Exit points are transient pseudostates. Reaching an exit point exits the child configuration and then selects the matching boundary transition on the containing submachine state as part of the same run-to-completion step; the machine must not settle at the exit point.
 
 ---
 
@@ -235,6 +299,7 @@ Declares a transition between states or pseudostates.
 
 **Constraints:**
 
+* A transition must declare a target or at least one effect. A guard alone is not an effect and must not create a silent event-consuming transition.
 * Compile-time function.
 
 **Description:**
@@ -292,9 +357,9 @@ Enables simple event triggering by string name, useful for events without struct
 
 ### Event Ownership
 
-Dispatch implementations should treat the event envelope (`Name`, `QualifiedName`, `Source`, `Target`, `ID`, and `Kind`) as immutable routing state. Behavior metadata writes must not change those envelope fields; mutable payload data and schema metadata remain application-owned values.
+Dispatch implementations should treat the event envelope (`Name`, `QualifiedName`, `Source`, `Target`, `ID`, and `Kind`) as immutable routing state. Behavior metadata writes must not change those envelope fields; mutable payload data, schema values, and metadata remain application-owned values.
 
-Event payload data is application-owned. Implementations may pass payload data by reference unless a language binding explicitly documents stronger copy semantics. Callers that need isolated mutable payloads should provide immutable data or copy it at the application boundary.
+Event payload data and metadata are application-owned. Implementations may pass them by reference unless a language binding explicitly documents stronger copy semantics. Callers that need isolated mutable values should provide immutable data or copy at the application boundary.
 
 ### `hsm.OnCall(operation_name)`
 
@@ -312,6 +377,8 @@ Declares a transition trigger linked to a named operation. Fires when that opera
 **Description:**
 Routes transitions based on explicit operation invocation, allowing the state machine to respond to named procedure calls.
 
+`hsm.Call(...)` first executes the named operation and returns the operation result through its completion handle. If the operation completes successfully, the runtime dispatches a call event whose name and source are the fully-qualified operation name and whose data is `CallData(Name, Args)`. If the operation raises or its returned completion fails, the call event is not dispatched and the machine state is unchanged by `OnCall(...)`.
+
 ### `hsm.When(attribute_name)` / `hsm.OnSet(attribute_name)`
 
 Declares an attribute-change trigger that fires when a named attribute is modified via either compile-time or runtime attribute setters.
@@ -327,6 +394,8 @@ Declares an attribute-change trigger that fires when a named attribute is modifi
 
 **Description:**
 Triggers a transition whenever a specific attribute value changes. Provides reactive attribute-based state management.
+
+The generated change event name is the fully-qualified attribute name. Its data is `AttributeChange(Name, Old, New/Value)`. Setting an attribute to a value equal to the stored value is a no-op and must not dispatch a change event.
 
 ---
 
@@ -389,7 +458,7 @@ Declares the target state of a transition using a hierarchical path.
 
 **Parameters:**
 
-* `path` State path (string literal). Absolute paths start with `/`, for example `/RootName/ParentName/ChildName`. Relative paths are resolved from the containing state, for example `child`, `../sibling`, or `.` for the current source state.
+* `path` State path (string literal). Absolute paths start with `/`, for example `/RootName/ParentName/ChildName`. Relative paths are resolved from the containing state, for example `child`, `../sibling`, or `.` for the current source state. In a composed submachine, the child model root is stripped, so paths use the containing submachine state name rather than the reusable child model name.
 
 **Constraints:**
 
@@ -419,6 +488,10 @@ Explicitly names the originating state of a transition. Enables transitions to b
 ---
 
 ## State Behaviors
+
+Entry, exit, effect, and guard behavior is sequential. Sequential callbacks must complete synchronously and must not return promises, futures, tasks, coroutines, channels, or other awaitable/asynchronous results. Activities are the only state behavior category that may run concurrently with the settled state; an activity may be modeled as a concurrent behavior and must be cancelable on state exit, restart, or stop.
+
+An implementation may expose behavior objects, state machines, or groups as reusable behavior values. When such a value is used in a sequential slot, the behavior operation itself must obey the sequential contract even if it schedules internal work.
 
 ### `hsm.Entry(action...)`
 
@@ -596,6 +669,8 @@ Declares that certain event types should be deferred (queued) while in a state, 
 **Description:**
 Specifies event types that should not be processed in the current state but instead queued for later processing when the state is exited.
 
+Deferred events are replayed by returning them to the runtime queue after a transition exits the state that deferred them. Completion events, including error and final events, keep runtime priority over regular deferred events.
+
 Deferred events are scoped to the runtime region that deferred them. If an active child machine defers an event and the containing `hsm.SubmachineState(...)` is later exited by a parent transition before the child can replay that event, the child-owned deferred event is discarded as part of child runtime teardown. It must not be replayed into the parent machine after the submachine boundary has been exited.
 
 ---
@@ -614,10 +689,11 @@ Declares a model-level attribute of a specified type without a default value.
 **Constraints:**
 
 * Attribute names must not contain `/`.
+* Attribute names share the top-level model namespace with states and operations.
 * Compile-time function.
 
 **Description:**
-Defines a named data member of the state machine with explicit type specification.
+Defines a named data member of the top-level state machine with explicit type specification. When a reusable submachine model is composed into a parent, its attributes are redefined onto the containing top-level model namespace; relative runtime attribute names resolve there.
 
 ### `hsm.Attribute(name, type, default_value)`
 
@@ -632,6 +708,7 @@ Declares a model-level attribute with a default value.
 **Constraints:**
 
 * Attribute names must not contain `/`.
+* Attribute names share the top-level model namespace with states and operations.
 * Compile-time function.
 
 ### `hsm.Attribute(name, default_value)`
@@ -646,6 +723,7 @@ Declares a model-level attribute with type deduced from the default value.
 **Constraints:**
 
 * Attribute names must not contain `/`.
+* Attribute names share the top-level model namespace with states and operations.
 * Compile-time function.
 
 ### `hsm.Operation(name, implementation)`
@@ -660,11 +738,56 @@ Declares a named operation that can be invoked via explicit operation calls and 
 **Constraints:**
 
 * Operation names must not contain `/`.
+* Operation names share the top-level model namespace with states and attributes.
 * Implementation must be a callable reference (not an inline lambda/anonymous callable).
 * Compile-time function.
 
 **Description:**
-Registers a named operation in the model. Operations can be invoked via a language-specific call mechanism and trigger corresponding transitions via `hsm.OnCall(...)`.
+Registers a named operation on the top-level state machine namespace. When a reusable submachine model is composed into a parent, its operations are redefined onto the containing top-level model namespace. A later redefinition of the same operation name replaces the earlier binding, allowing composed models to override operations intentionally. Operations can be invoked via a language-specific call mechanism and trigger corresponding transitions via `hsm.OnCall(...)`.
+
+### `hsm.Operation(name)`
+
+Declares a named operation whose implementation is resolved from the runtime instance by the same name.
+
+**Parameters:**
+
+* `name` Operation identifier (string literal). Cannot contain `/`.
+
+**Constraints:**
+
+* Operation names must not contain `/`.
+* Operation names share the top-level model namespace with states and attributes.
+* The runtime instance must provide a callable member with the same operation name before the operation is executed.
+* Compile-time function.
+
+**Description:**
+Allows a model to declare an operation contract without binding the callable at model-definition time. This is useful when the same model is reused with different instance implementations.
+
+---
+
+## Observability
+
+### `hsm.Observe(observer, targets...)`
+
+Declares an observation hook for behavior execution and selected transition events.
+
+**Parameters:**
+
+* `observer` Callable receiving the runtime context, instance, and generated observation event.
+* `targets...` Optional event names, event values, element references, or fully-qualified model member names. If omitted, the observer applies to every observable event and behavior.
+
+**Constraints:**
+
+* Compile-time/redefinition-time function.
+* The observer must not change the observed event envelope.
+* Observation must not change transition selection.
+
+**Description:**
+Observation is modeled as a redefinable element so tooling can attach observation to an existing model without mutating the original finalized model. Redefining a model with `hsm.Observe(...)` creates a new model that includes the observation hooks and then runs validation and finalization again.
+
+If a target matches a behavior member's fully-qualified name, the implementation wraps that behavior and invokes the observer before the original behavior. If a target matches an event name or a transition member, the implementation observes the selected transition by inserting the observation as the first transition effect.
+
+The generated observation event has name `hsm/observation`. Its source is the observed behavior or transition qualified name. Its data contains the original event, an occurrence label such as `event` or `behavior`, and the occurrence time.
 
 ---
 
@@ -672,19 +795,19 @@ Registers a named operation in the model. Operations can be invoked via a langua
 
 ### `hsm.MakeGroup(machines...)`
 
-Factory function to create a group of multiple state machine instances.
+Factory function to create a group of state machine instances.
 
 **Parameters:**
 
-* `machines...` Two or more state machine instances.
+* `machines...` Zero or more state machine instances or groups.
 
 **Constraints:**
 
-* Requires at least one machine.
-* Compile-time function.
+* Runtime function.
+* Nested groups are flattened.
 
 **Description:**
-Combines multiple machines into a logical group for coordinated dispatch and management.
+Combines machines into a logical group for coordinated dispatch and lifecycle management. A group is dispatchable and is also a behavior value, so it can be used in `hsm.Entry(...)`, `hsm.Exit(...)`, `hsm.Effect(...)`, and `hsm.Activity(...)` to forward the current event to all active group members.
 
 ### `hsm.MakeGroup(group_id, machines...)`
 
@@ -693,16 +816,23 @@ Factory function to create a group with an identifier.
 **Parameters:**
 
 * `group_id` Group identifier (string).
-* `machines...` Two or more state machine instances.
+* `machines...` Zero or more state machine instances or groups.
 
 **Constraints:**
 
-* Compile-time function.
+* Runtime function.
+* Nested groups are flattened.
 
 **Description:**
 Creates an identified group of machines for tracking and coordinated operation.
 
 **Python alias:** `hsm.make_group(...)` maps directly to `hsm.MakeGroup(...)`. Python also keeps `hsm.NewGroup(...)` / `hsm.new_group(...)` as compatibility aliases for existing callers.
+
+### Group Runtime Behavior
+
+Group dispatch submits the event to each started member. Stopped or uninitialized members are skipped. Dispatching to an empty group or a group with no selected members completes successfully and does not raise.
+
+Group state returns one active state path per grouped instance, preserving group order. Group snapshotting returns one `Snapshot` per grouped instance, preserving group order. Group stop and restart fan out to each grouped instance; restart data is instance-owned, so implementations that pass mutable startup data by reference should isolate the value per member.
 
 ---
 
@@ -740,14 +870,87 @@ Checks if a kind matches or inherits from one or more base kinds.
 
 ---
 
-## Runtime Dispatch
+## Runtime Lifecycle
 
-### `instance.Dispatch(event)`
+### `hsm.New(instance, model, config)`
 
-Submits an event to a running state machine instance.
+Binds a state machine model to a runtime instance without starting it.
 
 **Parameters:**
 
+* `instance` Runtime instance object.
+* `model` Finalized or redefinable model.
+* `config` Optional runtime configuration.
+
+**Returns:** the supplied instance.
+
+**Description:**
+Creates the runtime machine associated with the instance. The instance remains stopped until `hsm.Start(...)` is called.
+
+### `hsm.Start(ctx, instance, data)`
+
+Starts an instance that has already been bound to a model.
+
+**Returns:** completion handle resolving to the started instance.
+
+**Description:**
+Starting enters the model through its initial transition and runs startup as one run-to-completion operation. Dispatches submitted while startup is in progress must wait behind startup processing.
+
+### `hsm.Started(ctx, instance, model, config)`
+
+Convenience function equivalent to `hsm.New(instance, model, config)` followed by `hsm.Start(ctx, instance, config.Data)`.
+
+**Returns:** completion handle resolving to the started instance.
+
+### `hsm.Stop(instance_or_group, ctx)`
+
+Stops a running instance or group.
+
+**Returns:** no-value completion handle.
+
+**Description:**
+Stop exits the active state configuration, cancels active activities, clears runtime-owned deferred and completion work for the stopped machine, and leaves the machine in the stopped root state. Stopping a group stops each member.
+
+### `hsm.Restart(instance_or_group, data, ctx)`
+
+Stops and starts an instance or group.
+
+**Returns:** completion handle resolving to the restarted instance, group, or the host-language equivalent.
+
+**Description:**
+Restart performs stop/start lifecycle work without mutating the model. Restarting a group restarts each member.
+
+### Runtime Identity Helpers
+
+* `hsm.ID(instance_or_group)` returns the runtime instance or group identifier.
+* `hsm.QualifiedName(instance)` returns the runtime machine qualified name.
+* `hsm.Name(instance)` returns the final path component of the runtime machine qualified name.
+
+Groups have an ID and contain member machine identities, but they are not themselves a model-qualified state machine.
+
+---
+
+## Runtime Dispatch
+
+### `hsm.Dispatchable`
+
+Runtime protocol implemented by values that can receive events.
+
+**Required behavior:**
+
+* Provides access to its runtime context.
+* Provides dispatch of an event with a context and returns a no-value completion handle.
+
+`hsm.Instance`, `hsm.Group`, and state machine runtime handles should satisfy this contract without exposing concrete implementation internals.
+
+### `hsm.Dispatch(ctx, dispatchable, event)`
+
+Submits an event to any dispatchable runtime value.
+
+**Parameters:**
+
+* `ctx` Runtime context.
+* `dispatchable` A state machine instance, group, or other value that implements the dispatchable contract.
 * `event` Event value or event name accepted by the implementation's event-construction rules.
 
 **Returns:** completion handle.
@@ -762,12 +965,37 @@ The completion handle is a host-language-native waitable that carries no value:
 **Description:**
 Dispatch submits the event and optionally lets callers wait until the resulting run-to-completion work reaches the implementation's synchronization point. The normal dispatch API does not report whether a submitted event was immediately consumed, deferred for later replay, or ignored by transition selection. Deferred-event handling is runtime-internal behavior unless exposed through explicit observation APIs.
 
+Calling code may ignore the returned completion handle for fire-and-forget behavior. If it waits, queue failures or runtime processing failures surface through the completion mechanism used by the host language.
+
+Dispatching directly to an unstarted or stopped machine must not throw synchronously from the dispatch call. It returns a failed completion handle. Fan-out dispatch APIs such as groups, `hsm.DispatchAll(...)`, and `hsm.DispatchTo(...)` filter inactive recipients before dispatching and complete successfully when no active recipients are selected.
+
+### `dispatchable.Dispatch(ctx, event)`
+
+Method form of `hsm.Dispatch(...)` for languages that expose dispatchable objects with methods.
+
+**Parameters:**
+
+* `ctx` Runtime context.
+* `event` Event value or event name accepted by the implementation's event-construction rules.
+
+**Returns:** completion handle.
+
+The completion handle is a host-language-native waitable that carries no value:
+
+* Go: a receive-only completion channel such as `<-chan struct{}`.
+* Python: an awaitable / future that resolves to `None`.
+* JavaScript / TypeScript: a `Promise<void>`.
+* C# / Rust / Dart / Zig / C++: the nearest native no-value completion primitive, or `void` for strictly synchronous implementations.
+
+**Description:**
+Equivalent to `hsm.Dispatch(ctx, dispatchable, event)`.
+
 **Constraints:**
 
 * Waiting on the returned completion handle is the supported production synchronization path after dispatch.
 * Completion handles must not carry `Processed`, `Deferred`, `QueueFull`, or equivalent dispatch-result values.
 * Queue failures are runtime errors, not normal dispatch results. If processing can continue, implementations should surface queue failures through the runtime error-event mechanism.
-* Dispatch implementations should treat the event envelope (`Name`, `QualifiedName`, `Source`, `Target`, `ID`, and `Kind`) as immutable routing state. Behavior metadata writes must not change those envelope fields; mutable payload data and schema metadata remain application-owned values.
+* Dispatch implementations should treat the event envelope (`Name`, `QualifiedName`, `Source`, `Target`, `ID`, and `Kind`) as immutable routing state. Behavior metadata writes must not change those envelope fields; mutable payload data, schema values, and metadata remain application-owned values.
 
 ### Runtime Context
 
@@ -789,7 +1017,7 @@ Submits an event to every started machine in a runtime context.
 
 **Returns:** completion handle.
 
-The handle completes after all selected machines have reached their dispatch synchronization point. It carries no value.
+The handle completes after all selected machines have reached their dispatch synchronization point. It carries no value. If the context has no registry or no started machines, the handle completes successfully without dispatching.
 
 ### `hsm.DispatchTo(ctx, event, ids...)`
 
@@ -797,13 +1025,15 @@ Submits an event to started machines matching one or more runtime instance ident
 
 **Returns:** completion handle.
 
-The handle completes after all selected machines have reached their dispatch synchronization point. It carries no value.
+The handle completes after all selected machines have reached their dispatch synchronization point. It carries no value. If no started machines match, the handle completes successfully without dispatching.
 
 ---
 
-## Runtime Attribute Access
+## Runtime Attribute And Operation Access
 
 Runtime string-based attribute accessors that complement compile-time, name-specialized access (for languages that support it). These APIs use **type erasure** via a **dynamic value container** (for example: `Any`, `Variant`, or equivalent in the host language) to support scripting bindings, serialization, and tooling.
+
+Runtime attribute and operation names resolve in the top-level model namespace. Relative names are joined to the model qualified name; absolute names are used as supplied.
 
 ### `instance.Get(name)`
 
@@ -815,16 +1045,22 @@ Runtime attribute read.
 
 **Returns:**
 
-* A **dynamic value** containing a copy of the attribute value, or
-* An **empty dynamic value** if no attribute with the given name exists.
+* A **dynamic value** containing the attribute value.
+* A boolean indicating whether an attribute with the given name exists.
 
 **Description:**
 Looks up an attribute by name at runtime and returns its value wrapped in a dynamic container.
 
 **Limitations:**
 
-* Returns a copy (inherent to type erasure).
+* Value ownership is language-specific. Implementations may return a copy or a shared reference according to their native runtime conventions.
 * Caller must know the expected type (or inspect the dynamic value) to extract safely.
+
+### `hsm.Get(ctx, instance, name)`
+
+Top-level attribute read. If `instance` is supplied, it reads from that instance. If `instance` is omitted or null and the context identifies a current machine, it reads from the current machine.
+
+**Returns:** the same value/found pair as `instance.Get(name)`.
 
 ### `instance.Set(name, value)`
 
@@ -837,7 +1073,7 @@ Runtime attribute write.
 
 **Returns:** completion handle.
 
-The completion handle is the same host-language-native no-value waitable used by `instance.Dispatch(event)`.
+The completion handle is the same host-language-native no-value waitable used by `hsm.Dispatch(ctx, instance, event)`.
 
 **Description:**
 Looks up an attribute by name at runtime, validates the dynamic value matches the attribute type, applies change detection, updates storage, and emits any associated `hsm.When(...)` / `hsm.OnSet(...)` change events. Waiting on the returned completion handle is the supported synchronization path for both the attribute update and the resulting runtime reaction.
@@ -846,6 +1082,32 @@ Looks up an attribute by name at runtime, validates the dynamic value matches th
 
 * Requires exact type match (no implicit conversions).
 * Unknown-name and type-mismatch failures are runtime errors, not normal result values. Host-language bindings may surface them through exceptions, failed completion handles, or the runtime error-event mechanism according to that language's conventions.
+
+### `hsm.Set(ctx, instance, name, value)`
+
+Top-level attribute write. If `instance` is supplied, it writes to that instance. If `instance` is omitted or null and the context identifies a current machine, it writes to the current machine.
+
+**Returns:** the same no-value completion handle as `instance.Set(name, value)`.
+
+### `instance.Call(name, args...)`
+
+Invokes a named operation on a running instance.
+
+**Parameters:**
+
+* `name` Operation name. Relative names resolve in the top-level model namespace; absolute names are used as supplied.
+* `args...` Dynamic operation arguments.
+
+**Returns:** completion handle resolving to the operation result.
+
+**Description:**
+The operation body executes before any `hsm.OnCall(...)` transition is dispatched. On success, the runtime dispatches the generated call event and the returned handle resolves to the operation result. On failure, the returned handle fails and no call event is dispatched.
+
+### `hsm.Call(ctx, instance, name, args...)`
+
+Top-level operation call. If `instance` is supplied, it calls that instance. If `instance` is omitted or null and the context identifies a current machine, it calls the current machine.
+
+**Returns:** the same result-bearing completion handle as `instance.Call(name, args...)`.
 
 ---
 
@@ -878,15 +1140,18 @@ Defines runtime event queue behavior for regular event ingress and selection.
 
 **Parameters:**
 
-* `fifo` Optional regular-event FIFO backend with synchronous `push(event)`, `pop()`, and `len()` methods. Defaults to an internal `Fifo` deque. May also be another `Queue` instance whose `push`/`pop`/`len` handle regular events only.
+* `fifo` Optional regular-event FIFO backend with synchronous `Push(event)`, `Pop()`, and `Len()` methods, or language-native equivalents such as `push`, `pop`, and `len`. Defaults to an internal `Fifo` deque. May also be another `Queue` instance whose queue methods handle regular events only.
 
 **Constraints:**
 
 * Runtime facility.
 * Queue configuration is instance-specific and must not mutate the model.
 * Implementations must provide a default queue when no `Config.Queue` is supplied.
-* A custom `fifo` backend must implement all three operations: `push`, `pop`, and `len`.
+* A custom `fifo` backend must implement all three operations: `Push`, `Pop`, and `Len`.
 * Queue operations are synchronous runtime hooks. `Push`, `Pop`, and `Len` must not return promises, futures, tasks, coroutines, channels, or other awaitable/asynchronous results.
+* `Push(event)` returns `QueuePushResult`: `(Error)`.
+* `Pop()` returns `QueuePopResult`: `(Event, OK, Error)`.
+* `Len()` returns `QueueLenResult`: `(Count, Error)`.
 * A supplied queue receives regular events only. Runtime completion events remain in the runtime-owned priority queue, are selected before regular events, and must not be routed through custom queue hooks.
 * Queue operation errors must be propagated through the runtime as `ErrorEvent` when processing can continue. Since `ErrorEvent` derives from `CompletionEvent`, those propagated errors must enter the runtime-owned priority queue and must not be routed back through the supplied queue.
 * Queue implementations must preserve run-to-completion compatibility: `Push` must not process transitions directly, and `Pop` must return events to the runtime for normal transition selection.
@@ -945,6 +1210,15 @@ Captures a point-in-time snapshot of a state machine instance for debugging, obs
 **Description:**
 Collects a consistent, read-only view of the machine at the time of invocation. Snapshotting is intended for diagnostics, visualization, time-travel debugging, audit logs, and deterministic testing. The snapshot reflects the *current stable state* of the machine and does not advance execution.
 
+### `hsm.TakeSnapshot(ctx, group)`
+
+Captures one snapshot for each instance in a group.
+
+**Returns:** ordered list of `Snapshot`, one per grouped instance.
+
+**Description:**
+Group snapshotting must not collapse member state into a single aggregate snapshot. The returned list preserves group order.
+
 ---
 
 ### Snapshot Data Model
@@ -962,6 +1236,8 @@ Describes a transition that is visible from the current active state at the time
 * `Events` Ordered list of trigger event names for the transition.
 * `Guard` Boolean indicating whether the transition has a guard.
 
+Implementations may expose native transition objects in `Snapshot.Transitions` when those objects carry equivalent information. Conformance tooling normalizes those objects to the logical `TransitionSnapshot` shape above.
+
 #### `Snapshot`
 
 Represents the complete observable state of a machine at a point in time.
@@ -971,13 +1247,35 @@ Represents the complete observable state of a machine at a point in time.
 * `State` Current active state path.
 * `Attributes` Map of fully-qualified attribute names to their current values (dynamic values).
 * `QueueLen` Number of events currently queued.
-* `Transitions` Ordered list of `TransitionSnapshot` entries describing transitions visible from the current active state.
+* `Transitions` Ordered list of `TransitionSnapshot` entries, or native transition objects with equivalent fields, describing transitions visible from the current active state.
 
 **Notes:**
 
 * Attribute values are represented using a dynamic value container (`Any` / `Variant` / equivalent).
-* Snapshot contents are immutable once produced.
+* Snapshot containers are immutable once produced.
+* Attribute values remain application-owned values. Implementations must not require a deep copy or deep freeze unless the language binding explicitly documents stronger snapshot isolation.
 * Implementations may cap the number of transitions recorded for bounded memory usage.
+
+---
+
+## Runtime Constants
+
+The following event constants are part of the shared runtime surface:
+
+* `hsm.InitialEvent`: event named `hsm/initial`, used for startup entry behavior and initial transitions.
+* `hsm.FinalEvent`: completion event named `hsm/final`, dispatched when a final state is entered.
+* `hsm.ErrorEvent`: completion event named `hsm/error`, dispatched when behavior or runtime queue processing raises an error and processing can continue.
+* `hsm.AnyEvent`: wildcard event used by transitions that match any non-wildcard event.
+
+Completion events are runtime-priority events. They are selected before regular queued events and must not be routed through custom regular-event FIFO backends.
+
+Generated runtime event data:
+
+* `CallData(Name, Args)` is used by `hsm.Call(...)` generated call events.
+* `AttributeChange(Name, Old, New/Value)` is used by `hsm.Set(...)` generated attribute-change events.
+* Observation event data contains the observed event, occurrence kind, and occurrence time.
+
+Implementations should expose kind constants for model elements, event categories, transition kinds, and behavior categories so generated code and conformance tooling can compare model structure without relying on language-specific classes.
 
 ---
 

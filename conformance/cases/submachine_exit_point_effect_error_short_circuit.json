@@ -105,7 +105,7 @@
     }
   ],
   "expect": {
-    "state": "/SubmachineExitPointEffectErrorShortCircuit/drive/ExitPointErrorChild/active",
+    "state": "/SubmachineExitPointEffectErrorShortCircuit/drive/active",
     "error": {
       "code": "exit_point_error",
       "message_contains": "exit point boom"
@@ -129,7 +129,7 @@
       },
       {
         "type": "stable",
-        "state": "/SubmachineExitPointEffectErrorShortCircuit/drive/ExitPointErrorChild/active"
+        "state": "/SubmachineExitPointEffectErrorShortCircuit/drive/active"
       }
     ]
   }

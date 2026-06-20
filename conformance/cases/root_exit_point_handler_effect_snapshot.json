@@ -7,5 +7,5 @@
   "models": [{"name": "RootExitPointSnapshotChild", "initial": "active", "exit_points": [{"name": "done"}], "states": [{"name": "active", "transitions": [{"on": "finish", "target": "done"}]}]}],
   "behaviors": {"handler_snapshot": [{"op": "snapshot"}], "entry_done": [{"op": "trace", "value": "entry:done"}]},
   "script": [{"op": "start"}, {"op": "dispatch", "event": "finish"}],
-  "expect": {"state": "/RootExitPointHandlerEffectSnapshot/done", "trace": [{"type": "dispatch", "event": "finish"}, {"type": "snapshot", "state": "/RootExitPointHandlerEffectSnapshot/drive/RootExitPointSnapshotChild/active"}, {"type": "trace", "value": "entry:done"}, {"type": "stable", "state": "/RootExitPointHandlerEffectSnapshot/done"}]}
+  "expect": {"state": "/RootExitPointHandlerEffectSnapshot/done", "trace": [{"type": "dispatch", "event": "finish"}, {"type": "snapshot", "state": "/RootExitPointHandlerEffectSnapshot/drive/active"}, {"type": "trace", "value": "entry:done"}, {"type": "stable", "state": "/RootExitPointHandlerEffectSnapshot/done"}]}
 }

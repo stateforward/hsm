@@ -86,7 +86,7 @@
     }
   ],
   "expect": {
-    "state": "/SubmachineRestartLifecycle/drive/RestartLifecycleChild/active",
+    "state": "/SubmachineRestartLifecycle/drive/active",
     "trace": [
       {
         "type": "start"
@@ -120,7 +120,7 @@
       },
       {
         "type": "stable",
-        "state": "/SubmachineRestartLifecycle/drive/RestartLifecycleChild/active"
+        "state": "/SubmachineRestartLifecycle/drive/active"
       }
     ]
   }

@@ -97,7 +97,7 @@
     }
   ],
   "expect": {
-    "state": "/SubmachineEntryDisambiguation/second/ReusableEntryChild/running",
+    "state": "/SubmachineEntryDisambiguation/second/running",
     "trace": [
       {
         "type": "dispatch",
@@ -117,7 +117,7 @@
       },
       {
         "type": "stable",
-        "state": "/SubmachineEntryDisambiguation/second/ReusableEntryChild/running"
+        "state": "/SubmachineEntryDisambiguation/second/running"
       }
     ]
   }

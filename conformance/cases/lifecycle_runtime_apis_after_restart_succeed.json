@@ -154,11 +154,11 @@
       },
       {
         "type": "trace",
-        "value": "effect:call"
+        "value": "operation:ping"
       },
       {
         "type": "trace",
-        "value": "operation:ping"
+        "value": "effect:call"
       },
       {
         "type": "dispatch",

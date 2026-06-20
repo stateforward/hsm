@@ -140,7 +140,7 @@
     }
   ],
   "expect": {
-    "state": "/SubmachineExitToEntry/right/RightChild/ready",
+    "state": "/SubmachineExitToEntry/right/ready",
     "trace": [
       {
         "type": "dispatch",
@@ -168,7 +168,7 @@
       },
       {
         "type": "stable",
-        "state": "/SubmachineExitToEntry/right/RightChild/ready"
+        "state": "/SubmachineExitToEntry/right/ready"
       }
     ]
   }

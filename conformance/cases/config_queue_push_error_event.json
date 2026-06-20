@@ -1,7 +1,7 @@
 {
   "version": "hsm-conformance-v1",
   "name": "config_queue_push_error_event",
-  "description": "A custom queue Push failure is converted to a runtime ErrorEvent that bypasses the custom queue hook.",
+  "description": "A custom queue Push failure rejects the dispatch completion and does not enqueue an ErrorEvent through the same failing queue hook.",
   "features": ["queue", "error"],
   "model": {
     "name": "ConfigQueuePushErrorEvent",
@@ -11,7 +11,7 @@
         "name": "idle",
         "transitions": [
           {
-            "on": "hsm_error",
+            "on": "hsm/error",
             "target": "failed",
             "effects": [
               {
@@ -52,7 +52,11 @@
     }
   ],
   "expect": {
-    "state": "/ConfigQueuePushErrorEvent/failed",
+    "state": "/ConfigQueuePushErrorEvent/idle",
+    "error": {
+      "code": "runtime_error",
+      "message_contains": "push error"
+    },
     "trace": [
       {
         "type": "dispatch",
@@ -63,12 +67,12 @@
         "value": "queue:push-error:go"
       },
       {
-        "type": "trace",
-        "value": "effect:error"
+        "type": "error",
+        "code": "runtime_error"
       },
       {
         "type": "stable",
-        "state": "/ConfigQueuePushErrorEvent/failed"
+        "state": "/ConfigQueuePushErrorEvent/idle"
       }
     ]
   }

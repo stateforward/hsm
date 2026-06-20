@@ -152,7 +152,7 @@
     }
   ],
   "expect": {
-    "state": "/SubmachineExitSelfEntry/drive/ExitSelfChild/running",
+    "state": "/SubmachineExitSelfEntry/drive/running",
     "trace": [
       {
         "type": "trace",
@@ -192,7 +192,7 @@
       },
       {
         "type": "stable",
-        "state": "/SubmachineExitSelfEntry/drive/ExitSelfChild/running"
+        "state": "/SubmachineExitSelfEntry/drive/running"
       }
     ]
   }

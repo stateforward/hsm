@@ -229,7 +229,7 @@
     }
   ],
   "expect": {
-    "state": "/SubmodelTimerEffectDispatchCallReentrancy/drive/ChildSubmodelTimerEffectDispatchCallReentrancy/all_seen",
+    "state": "/SubmodelTimerEffectDispatchCallReentrancy/drive/all_seen",
     "trace": [
       {
         "type": "timer_scheduled"
@@ -239,7 +239,7 @@
       },
       {
         "type": "snapshot",
-        "state": "/SubmodelTimerEffectDispatchCallReentrancy/drive/ChildSubmodelTimerEffectDispatchCallReentrancy/idle"
+        "state": "/SubmodelTimerEffectDispatchCallReentrancy/drive/idle"
       },
       {
         "type": "dispatch",
@@ -275,7 +275,7 @@
       },
       {
         "type": "stable",
-        "state": "/SubmodelTimerEffectDispatchCallReentrancy/drive/ChildSubmodelTimerEffectDispatchCallReentrancy/all_seen"
+        "state": "/SubmodelTimerEffectDispatchCallReentrancy/drive/all_seen"
       }
     ]
   }

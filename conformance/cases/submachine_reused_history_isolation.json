@@ -161,7 +161,7 @@
     }
   ],
   "expect": {
-    "state": "/SubmachineReuseHistory/first/HistoryToggle/comp/b",
+    "state": "/SubmachineReuseHistory/first/comp/b",
     "trace": [
       {
         "type": "dispatch",
@@ -213,7 +213,7 @@
       },
       {
         "type": "stable",
-        "state": "/SubmachineReuseHistory/first/HistoryToggle/comp/b"
+        "state": "/SubmachineReuseHistory/first/comp/b"
       }
     ]
   }

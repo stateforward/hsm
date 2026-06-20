@@ -97,8 +97,8 @@
     },
     "trace": [
       {
-        "type": "call",
-        "operation": "outer"
+        "operation": "outer",
+        "type": "call"
       },
       {
         "type": "trace",
@@ -110,6 +110,10 @@
       },
       {
         "type": "trace",
+        "value": "operation:outer-after-call"
+      },
+      {
+        "type": "trace",
         "value": "effect:audit"
       },
       {
@@ -117,12 +121,8 @@
         "value": "entry:handled"
       },
       {
-        "type": "trace",
-        "value": "operation:outer-after-call"
-      },
-      {
-        "type": "stable",
-        "state": "/OperationCallFromOperationBodyReentrancy/handled"
+        "state": "/OperationCallFromOperationBodyReentrancy/handled",
+        "type": "stable"
       }
     ]
   }

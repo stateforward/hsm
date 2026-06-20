@@ -1,7 +1,7 @@
 {
   "version": "hsm-conformance-v1",
   "name": "config_queue_on_call_event_fifo",
-  "description": "A script operation call event is routed through the configured FIFO queue before on_call transition selection.",
+  "description": "A script operation call runs the operation body first, then routes the generated operation event through the configured FIFO queue before on_call transition selection.",
   "features": [
     "queue",
     "operation",
@@ -84,16 +84,20 @@
     "state": "/ConfigQueueOnCallEventFifo/approved",
     "trace": [
       {
-        "type": "call",
-        "operation": "approve"
+        "operation": "approve",
+        "type": "call"
       },
       {
         "type": "trace",
-        "value": "queue:push:@call:approve"
+        "value": "operation:approve"
       },
       {
         "type": "trace",
-        "value": "queue:pop:@call:approve"
+        "value": "queue:push:/ConfigQueueOnCallEventFifo/approve"
+      },
+      {
+        "type": "trace",
+        "value": "queue:pop:/ConfigQueueOnCallEventFifo/approve"
       },
       {
         "type": "trace",
@@ -104,12 +108,8 @@
         "value": "enter:approved"
       },
       {
-        "type": "trace",
-        "value": "operation:approve"
-      },
-      {
-        "type": "stable",
-        "state": "/ConfigQueueOnCallEventFifo/approved"
+        "state": "/ConfigQueueOnCallEventFifo/approved",
+        "type": "stable"
       }
     ]
   }

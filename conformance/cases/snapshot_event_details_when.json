@@ -11,7 +11,7 @@
     "name": "SnapshotEventDetailsWhen",
     "initial": "idle",
     "attributes": {
-      "ready": {
+      "ready_flag": {
         "type": "boolean",
         "default": false
       }
@@ -23,7 +23,7 @@
           {
             "trigger": {
               "kind": "when",
-              "attribute": "ready"
+              "attribute": "ready_flag"
             },
             "target": "ready"
           }
@@ -50,7 +50,7 @@
         "qualified_name": "/SnapshotEventDetailsWhen",
         "state": "/SnapshotEventDetailsWhen/idle",
         "attributes": {
-          "ready": false
+          "ready_flag": false
         },
         "queue_len": 0,
         "transitions": [
@@ -60,7 +60,7 @@
             "source": "/SnapshotEventDetailsWhen/idle",
             "target": "/SnapshotEventDetailsWhen/ready",
             "events": [
-              "/SnapshotEventDetailsWhen/ready"
+              "/SnapshotEventDetailsWhen/ready_flag"
             ],
             "guard": false
           }

@@ -100,7 +100,7 @@
     }
   ],
   "expect": {
-    "state": "/ConfigQueueSubmachineChildEventUsesParentQueue/drive/ConfigQueueChildHandlesEvent/handled",
+    "state": "/ConfigQueueSubmachineChildEventUsesParentQueue/drive/handled",
     "trace": [
       {
         "type": "dispatch",
@@ -124,7 +124,7 @@
       },
       {
         "type": "stable",
-        "state": "/ConfigQueueSubmachineChildEventUsesParentQueue/drive/ConfigQueueChildHandlesEvent/handled"
+        "state": "/ConfigQueueSubmachineChildEventUsesParentQueue/drive/handled"
       }
     ]
   }

@@ -104,7 +104,7 @@
     }
   ],
   "expect": {
-    "state": "/SubmachineEntryNestedSubmachine/outer/OuterWithNested/inner/InnerDefault/leaf",
+    "state": "/SubmachineEntryNestedSubmachine/outer/inner/leaf",
     "trace": [
       {
         "type": "dispatch",
@@ -124,7 +124,7 @@
       },
       {
         "type": "stable",
-        "state": "/SubmachineEntryNestedSubmachine/outer/OuterWithNested/inner/InnerDefault/leaf"
+        "state": "/SubmachineEntryNestedSubmachine/outer/inner/leaf"
       }
     ]
   }

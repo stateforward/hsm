@@ -1,0 +1,49 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "dispatch_to_populates_missing_target",
+  "description": "DispatchTo populates a missing event target envelope field with the selected recipient runtime ID.",
+  "features": ["dispatch_to", "event_ownership", "guard"],
+  "model": {
+    "name": "DispatchToPopulatesMissingTarget",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "on": "audit",
+            "guard": {"behavior": "target_peer"},
+            "target": "done",
+            "effects": [{"behavior": "effect_peer"}]
+          }
+        ]
+      },
+      {"name": "done"}
+    ]
+  },
+  "instances": [
+    {"id": "peer"}
+  ],
+  "behaviors": {
+    "target_peer": [
+      {"op": "event_metadata_equals", "name": "target", "value": "peer"}
+    ],
+    "effect_peer": [
+      {"op": "trace", "value": "effect:peer"}
+    ]
+  },
+  "script": [
+    {"op": "start", "instance": "peer"},
+    {"op": "dispatch_to", "target": "peer", "event": "audit"}
+  ],
+  "expect": {
+    "states": {
+      "peer": "/DispatchToPopulatesMissingTarget/done"
+    },
+    "trace": [
+      {"type": "dispatch", "event": "audit", "target": "peer"},
+      {"type": "trace", "value": "effect:peer"},
+      {"type": "stable", "state": "peer"}
+    ]
+  }
+}

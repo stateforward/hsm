@@ -125,7 +125,7 @@
     }
   ],
   "expect": {
-    "state": "/SubmachineExternalReentry/drive/ExternalReentryChild/running",
+    "state": "/SubmachineExternalReentry/drive/running",
     "trace": [
       {
         "type": "trace",
@@ -161,7 +161,7 @@
       },
       {
         "type": "stable",
-        "state": "/SubmachineExternalReentry/drive/ExternalReentryChild/running"
+        "state": "/SubmachineExternalReentry/drive/running"
       }
     ]
   }

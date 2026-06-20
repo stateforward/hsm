@@ -1,7 +1,7 @@
 {
   "version": "hsm-conformance-v1",
   "name": "root_transition_on_call_global",
-  "description": "A source-less root-owned on_call transition can be selected from the active leaf and runs before the operation body completes.",
+  "description": "A source-less root-owned on_call transition can be selected from the active leaf after the operation body runs.",
   "features": [
     "root_transition",
     "operation",
@@ -76,8 +76,12 @@
     "state": "/RootTransitionOnCallGlobal/approved",
     "trace": [
       {
-        "type": "call",
-        "operation": "approve"
+        "operation": "approve",
+        "type": "call"
+      },
+      {
+        "type": "trace",
+        "value": "operation:approve"
       },
       {
         "type": "trace",
@@ -88,12 +92,8 @@
         "value": "entry:approved"
       },
       {
-        "type": "trace",
-        "value": "operation:approve"
-      },
-      {
-        "type": "stable",
-        "state": "/RootTransitionOnCallGlobal/approved"
+        "state": "/RootTransitionOnCallGlobal/approved",
+        "type": "stable"
       }
     ]
   }

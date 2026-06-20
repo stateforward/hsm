@@ -228,14 +228,14 @@
     }
   ],
   "expect": {
-    "state": "/SubmodelTimerGuardAllOpsReentrancy/drive/ChildSubmodelTimerGuardAllOpsReentrancy/all_seen",
+    "state": "/SubmodelTimerGuardAllOpsReentrancy/drive/all_seen",
     "trace": [
       {
         "type": "timer_scheduled"
       },
       {
         "type": "snapshot",
-        "state": "/SubmodelTimerGuardAllOpsReentrancy/drive/ChildSubmodelTimerGuardAllOpsReentrancy/idle"
+        "state": "/SubmodelTimerGuardAllOpsReentrancy/drive/idle"
       },
       {
         "type": "dispatch",
@@ -270,7 +270,7 @@
       },
       {
         "type": "stable",
-        "state": "/SubmodelTimerGuardAllOpsReentrancy/drive/ChildSubmodelTimerGuardAllOpsReentrancy/all_seen"
+        "state": "/SubmodelTimerGuardAllOpsReentrancy/drive/all_seen"
       }
     ]
   }

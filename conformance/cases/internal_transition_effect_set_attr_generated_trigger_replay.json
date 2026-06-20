@@ -1,1 +1,167 @@
-{"version":"hsm-conformance-v1","name":"internal_transition_effect_set_attr_generated_trigger_replay","description":"Attribute work generated from a internal transition effect replays according to the transition kind lifecycle.","features":["attribute","on_set","when","transition_kind","internal","queue","reentrancy"],"model":{"name":"InternalTransitionEffectSetAttrGeneratedTriggerReplay","initial":"active","attributes":{"flag":{"type":"boolean","default":false},"ready":{"type":"boolean","default":false}},"states":[{"name":"active","entry":[],"transitions":[{"on":"go","kind":"internal","effects":[{"behavior":"set_effect"}]},{"trigger":{"kind":"on_set","attribute":"flag"},"target":"seen","effects":[{"behavior":"effect_flag"}]}]},{"name":"seen","entry":[{"behavior":"entry_seen"}],"transitions":[{"trigger":{"kind":"when","behavior":"ready_when"},"target":"ready","effects":[{"behavior":"effect_ready"}]}]},{"name":"ready"}]},"behaviors":{"set_effect":[{"op":"set_attr","name":"flag","value":true},{"op":"set_attr","name":"ready","value":true},{"op":"trace","value":"effect:set"}],"ready_when":[{"op":"return_equals","name":"ready","value":true}],"effect_flag":[{"op":"trace","value":"effect:flag"}],"entry_seen":[{"op":"trace","value":"entry:seen"}],"effect_ready":[{"op":"trace","value":"effect:ready"}]},"script":[{"op":"start"},{"op":"dispatch","event":"go"}],"expect":{"state":"/InternalTransitionEffectSetAttrGeneratedTriggerReplay/ready","attributes":{"flag":true,"ready":true},"trace":[{"type":"dispatch","event":"go"},{"type":"trace","value":"effect:set"},{"type":"trace","value":"effect:flag"},{"type":"trace","value":"entry:seen"},{"type":"trace","value":"effect:ready"},{"type":"stable","state":"/InternalTransitionEffectSetAttrGeneratedTriggerReplay/ready"}]}}
+{
+  "version": "hsm-conformance-v1",
+  "name": "internal_transition_effect_set_attr_generated_trigger_replay",
+  "description": "Attribute work generated from a internal transition effect replays according to the transition kind lifecycle.",
+  "features": [
+    "attribute",
+    "on_set",
+    "when",
+    "transition_kind",
+    "internal",
+    "queue",
+    "reentrancy"
+  ],
+  "model": {
+    "name": "InternalTransitionEffectSetAttrGeneratedTriggerReplay",
+    "initial": "active",
+    "attributes": {
+      "flag": {
+        "type": "boolean",
+        "default": false
+      },
+      "ready_flag": {
+        "type": "boolean",
+        "default": false
+      }
+    },
+    "states": [
+      {
+        "name": "active",
+        "entry": [],
+        "transitions": [
+          {
+            "on": "go",
+            "kind": "internal",
+            "effects": [
+              {
+                "behavior": "set_effect"
+              }
+            ]
+          },
+          {
+            "trigger": {
+              "kind": "on_set",
+              "attribute": "flag"
+            },
+            "target": "seen",
+            "effects": [
+              {
+                "behavior": "effect_flag"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "seen",
+        "entry": [
+          {
+            "behavior": "entry_seen"
+          }
+        ],
+        "transitions": [
+          {
+            "trigger": {
+              "kind": "when",
+              "behavior": "ready_when"
+            },
+            "target": "ready",
+            "effects": [
+              {
+                "behavior": "effect_ready"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "ready"
+      }
+    ]
+  },
+  "behaviors": {
+    "set_effect": [
+      {
+        "op": "set_attr",
+        "name": "flag",
+        "value": true
+      },
+      {
+        "op": "set_attr",
+        "name": "ready_flag",
+        "value": true
+      },
+      {
+        "op": "trace",
+        "value": "effect:set"
+      }
+    ],
+    "ready_when": [
+      {
+        "op": "return_equals",
+        "name": "ready_flag",
+        "value": true
+      }
+    ],
+    "effect_flag": [
+      {
+        "op": "trace",
+        "value": "effect:flag"
+      }
+    ],
+    "entry_seen": [
+      {
+        "op": "trace",
+        "value": "entry:seen"
+      }
+    ],
+    "effect_ready": [
+      {
+        "op": "trace",
+        "value": "effect:ready"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "go"
+    }
+  ],
+  "expect": {
+    "state": "/InternalTransitionEffectSetAttrGeneratedTriggerReplay/ready",
+    "attributes": {
+      "flag": true,
+      "ready_flag": true
+    },
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "go"
+      },
+      {
+        "type": "trace",
+        "value": "effect:set"
+      },
+      {
+        "type": "trace",
+        "value": "effect:flag"
+      },
+      {
+        "type": "trace",
+        "value": "entry:seen"
+      },
+      {
+        "type": "trace",
+        "value": "effect:ready"
+      },
+      {
+        "type": "stable",
+        "state": "/InternalTransitionEffectSetAttrGeneratedTriggerReplay/ready"
+      }
+    ]
+  }
+}

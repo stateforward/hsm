@@ -113,7 +113,7 @@
   "expect": {
     "states": {
       "exited": "/ConfigClockSubmachineTimerParentExitPreservesSiblingTimer/outside",
-      "running": "/ConfigClockSubmachineTimerParentExitPreservesSiblingTimer/drive/ConfigClockSubmachineSiblingTimerChild/timeout"
+      "running": "/ConfigClockSubmachineTimerParentExitPreservesSiblingTimer/drive/timeout"
     },
     "trace": [
       {

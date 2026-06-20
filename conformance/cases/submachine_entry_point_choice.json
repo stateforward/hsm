@@ -127,7 +127,7 @@
     }
   ],
   "expect": {
-    "state": "/SubmachineEntryChoice/drive/ChoiceChild/b",
+    "state": "/SubmachineEntryChoice/drive/b",
     "trace": [
       {
         "type": "dispatch",
@@ -151,7 +151,7 @@
       },
       {
         "type": "stable",
-        "state": "/SubmachineEntryChoice/drive/ChoiceChild/b"
+        "state": "/SubmachineEntryChoice/drive/b"
       }
     ]
   }

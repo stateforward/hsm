@@ -126,7 +126,7 @@
     }
   ],
   "expect": {
-    "state": "/SubmachineSelfEntryPoint/drive/SelfEntryChild/running",
+    "state": "/SubmachineSelfEntryPoint/drive/running",
     "trace": [
       {
         "type": "trace",
@@ -162,7 +162,7 @@
       },
       {
         "type": "stable",
-        "state": "/SubmachineSelfEntryPoint/drive/SelfEntryChild/running"
+        "state": "/SubmachineSelfEntryPoint/drive/running"
       }
     ]
   }

@@ -229,7 +229,7 @@
     }
   ],
   "expect": {
-    "state": "/EntryPointEffectSetAttrFromEventDataGeneratedTriggerAfterCompositeTargetResolution/drive/EntryPointCaptureCompositeChild/comp/all_seen",
+    "state": "/EntryPointEffectSetAttrFromEventDataGeneratedTriggerAfterCompositeTargetResolution/drive/comp/all_seen",
     "attributes": {
       "flag": true,
       "ready": true
@@ -269,7 +269,7 @@
       },
       {
         "type": "stable",
-        "state": "/EntryPointEffectSetAttrFromEventDataGeneratedTriggerAfterCompositeTargetResolution/drive/EntryPointCaptureCompositeChild/comp/all_seen"
+        "state": "/EntryPointEffectSetAttrFromEventDataGeneratedTriggerAfterCompositeTargetResolution/drive/comp/all_seen"
       }
     ]
   }

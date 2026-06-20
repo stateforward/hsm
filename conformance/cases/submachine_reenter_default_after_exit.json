@@ -93,7 +93,7 @@
     }
   ],
   "expect": {
-    "state": "/SubmachineReenterDefault/drive/ReenterChild/a",
+    "state": "/SubmachineReenterDefault/drive/a",
     "trace": [
       {
         "type": "trace",
@@ -121,7 +121,7 @@
       },
       {
         "type": "stable",
-        "state": "/SubmachineReenterDefault/drive/ReenterChild/a"
+        "state": "/SubmachineReenterDefault/drive/a"
       }
     ]
   }

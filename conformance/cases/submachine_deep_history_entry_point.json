@@ -133,7 +133,7 @@
     }
   ],
   "expect": {
-    "state": "/SubmachineDeepHistory/drive/DeepHistoryChild/comp/b/leaf",
+    "state": "/SubmachineDeepHistory/drive/comp/b/leaf",
     "trace": [
       {
         "type": "dispatch",
@@ -165,7 +165,7 @@
       },
       {
         "type": "stable",
-        "state": "/SubmachineDeepHistory/drive/DeepHistoryChild/comp/b/leaf"
+        "state": "/SubmachineDeepHistory/drive/comp/b/leaf"
       }
     ]
   }

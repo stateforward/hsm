@@ -182,7 +182,7 @@
     }
   ],
   "expect": {
-    "state": "/SubmachineChildDeepHistoryClearedOnParentLifecycleReset/drive/LifecycleResetDeepHistoryChild/comp/a",
+    "state": "/SubmachineChildDeepHistoryClearedOnParentLifecycleReset/drive/comp/a",
     "trace": [
       {
         "type": "dispatch",
@@ -254,7 +254,7 @@
       },
       {
         "type": "stable",
-        "state": "/SubmachineChildDeepHistoryClearedOnParentLifecycleReset/drive/LifecycleResetDeepHistoryChild/comp/a"
+        "state": "/SubmachineChildDeepHistoryClearedOnParentLifecycleReset/drive/comp/a"
       }
     ]
   }

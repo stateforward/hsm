@@ -99,7 +99,7 @@
     }
   ],
   "expect": {
-    "state": "/SubmodelAbsoluteTransitionTargetPath/drive/ChildAbsoluteTransitionTargetPath/parent/leaf",
+    "state": "/SubmodelAbsoluteTransitionTargetPath/drive/parent/leaf",
     "trace": [
       {
         "type": "trace",
@@ -123,7 +123,7 @@
       },
       {
         "type": "stable",
-        "state": "/SubmodelAbsoluteTransitionTargetPath/drive/ChildAbsoluteTransitionTargetPath/parent/leaf"
+        "state": "/SubmodelAbsoluteTransitionTargetPath/drive/parent/leaf"
       }
     ]
   }

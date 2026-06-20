@@ -134,7 +134,7 @@
   "expect": {
     "states": {
       "exited": "/SubmachineChildDeferQueuePerInstanceCleanupOnParentExit/outside",
-      "running": "/SubmachineChildDeferQueuePerInstanceCleanupOnParentExit/drive/ChildSubmachinePerInstanceDeferParentExit/done"
+      "running": "/SubmachineChildDeferQueuePerInstanceCleanupOnParentExit/drive/done"
     },
     "queue": {
       "lifecycle_cleanup": "child_deferred_events_cleared_only_for_parent_exit_instance"

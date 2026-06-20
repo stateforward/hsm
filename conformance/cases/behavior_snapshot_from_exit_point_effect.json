@@ -82,7 +82,7 @@
       },
       {
         "type": "snapshot",
-        "state": "/BehaviorSnapshotFromExitPointEffect/drive/SnapshotFromExitPointChild/active"
+        "state": "/BehaviorSnapshotFromExitPointEffect/drive/active"
       },
       {
         "type": "stable",

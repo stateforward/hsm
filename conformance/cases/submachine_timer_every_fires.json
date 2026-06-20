@@ -75,7 +75,7 @@
     }
   ],
   "expect": {
-    "state": "/SubmachineTimerEvery/drive/TimerEveryChild/fired",
+    "state": "/SubmachineTimerEvery/drive/fired",
     "trace": [
       {
         "type": "timer_scheduled"
@@ -93,7 +93,7 @@
       },
       {
         "type": "stable",
-        "state": "/SubmachineTimerEvery/drive/TimerEveryChild/fired"
+        "state": "/SubmachineTimerEvery/drive/fired"
       }
     ]
   }

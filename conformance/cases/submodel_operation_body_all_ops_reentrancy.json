@@ -153,7 +153,7 @@
     }
   ],
   "expect": {
-    "state": "/SubmodelOperationBodyAllOpsReentrancy/drive/ChildOperationBodyAllOpsReentrancy/all_seen",
+    "state": "/SubmodelOperationBodyAllOpsReentrancy/drive/all_seen",
     "trace": [
       {
         "type": "snapshot",
@@ -197,7 +197,7 @@
       },
       {
         "type": "stable",
-        "state": "/SubmodelOperationBodyAllOpsReentrancy/drive/ChildOperationBodyAllOpsReentrancy/all_seen"
+        "state": "/SubmodelOperationBodyAllOpsReentrancy/drive/all_seen"
       }
     ]
   }

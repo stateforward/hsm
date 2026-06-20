@@ -133,7 +133,7 @@
     }
   ],
   "expect": {
-    "state": "/SubmachineHistory/drive/HistoryChild/comp/b/deep",
+    "state": "/SubmachineHistory/drive/comp/b/deep",
     "trace": [
       {
         "type": "dispatch",
@@ -165,7 +165,7 @@
       },
       {
         "type": "stable",
-        "state": "/SubmachineHistory/drive/HistoryChild/comp/b/deep"
+        "state": "/SubmachineHistory/drive/comp/b/deep"
       }
     ]
   }

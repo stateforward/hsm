@@ -77,7 +77,7 @@
     }
   ],
   "expect": {
-    "state": "/SubmachineUnhandledExitPoint/drive/UnhandledExitChild/inside",
+    "state": "/SubmachineUnhandledExitPoint/drive/inside",
     "error": {
       "code": "unhandled_exit_point",
       "message_contains": "escaped"
@@ -101,7 +101,7 @@
       },
       {
         "type": "stable",
-        "state": "/SubmachineUnhandledExitPoint/drive/UnhandledExitChild/inside"
+        "state": "/SubmachineUnhandledExitPoint/drive/inside"
       }
     ]
   }

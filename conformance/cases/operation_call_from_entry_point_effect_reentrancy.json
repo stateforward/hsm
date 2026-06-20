@@ -143,7 +143,7 @@
     }
   ],
   "expect": {
-    "state": "/OperationCallFromEntryPointEffectReentrancy/drive/CallFromEntryPointChild/handled",
+    "state": "/OperationCallFromEntryPointEffectReentrancy/drive/handled",
     "queue": {
       "operation_call_from_entry_point_effect": "queued_until_entry_point_target_entry_completes"
     },
@@ -178,7 +178,7 @@
       },
       {
         "type": "stable",
-        "state": "/OperationCallFromEntryPointEffectReentrancy/drive/CallFromEntryPointChild/handled"
+        "state": "/OperationCallFromEntryPointEffectReentrancy/drive/handled"
       }
     ]
   }

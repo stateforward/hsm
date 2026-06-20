@@ -117,7 +117,7 @@
     }
   ],
   "expect": {
-    "state": "/SubmachineWhenPrecedence/drive/WhenChild/ready",
+    "state": "/SubmachineWhenPrecedence/drive/ready",
     "attributes": {
       "ready": true
     },
@@ -141,7 +141,7 @@
       },
       {
         "type": "stable",
-        "state": "/SubmachineWhenPrecedence/drive/WhenChild/ready"
+        "state": "/SubmachineWhenPrecedence/drive/ready"
       }
     ]
   }

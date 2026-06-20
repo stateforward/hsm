@@ -144,7 +144,7 @@
     }
   ],
   "expect": {
-    "state": "/SubmachineParentKinds/drive/KindsChild/active",
+    "state": "/SubmachineParentKinds/drive/active",
     "trace": [
       {
         "type": "trace",
@@ -212,7 +212,7 @@
       },
       {
         "type": "stable",
-        "state": "/SubmachineParentKinds/drive/KindsChild/active"
+        "state": "/SubmachineParentKinds/drive/active"
       }
     ]
   }

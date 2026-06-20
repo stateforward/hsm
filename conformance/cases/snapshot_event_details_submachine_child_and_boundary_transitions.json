@@ -56,27 +56,27 @@
     }
   ],
   "expect": {
-    "state": "/SnapshotEventDetailsSubmachineBoundary/drive/ChildWithSnapshotEvents/idle",
+    "state": "/SnapshotEventDetailsSubmachineBoundary/drive/idle",
     "snapshots": {
       "last": {
         "id": "default",
         "qualified_name": "/SnapshotEventDetailsSubmachineBoundary",
-        "state": "/SnapshotEventDetailsSubmachineBoundary/drive/ChildWithSnapshotEvents/idle",
+        "state": "/SnapshotEventDetailsSubmachineBoundary/drive/idle",
         "attributes": {},
         "queue_len": 0,
         "transitions": [
           {
-            "name": "/SnapshotEventDetailsSubmachineBoundary/drive/ChildWithSnapshotEvents/idle/transition_10",
+            "name": "/SnapshotEventDetailsSubmachineBoundary/drive/idle/transition_7",
             "kind": 67343,
-            "source": "/SnapshotEventDetailsSubmachineBoundary/drive/ChildWithSnapshotEvents/idle",
-            "target": "/SnapshotEventDetailsSubmachineBoundary/drive/ChildWithSnapshotEvents/child_done",
+            "source": "/SnapshotEventDetailsSubmachineBoundary/drive/idle",
+            "target": "/SnapshotEventDetailsSubmachineBoundary/drive/child_done",
             "events": [
               "child_go"
             ],
             "guard": false
           },
           {
-            "name": "/SnapshotEventDetailsSubmachineBoundary/drive/transition_12",
+            "name": "/SnapshotEventDetailsSubmachineBoundary/drive/transition_9",
             "kind": 67343,
             "source": "/SnapshotEventDetailsSubmachineBoundary/drive",
             "target": "/SnapshotEventDetailsSubmachineBoundary/parent_done",
@@ -91,11 +91,11 @@
     "trace": [
       {
         "type": "snapshot",
-        "state": "/SnapshotEventDetailsSubmachineBoundary/drive/ChildWithSnapshotEvents/idle"
+        "state": "/SnapshotEventDetailsSubmachineBoundary/drive/idle"
       },
       {
         "type": "stable",
-        "state": "/SnapshotEventDetailsSubmachineBoundary/drive/ChildWithSnapshotEvents/idle"
+        "state": "/SnapshotEventDetailsSubmachineBoundary/drive/idle"
       }
     ]
   }

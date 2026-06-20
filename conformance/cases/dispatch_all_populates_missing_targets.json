@@ -1,0 +1,79 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "dispatch_all_populates_missing_targets",
+  "description": "DispatchAll populates a missing event target envelope field separately for each recipient runtime ID.",
+  "features": ["event_ownership", "guard"],
+  "model": {
+    "name": "DispatchAllPopulatesMissingTargetsAlpha",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "on": "audit",
+            "guard": {"behavior": "target_alpha"},
+            "target": "done",
+            "effects": [{"behavior": "effect_alpha"}]
+          }
+        ]
+      },
+      {"name": "done"}
+    ]
+  },
+  "models": [
+    {
+      "name": "DispatchAllPopulatesMissingTargetsBeta",
+      "initial": "idle",
+      "states": [
+        {
+          "name": "idle",
+          "transitions": [
+            {
+              "on": "audit",
+              "guard": {"behavior": "target_beta"},
+              "target": "done",
+              "effects": [{"behavior": "effect_beta"}]
+            }
+          ]
+        },
+        {"name": "done"}
+      ]
+    }
+  ],
+  "instances": [
+    {"id": "alpha"},
+    {"id": "beta", "model": "DispatchAllPopulatesMissingTargetsBeta"}
+  ],
+  "behaviors": {
+    "target_alpha": [
+      {"op": "event_metadata_equals", "name": "target", "value": "alpha"}
+    ],
+    "target_beta": [
+      {"op": "event_metadata_equals", "name": "target", "value": "beta"}
+    ],
+    "effect_alpha": [
+      {"op": "trace", "value": "effect:alpha"}
+    ],
+    "effect_beta": [
+      {"op": "trace", "value": "effect:beta"}
+    ]
+  },
+  "script": [
+    {"op": "start", "instance": "alpha"},
+    {"op": "start", "instance": "beta"},
+    {"op": "dispatch_all", "event": "audit"}
+  ],
+  "expect": {
+    "states": {
+      "alpha": "/DispatchAllPopulatesMissingTargetsAlpha/done",
+      "beta": "/DispatchAllPopulatesMissingTargetsBeta/done"
+    },
+    "trace": [
+      {"type": "dispatch", "event": "audit", "target": "all"},
+      {"type": "trace", "value": "effect:alpha"},
+      {"type": "trace", "value": "effect:beta"},
+      {"type": "stable", "state": "all"}
+    ]
+  }
+}

@@ -1,1 +1,114 @@
-{"version":"hsm-conformance-v1","name":"submodel_exit_point_effect_uses_child_attribute_scope","description":"A child-model exit-point effect resolves shadowed attributes in child scope instead of mutating the parent instance attribute.","features":["submachine","exit_point","attribute"],"model":{"name":"SubmodelExitPointEffectUsesChildAttributeScope","initial":"drive","attributes":{"mark":{"type":"boolean","default":false}},"states":[{"name":"drive","kind":"submachine","machine":"ExitPointAttrScopeChild","transitions":[{"trigger":{"kind":"exit_point","exit_point":"done"},"target":"outside"}]},{"name":"outside"}]},"models":[{"name":"ExitPointAttrScopeChild","initial":"active","attributes":{"mark":{"type":"boolean","default":false}},"exit_points":[{"name":"done","effects":[{"behavior":"set_child_mark"}]}],"states":[{"name":"active","transitions":[{"on":"finish","target":"done"}]}]}],"behaviors":{"set_child_mark":[{"op":"set_attr","name":"mark","value":true},{"op":"trace","value":"effect:set-child-mark"}]},"script":[{"op":"start"},{"op":"dispatch","event":"finish"}],"expect":{"state":"/SubmodelExitPointEffectUsesChildAttributeScope/outside","attributes":{"mark":false},"trace":[{"type":"dispatch","event":"finish"},{"type":"trace","value":"effect:set-child-mark"},{"type":"stable","state":"/SubmodelExitPointEffectUsesChildAttributeScope/outside"}]}}
+{
+  "version": "hsm-conformance-v1",
+  "name": "submodel_exit_point_effect_uses_child_attribute_scope",
+  "description": "A child-model exit-point effect resolves redefined attributes through the flattened model namespace.",
+  "features": [
+    "submachine",
+    "exit_point",
+    "attribute"
+  ],
+  "model": {
+    "name": "SubmodelExitPointEffectUsesChildAttributeScope",
+    "initial": "drive",
+    "attributes": {
+      "mark": {
+        "type": "boolean",
+        "default": false
+      }
+    },
+    "states": [
+      {
+        "name": "drive",
+        "kind": "submachine",
+        "machine": "ExitPointAttrScopeChild",
+        "transitions": [
+          {
+            "trigger": {
+              "kind": "exit_point",
+              "exit_point": "done"
+            },
+            "target": "outside"
+          }
+        ]
+      },
+      {
+        "name": "outside"
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "ExitPointAttrScopeChild",
+      "initial": "active",
+      "attributes": {
+        "mark": {
+          "type": "boolean",
+          "default": false
+        }
+      },
+      "exit_points": [
+        {
+          "name": "done",
+          "effects": [
+            {
+              "behavior": "set_child_mark"
+            }
+          ]
+        }
+      ],
+      "states": [
+        {
+          "name": "active",
+          "transitions": [
+            {
+              "on": "finish",
+              "target": "done"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "behaviors": {
+    "set_child_mark": [
+      {
+        "op": "set_attr",
+        "name": "mark",
+        "value": true
+      },
+      {
+        "op": "trace",
+        "value": "effect:set-child-mark"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "finish"
+    }
+  ],
+  "expect": {
+    "state": "/SubmodelExitPointEffectUsesChildAttributeScope/outside",
+    "attributes": {
+      "mark": true
+    },
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "finish"
+      },
+      {
+        "type": "trace",
+        "value": "effect:set-child-mark"
+      },
+      {
+        "type": "stable",
+        "state": "/SubmodelExitPointEffectUsesChildAttributeScope/outside"
+      }
+    ]
+  }
+}

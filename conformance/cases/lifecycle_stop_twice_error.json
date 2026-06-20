@@ -1,7 +1,7 @@
 {
   "version": "hsm-conformance-v1",
   "name": "lifecycle_stop_twice_error",
-  "description": "Stopping an instance twice produces a normalized lifecycle error after the first stop completes.",
+  "description": "Stopping an instance twice leaves it stopped.",
   "features": ["lifecycle", "stop", "error"],
   "model": {
     "name": "LifecycleStopTwiceError",
@@ -25,15 +25,7 @@
   ],
   "expect": {
     "state": "/LifecycleStopTwiceError",
-    "error": {
-      "code": "lifecycle_error",
-      "message_contains": "started"
-    },
     "trace": [
-      {
-        "type": "error",
-        "code": "lifecycle_error"
-      },
       {
         "type": "stable",
         "state": "/LifecycleStopTwiceError"

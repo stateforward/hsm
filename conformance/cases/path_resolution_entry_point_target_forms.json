@@ -114,7 +114,7 @@
     }
   ],
   "expect": {
-    "state": "/PathResolutionEntryPointTargetForms/absolute_drive/EntryPointPathChild/ready",
+    "state": "/PathResolutionEntryPointTargetForms/absolute_drive/ready",
     "trace": [
       {
         "type": "dispatch",
@@ -142,7 +142,7 @@
       },
       {
         "type": "stable",
-        "state": "/PathResolutionEntryPointTargetForms/absolute_drive/EntryPointPathChild/ready"
+        "state": "/PathResolutionEntryPointTargetForms/absolute_drive/ready"
       }
     ]
   }

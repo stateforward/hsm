@@ -2,12 +2,18 @@
   "version": "hsm-conformance-v1",
   "name": "behavior_effect_set_attr_triggers_when",
   "description": "A transition effect set_attr change evaluates when after the current transition reaches its target.",
-  "features": ["attribute", "when", "behavior_attr", "queue", "reentrancy"],
+  "features": [
+    "attribute",
+    "when",
+    "behavior_attr",
+    "queue",
+    "reentrancy"
+  ],
   "model": {
     "name": "EffectSetAttrWhen",
     "initial": "idle",
     "attributes": {
-      "ready": {
+      "ready_flag": {
         "type": "boolean",
         "default": false
       }
@@ -57,7 +63,7 @@
       },
       {
         "op": "set_attr",
-        "name": "ready",
+        "name": "ready_flag",
         "value": true
       }
     ],
@@ -68,7 +74,7 @@
       },
       {
         "op": "return_equals",
-        "name": "ready",
+        "name": "ready_flag",
         "value": true
       }
     ],
@@ -91,7 +97,7 @@
   "expect": {
     "state": "/EffectSetAttrWhen/ready",
     "attributes": {
-      "ready": true
+      "ready_flag": true
     },
     "trace": [
       {

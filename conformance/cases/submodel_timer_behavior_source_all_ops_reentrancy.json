@@ -211,7 +211,7 @@
     }
   ],
   "expect": {
-    "state": "/SubmodelTimerBehaviorSourceAllOpsReentrancy/drive/ChildSubmodelTimerBehaviorSourceAllOpsReentrancy/all_seen",
+    "state": "/SubmodelTimerBehaviorSourceAllOpsReentrancy/drive/all_seen",
     "trace": [
       {
         "type": "snapshot",
@@ -243,7 +243,7 @@
       },
       {
         "type": "stable",
-        "state": "/SubmodelTimerBehaviorSourceAllOpsReentrancy/drive/ChildSubmodelTimerBehaviorSourceAllOpsReentrancy/all_seen"
+        "state": "/SubmodelTimerBehaviorSourceAllOpsReentrancy/drive/all_seen"
       }
     ]
   }

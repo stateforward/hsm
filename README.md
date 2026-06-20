@@ -31,7 +31,7 @@ Every implementation shares the same compile-time DSL, the same semantics, and t
 All implementations conform to the [HSM DSL Reference](dsl.md) — a language-agnostic specification that defines:
 
 <!-- public DSL function groups from dsl.md -->
-- **Model definition** — `hsm.Define`, `hsm.State`, `hsm.Final`
+- **Model definition** — `hsm.Define`, `hsm.Redefine`, `hsm.Validator`, `hsm.Finalizer`, `hsm.State`, `hsm.Final`
 - **Submachine composition** — `hsm.SubmachineState`, `hsm.EntryPoint`, `hsm.ExitPoint`
 - **Pseudostates** — `hsm.Choice`, `hsm.ShallowHistory`, `hsm.DeepHistory`
 - **Transitions** — `hsm.Transition`, `hsm.Initial`, `hsm.Target`, `hsm.Source`
@@ -42,6 +42,9 @@ All implementations conform to the [HSM DSL Reference](dsl.md) — a language-ag
 - **Metadata** — `hsm.Attribute`, `hsm.Operation`
 - **Composition** — `hsm.MakeGroup`
 - **Runtime configuration** — `hsm.Config`, `hsm.Clock`, `hsm.Queue`
+- **Runtime lifecycle** — `hsm.New`, `hsm.Start`, `hsm.Started`, `hsm.Stop`, `hsm.Restart`
+- **Runtime dispatch** — `hsm.Dispatch`, `hsm.DispatchAll`, `hsm.DispatchTo`
+- **Runtime access** — `hsm.Get`, `hsm.Set`, `hsm.Call`
 - **Snapshotting** — `hsm.TakeSnapshot`
 
 All DSL functions use **PascalCase** across every language for a 1:1 API mapping.

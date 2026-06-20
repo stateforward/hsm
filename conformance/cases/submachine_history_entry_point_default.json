@@ -98,7 +98,7 @@
     }
   ],
   "expect": {
-    "state": "/SubmachineHistoryDefault/drive/HistoryDefaultChild/comp/b",
+    "state": "/SubmachineHistoryDefault/drive/comp/b",
     "trace": [
       {
         "type": "dispatch",
@@ -110,7 +110,7 @@
       },
       {
         "type": "stable",
-        "state": "/SubmachineHistoryDefault/drive/HistoryDefaultChild/comp/b"
+        "state": "/SubmachineHistoryDefault/drive/comp/b"
       }
     ]
   }

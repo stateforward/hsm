@@ -156,7 +156,7 @@
     }
   ],
   "expect": {
-    "state": "/SubmodelTimerGuardAndEffectSetAttrGeneratedTriggerReplay/drive/ChildTimerSetAttrReplay/all_seen",
+    "state": "/SubmodelTimerGuardAndEffectSetAttrGeneratedTriggerReplay/drive/all_seen",
     "attributes": {
       "flag": true,
       "ready": true
@@ -186,7 +186,7 @@
       },
       {
         "type": "stable",
-        "state": "/SubmodelTimerGuardAndEffectSetAttrGeneratedTriggerReplay/drive/ChildTimerSetAttrReplay/all_seen"
+        "state": "/SubmodelTimerGuardAndEffectSetAttrGeneratedTriggerReplay/drive/all_seen"
       }
     ]
   }

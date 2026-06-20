@@ -2,12 +2,16 @@
   "version": "hsm-conformance-v1",
   "name": "behavior_set_attr_triggers_when",
   "description": "A behavior-side set_attr change evaluates when transitions through the same runtime path as script set.",
-  "features": ["attribute", "when", "behavior_attr"],
+  "features": [
+    "attribute",
+    "when",
+    "behavior_attr"
+  ],
   "model": {
     "name": "BehaviorSetAttrWhen",
     "initial": "idle",
     "attributes": {
-      "ready": {
+      "ready_flag": {
         "type": "boolean",
         "default": false
       }
@@ -48,7 +52,7 @@
       },
       {
         "op": "set_attr",
-        "name": "ready",
+        "name": "ready_flag",
         "value": true
       }
     ],
@@ -59,7 +63,7 @@
       },
       {
         "op": "return_equals",
-        "name": "ready",
+        "name": "ready_flag",
         "value": true
       }
     ],
@@ -78,7 +82,7 @@
   "expect": {
     "state": "/BehaviorSetAttrWhen/ready",
     "attributes": {
-      "ready": true
+      "ready_flag": true
     },
     "trace": [
       {

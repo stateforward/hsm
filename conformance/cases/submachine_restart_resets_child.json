@@ -75,7 +75,7 @@
     }
   ],
   "expect": {
-    "state": "/SubmachineRestart/drive/RestartChild/a",
+    "state": "/SubmachineRestart/drive/a",
     "trace": [
       {
         "type": "trace",
@@ -95,7 +95,7 @@
       },
       {
         "type": "stable",
-        "state": "/SubmachineRestart/drive/RestartChild/a"
+        "state": "/SubmachineRestart/drive/a"
       }
     ]
   }

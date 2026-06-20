@@ -11,7 +11,7 @@
         "name": "idle",
         "transitions": [
           {
-            "on": "hsm_error",
+            "on": "hsm/error",
             "target": "failed",
             "effects": [
               {
@@ -88,7 +88,7 @@
             "source": "/ConfigQueueLenErrorEvent/idle",
             "target": "/ConfigQueueLenErrorEvent/failed",
             "events": [
-              "hsm_error"
+              "hsm/error"
             ],
             "guard": false
           },

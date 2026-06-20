@@ -10,7 +10,7 @@
     "name": "WhenSameValueNoop",
     "initial": "idle",
     "attributes": {
-      "ready": {
+      "ready_flag": {
         "type": "boolean",
         "default": false
       }
@@ -41,7 +41,7 @@
       },
       {
         "op": "return_equals",
-        "name": "ready",
+        "name": "ready_flag",
         "value": true
       }
     ]
@@ -52,19 +52,19 @@
     },
     {
       "op": "set",
-      "attribute": "ready",
+      "attribute": "ready_flag",
       "value": false
     }
   ],
   "expect": {
     "state": "/WhenSameValueNoop/idle",
     "attributes": {
-      "ready": false
+      "ready_flag": false
     },
     "trace": [
       {
         "type": "set",
-        "attribute": "ready",
+        "attribute": "ready_flag",
         "value": false
       },
       {

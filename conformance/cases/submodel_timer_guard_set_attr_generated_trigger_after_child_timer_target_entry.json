@@ -219,7 +219,7 @@
     }
   ],
   "expect": {
-    "state": "/SubmodelTimerGuardSetAttrGeneratedTriggerAfterChildTimerTargetEntry/drive/ChildSubmodelTimerGuardSetAttrGeneratedTriggerAfterChildTimerTargetEntry/parent/all_seen",
+    "state": "/SubmodelTimerGuardSetAttrGeneratedTriggerAfterChildTimerTargetEntry/drive/parent/all_seen",
     "attributes": {
       "flag": true,
       "ready": true
@@ -261,7 +261,7 @@
       },
       {
         "type": "stable",
-        "state": "/SubmodelTimerGuardSetAttrGeneratedTriggerAfterChildTimerTargetEntry/drive/ChildSubmodelTimerGuardSetAttrGeneratedTriggerAfterChildTimerTargetEntry/parent/all_seen"
+        "state": "/SubmodelTimerGuardSetAttrGeneratedTriggerAfterChildTimerTargetEntry/drive/parent/all_seen"
       }
     ]
   }

@@ -1,13 +1,16 @@
 {
   "version": "hsm-conformance-v1",
   "name": "when_attribute_positive",
-  "description": "A when trigger using an attribute operand fires when that attribute changes to a truthy value.",
-  "features": ["attribute", "when"],
+  "description": "A when trigger using an attribute operand fires when that attribute changes.",
+  "features": [
+    "attribute",
+    "when"
+  ],
   "model": {
     "name": "WhenAttributePositive",
     "initial": "idle",
     "attributes": {
-      "ready": {
+      "ready_flag": {
         "type": "boolean",
         "default": false
       }
@@ -19,7 +22,7 @@
           {
             "trigger": {
               "kind": "when",
-              "attribute": "ready"
+              "attribute": "ready_flag"
             },
             "target": "ready",
             "effects": [
@@ -60,19 +63,19 @@
     },
     {
       "op": "set",
-      "attribute": "ready",
+      "attribute": "ready_flag",
       "value": true
     }
   ],
   "expect": {
     "state": "/WhenAttributePositive/ready",
     "attributes": {
-      "ready": true
+      "ready_flag": true
     },
     "trace": [
       {
         "type": "set",
-        "attribute": "ready",
+        "attribute": "ready_flag",
         "value": true
       },
       {

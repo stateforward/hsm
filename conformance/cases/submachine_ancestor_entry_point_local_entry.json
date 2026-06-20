@@ -147,7 +147,7 @@
     }
   ],
   "expect": {
-    "state": "/SubmachineAncestorEntryLocal/outer/drive/AncestorEntryChild/running",
+    "state": "/SubmachineAncestorEntryLocal/outer/drive/running",
     "trace": [
       {
         "type": "trace",
@@ -179,7 +179,7 @@
       },
       {
         "type": "stable",
-        "state": "/SubmachineAncestorEntryLocal/outer/drive/AncestorEntryChild/running"
+        "state": "/SubmachineAncestorEntryLocal/outer/drive/running"
       }
     ]
   }

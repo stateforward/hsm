@@ -185,7 +185,7 @@
     }
   ],
   "expect": {
-    "state": "/SubmachineChildAttributeClearedOnParentLifecycleReset/drive/LifecycleResetChildAttribute/stop_start_verified",
+    "state": "/SubmachineChildAttributeClearedOnParentLifecycleReset/drive/stop_start_verified",
     "trace": [
       {
         "type": "dispatch",
@@ -233,7 +233,7 @@
       },
       {
         "type": "stable",
-        "state": "/SubmachineChildAttributeClearedOnParentLifecycleReset/drive/LifecycleResetChildAttribute/stop_start_verified"
+        "state": "/SubmachineChildAttributeClearedOnParentLifecycleReset/drive/stop_start_verified"
       }
     ]
   }

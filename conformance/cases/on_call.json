@@ -74,8 +74,12 @@
     "state": "/OnCallCase/approved",
     "trace": [
       {
-        "type": "call",
-        "operation": "approve"
+        "operation": "approve",
+        "type": "call"
+      },
+      {
+        "type": "trace",
+        "value": "operation:approve"
       },
       {
         "type": "trace",
@@ -86,13 +90,10 @@
         "value": "enter:approved"
       },
       {
-        "type": "trace",
-        "value": "operation:approve"
-      },
-      {
-        "type": "stable",
-        "state": "/OnCallCase/approved"
+        "state": "/OnCallCase/approved",
+        "type": "stable"
       }
     ]
-  }
+  },
+  "description": "An operation call runs the operation body and then dispatches the generated on_call event."
 }

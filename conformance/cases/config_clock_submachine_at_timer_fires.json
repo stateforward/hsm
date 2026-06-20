@@ -83,7 +83,7 @@
     }
   ],
   "expect": {
-    "state": "/ConfigClockSubmachineAtTimerFires/drive/ClockAtTimerChild/timeout",
+    "state": "/ConfigClockSubmachineAtTimerFires/drive/timeout",
     "trace": [
       {
         "type": "timer_scheduled"
@@ -105,7 +105,7 @@
       },
       {
         "type": "stable",
-        "state": "/ConfigClockSubmachineAtTimerFires/drive/ClockAtTimerChild/timeout"
+        "state": "/ConfigClockSubmachineAtTimerFires/drive/timeout"
       }
     ]
   }

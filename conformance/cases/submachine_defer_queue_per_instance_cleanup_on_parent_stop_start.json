@@ -111,8 +111,8 @@
   ],
   "expect": {
     "states": {
-      "reset": "/SubmachineDeferQueuePerInstanceCleanupOnParentStopStart/drive/ChildSubmachinePerInstanceDeferStopStart/ready",
-      "running": "/SubmachineDeferQueuePerInstanceCleanupOnParentStopStart/drive/ChildSubmachinePerInstanceDeferStopStart/done"
+      "reset": "/SubmachineDeferQueuePerInstanceCleanupOnParentStopStart/drive/ready",
+      "running": "/SubmachineDeferQueuePerInstanceCleanupOnParentStopStart/drive/done"
     },
     "queue": {
       "lifecycle_cleanup": "child_deferred_events_cleared_only_for_stop_start_parent"

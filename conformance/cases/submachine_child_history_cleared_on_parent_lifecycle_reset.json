@@ -176,7 +176,7 @@
     }
   ],
   "expect": {
-    "state": "/SubmachineChildHistoryClearedOnParentLifecycleReset/drive/LifecycleResetHistoryChild/comp/a",
+    "state": "/SubmachineChildHistoryClearedOnParentLifecycleReset/drive/comp/a",
     "trace": [
       {
         "type": "dispatch",
@@ -248,7 +248,7 @@
       },
       {
         "type": "stable",
-        "state": "/SubmachineChildHistoryClearedOnParentLifecycleReset/drive/LifecycleResetHistoryChild/comp/a"
+        "state": "/SubmachineChildHistoryClearedOnParentLifecycleReset/drive/comp/a"
       }
     ]
   }

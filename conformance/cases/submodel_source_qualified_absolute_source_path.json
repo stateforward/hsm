@@ -90,7 +90,7 @@
     }
   ],
   "expect": {
-    "state": "/SubmodelSourceQualifiedAbsoluteSourcePath/drive/ChildAbsoluteSourceQualifiedTransition/comp/b",
+    "state": "/SubmodelSourceQualifiedAbsoluteSourcePath/drive/comp/b",
     "trace": [
       {
         "type": "trace",
@@ -110,7 +110,7 @@
       },
       {
         "type": "stable",
-        "state": "/SubmodelSourceQualifiedAbsoluteSourcePath/drive/ChildAbsoluteSourceQualifiedTransition/comp/b"
+        "state": "/SubmodelSourceQualifiedAbsoluteSourcePath/drive/comp/b"
       }
     ]
   }

@@ -107,7 +107,7 @@
     }
   ],
   "expect": {
-    "state": "/BehaviorDispatchFromEntryPointEffect/drive/DispatchFromEntryPointChild/done",
+    "state": "/BehaviorDispatchFromEntryPointEffect/drive/done",
     "trace": [
       {
         "type": "dispatch",
@@ -131,7 +131,7 @@
       },
       {
         "type": "stable",
-        "state": "/BehaviorDispatchFromEntryPointEffect/drive/DispatchFromEntryPointChild/done"
+        "state": "/BehaviorDispatchFromEntryPointEffect/drive/done"
       }
     ]
   }

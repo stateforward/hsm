@@ -2,12 +2,16 @@
   "version": "hsm-conformance-v1",
   "name": "behavior_set_attr_same_value_when_noop",
   "description": "A behavior-side set_attr to the current value does not evaluate when transitions.",
-  "features": ["attribute", "when", "behavior_attr"],
+  "features": [
+    "attribute",
+    "when",
+    "behavior_attr"
+  ],
   "model": {
     "name": "BehaviorSetAttrSameValueWhen",
     "initial": "idle",
     "attributes": {
-      "ready": {
+      "ready_flag": {
         "type": "boolean",
         "default": false
       }
@@ -43,7 +47,7 @@
       },
       {
         "op": "set_attr",
-        "name": "ready",
+        "name": "ready_flag",
         "value": false
       }
     ],
@@ -54,7 +58,7 @@
       },
       {
         "op": "return_equals",
-        "name": "ready",
+        "name": "ready_flag",
         "value": true
       }
     ]
@@ -67,7 +71,7 @@
   "expect": {
     "state": "/BehaviorSetAttrSameValueWhen/idle",
     "attributes": {
-      "ready": false
+      "ready_flag": false
     },
     "trace": [
       {

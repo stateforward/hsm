@@ -67,7 +67,7 @@
     }
   ],
   "expect": {
-    "state": "/SubmachineReuse/second/Toggle/a",
+    "state": "/SubmachineReuse/second/a",
     "trace": [
       {
         "type": "dispatch",
@@ -79,7 +79,7 @@
       },
       {
         "type": "stable",
-        "state": "/SubmachineReuse/second/Toggle/a"
+        "state": "/SubmachineReuse/second/a"
       }
     ]
   }

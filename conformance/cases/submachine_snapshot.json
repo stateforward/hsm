@@ -50,10 +50,10 @@
     }
   ],
   "expect": {
-    "state": "/SubmachineSnapshot/drive/SnapshotChild/running",
+    "state": "/SubmachineSnapshot/drive/running",
     "snapshots": {
       "last": {
-        "state": "/SubmachineSnapshot/drive/SnapshotChild/running",
+        "state": "/SubmachineSnapshot/drive/running",
         "attributes": {},
         "queue_len": 0
       }
@@ -65,11 +65,11 @@
       },
       {
         "type": "snapshot",
-        "state": "/SubmachineSnapshot/drive/SnapshotChild/running"
+        "state": "/SubmachineSnapshot/drive/running"
       },
       {
         "type": "stable",
-        "state": "/SubmachineSnapshot/drive/SnapshotChild/running"
+        "state": "/SubmachineSnapshot/drive/running"
       }
     ]
   }

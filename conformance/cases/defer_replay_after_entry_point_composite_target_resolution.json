@@ -223,7 +223,7 @@
     }
   ],
   "expect": {
-    "state": "/DeferReplayAfterEntryPointCompositeTargetResolution/drive/EntryPointCompositeDeferredReplayChild/comp/done",
+    "state": "/DeferReplayAfterEntryPointCompositeTargetResolution/drive/comp/done",
     "queue": {
       "deferred": [
         "work"
@@ -277,7 +277,7 @@
       },
       {
         "type": "stable",
-        "state": "/DeferReplayAfterEntryPointCompositeTargetResolution/drive/EntryPointCompositeDeferredReplayChild/comp/done"
+        "state": "/DeferReplayAfterEntryPointCompositeTargetResolution/drive/comp/done"
       }
     ]
   }

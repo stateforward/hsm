@@ -135,7 +135,7 @@
     }
   ],
   "expect": {
-    "state": "/SubmachineEntryOrder/outer/drive/OrderChild/running",
+    "state": "/SubmachineEntryOrder/outer/drive/running",
     "trace": [
       {
         "type": "dispatch",
@@ -163,7 +163,7 @@
       },
       {
         "type": "stable",
-        "state": "/SubmachineEntryOrder/outer/drive/OrderChild/running"
+        "state": "/SubmachineEntryOrder/outer/drive/running"
       }
     ]
   }

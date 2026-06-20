@@ -1,1 +1,120 @@
-{"version":"hsm-conformance-v1","name":"submodel_exit_point_effect_set_attr_from_event_data_generated_trigger_replay","description":"Event-data attribute work from a child exit-point effect uses child context without mutating the parent attribute.","features":["submachine","exit_point","attribute","event_data"],"model":{"name":"SubmodelExitPointEffectSetAttrFromEventDataGeneratedTriggerReplay","initial":"drive","attributes":{"flag":{"type":"boolean","default":false}},"states":[{"name":"drive","kind":"submachine","machine":"ChildExitPointEventData","transitions":[{"trigger":{"kind":"exit_point","exit_point":"done"},"target":"outside"}]},{"name":"outside"}]},"models":[{"name":"ChildExitPointEventData","initial":"active","attributes":{"flag":{"type":"boolean","default":false}},"exit_points":[{"name":"done","effects":[{"behavior":"exit_point_capture"}]}],"states":[{"name":"active","transitions":[{"on":"finish","target":"done"}]}]}],"behaviors":{"exit_point_capture":[{"op":"set_attr_from_event_data","name":"flag","path":"flag"},{"op":"trace","value":"exit-point:capture"}]},"script":[{"op":"start"},{"op":"dispatch","event":{"name":"finish","data":{"flag":true}}}],"expect":{"state":"/SubmodelExitPointEffectSetAttrFromEventDataGeneratedTriggerReplay/outside","attributes":{"flag":false},"trace":[{"type":"dispatch","event":"finish"},{"type":"trace","value":"exit-point:capture"},{"type":"stable","state":"/SubmodelExitPointEffectSetAttrFromEventDataGeneratedTriggerReplay/outside"}]}}
+{
+  "version": "hsm-conformance-v1",
+  "name": "submodel_exit_point_effect_set_attr_from_event_data_generated_trigger_replay",
+  "description": "Event-data attribute work from a child-model exit-point effect replays through the flattened model namespace.",
+  "features": [
+    "submachine",
+    "exit_point",
+    "attribute",
+    "event_data"
+  ],
+  "model": {
+    "name": "SubmodelExitPointEffectSetAttrFromEventDataGeneratedTriggerReplay",
+    "initial": "drive",
+    "attributes": {
+      "flag": {
+        "type": "boolean",
+        "default": false
+      }
+    },
+    "states": [
+      {
+        "name": "drive",
+        "kind": "submachine",
+        "machine": "ChildExitPointEventData",
+        "transitions": [
+          {
+            "trigger": {
+              "kind": "exit_point",
+              "exit_point": "done"
+            },
+            "target": "outside"
+          }
+        ]
+      },
+      {
+        "name": "outside"
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "ChildExitPointEventData",
+      "initial": "active",
+      "attributes": {
+        "flag": {
+          "type": "boolean",
+          "default": false
+        }
+      },
+      "exit_points": [
+        {
+          "name": "done",
+          "effects": [
+            {
+              "behavior": "exit_point_capture"
+            }
+          ]
+        }
+      ],
+      "states": [
+        {
+          "name": "active",
+          "transitions": [
+            {
+              "on": "finish",
+              "target": "done"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "behaviors": {
+    "exit_point_capture": [
+      {
+        "op": "set_attr_from_event_data",
+        "name": "flag",
+        "path": "flag"
+      },
+      {
+        "op": "trace",
+        "value": "exit-point:capture"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": {
+        "name": "finish",
+        "data": {
+          "flag": true
+        }
+      }
+    }
+  ],
+  "expect": {
+    "state": "/SubmodelExitPointEffectSetAttrFromEventDataGeneratedTriggerReplay/outside",
+    "attributes": {
+      "flag": true
+    },
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "finish"
+      },
+      {
+        "type": "trace",
+        "value": "exit-point:capture"
+      },
+      {
+        "type": "stable",
+        "state": "/SubmodelExitPointEffectSetAttrFromEventDataGeneratedTriggerReplay/outside"
+      }
+    ]
+  }
+}

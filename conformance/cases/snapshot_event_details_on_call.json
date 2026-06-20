@@ -53,21 +53,21 @@
     "state": "/SnapshotEventDetailsOnCall/idle",
     "snapshots": {
       "last": {
+        "attributes": {},
         "id": "default",
         "qualified_name": "/SnapshotEventDetailsOnCall",
-        "state": "/SnapshotEventDetailsOnCall/idle",
-        "attributes": {},
         "queue_len": 0,
+        "state": "/SnapshotEventDetailsOnCall/idle",
         "transitions": [
           {
-            "name": "/SnapshotEventDetailsOnCall/idle/transition_4",
-            "kind": 67343,
-            "source": "/SnapshotEventDetailsOnCall/idle",
-            "target": "/SnapshotEventDetailsOnCall/done",
             "events": [
-              "@call:approve"
+              "/SnapshotEventDetailsOnCall/approve"
             ],
-            "guard": false
+            "guard": false,
+            "kind": 67343,
+            "name": "/SnapshotEventDetailsOnCall/idle/transition_4",
+            "source": "/SnapshotEventDetailsOnCall/idle",
+            "target": "/SnapshotEventDetailsOnCall/done"
           }
         ]
       }

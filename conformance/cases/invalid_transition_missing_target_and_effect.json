@@ -1,0 +1,28 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_transition_missing_target_and_effect",
+  "mode": "validation",
+  "description": "State transitions must have a target or an effect so triggered transitions cannot silently consume events.",
+  "features": ["validation"],
+  "model": {
+    "name": "InvalidTransitionMissingTargetAndEffect",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "on": "hit"
+          }
+        ]
+      }
+    ]
+  },
+  "expect": {
+    "validation": [
+      {
+        "code": "missing_target"
+      }
+    ]
+  }
+}

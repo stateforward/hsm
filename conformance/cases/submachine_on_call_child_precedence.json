@@ -110,11 +110,15 @@
     }
   ],
   "expect": {
-    "state": "/SubmachineOnCallPrecedence/drive/OnCallChild/approved",
+    "state": "/SubmachineOnCallPrecedence/drive/approved",
     "trace": [
       {
-        "type": "call",
-        "operation": "approve"
+        "operation": "approve",
+        "type": "call"
+      },
+      {
+        "type": "trace",
+        "value": "operation:approve"
       },
       {
         "type": "trace",
@@ -125,12 +129,8 @@
         "value": "enter:child-approved"
       },
       {
-        "type": "trace",
-        "value": "operation:approve"
-      },
-      {
-        "type": "stable",
-        "state": "/SubmachineOnCallPrecedence/drive/OnCallChild/approved"
+        "state": "/SubmachineOnCallPrecedence/drive/approved",
+        "type": "stable"
       }
     ]
   }

@@ -104,7 +104,7 @@
     }
   ],
   "expect": {
-    "state": "/SubmachineEntryPointMultipleEffects/drive/EntryPointEffectsChild/running",
+    "state": "/SubmachineEntryPointMultipleEffects/drive/running",
     "trace": [
       {
         "type": "dispatch",
@@ -128,7 +128,7 @@
       },
       {
         "type": "stable",
-        "state": "/SubmachineEntryPointMultipleEffects/drive/EntryPointEffectsChild/running"
+        "state": "/SubmachineEntryPointMultipleEffects/drive/running"
       }
     ]
   }

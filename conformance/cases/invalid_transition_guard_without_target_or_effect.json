@@ -1,0 +1,39 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "invalid_transition_guard_without_target_or_effect",
+  "mode": "validation",
+  "description": "A guarded state transition still needs a target or an effect; a guard alone must not silently consume events.",
+  "features": ["guard", "validation"],
+  "model": {
+    "name": "InvalidTransitionGuardWithoutTargetOrEffect",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "on": "hit",
+            "guard": {
+              "behavior": "allow"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "behaviors": {
+    "allow": [
+      {
+        "op": "return_value",
+        "value": true
+      }
+    ]
+  },
+  "expect": {
+    "validation": [
+      {
+        "code": "missing_target"
+      }
+    ]
+  }
+}

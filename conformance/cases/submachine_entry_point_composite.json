@@ -100,7 +100,7 @@
     }
   ],
   "expect": {
-    "state": "/SubmachineEntryComposite/drive/CompositeChild/comp/leaf",
+    "state": "/SubmachineEntryComposite/drive/comp/leaf",
     "trace": [
       {
         "type": "dispatch",
@@ -120,7 +120,7 @@
       },
       {
         "type": "stable",
-        "state": "/SubmachineEntryComposite/drive/CompositeChild/comp/leaf"
+        "state": "/SubmachineEntryComposite/drive/comp/leaf"
       }
     ]
   }

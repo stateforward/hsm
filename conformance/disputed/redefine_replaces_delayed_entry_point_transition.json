@@ -1,0 +1,90 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "redefine_replaces_delayed_entry_point_transition",
+  "description": "A derived model replacing a base entry-point selector transition does not replay the base delayed selector onto the replacement transition.",
+  "features": [
+    "redefine",
+    "submachine",
+    "entry_point"
+  ],
+  "model": {
+    "name": "RedefineReplaceDelayedEntryDerived",
+    "redefines": "RedefineReplaceDelayedEntryBase",
+    "states": [
+      {
+        "name": "outside",
+        "transitions": [
+          {
+            "id": "enter_drive",
+            "on": "go",
+            "target": "../replacement"
+          }
+        ]
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "RedefineReplaceDelayedEntryBase",
+      "initial": "outside",
+      "states": [
+        {
+          "name": "outside",
+          "transitions": [
+            {
+              "id": "enter_drive",
+              "on": "go",
+              "target": "../drive",
+              "entry_point": "warm"
+            }
+          ]
+        },
+        {
+          "name": "drive",
+          "kind": "submachine",
+          "machine": "RedefineReplaceDelayedEntryChild"
+        },
+        {
+          "name": "replacement"
+        }
+      ]
+    },
+    {
+      "name": "RedefineReplaceDelayedEntryChild",
+      "initial": "ready",
+      "entry_points": [
+        {
+          "name": "warm",
+          "target": "ready"
+        }
+      ],
+      "states": [
+        {
+          "name": "ready"
+        }
+      ]
+    }
+  ],
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "go"
+    }
+  ],
+  "expect": {
+    "state": "/RedefineReplaceDelayedEntryDerived/replacement",
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "go"
+      },
+      {
+        "type": "stable",
+        "state": "/RedefineReplaceDelayedEntryDerived/replacement"
+      }
+    ]
+  }
+}

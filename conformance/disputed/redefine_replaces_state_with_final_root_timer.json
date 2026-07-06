@@ -1,0 +1,64 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "redefine_replaces_state_with_final_root_timer",
+  "description": "A derived model replacing an inherited state with a final state removes root-owned generated-trigger activities sourced from that state.",
+  "features": [
+    "redefine",
+    "final",
+    "timer",
+    "after",
+    "source"
+  ],
+  "model": {
+    "name": "RedefineReplaceStateWithFinalRootTimerDerived",
+    "redefines": "RedefineReplaceStateWithFinalRootTimerBase",
+    "states": [
+      {
+        "name": "work",
+        "kind": "final"
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "RedefineReplaceStateWithFinalRootTimerBase",
+      "initial": "work",
+      "states": [
+        {
+          "name": "work"
+        },
+        {
+          "name": "stale"
+        }
+      ],
+      "transitions": [
+        {
+          "source": "work",
+          "trigger": {
+            "kind": "after",
+            "duration_ms": 0
+          },
+          "target": "stale"
+        }
+      ]
+    }
+  ],
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "tick",
+      "millis": 0
+    }
+  ],
+  "expect": {
+    "state": "/RedefineReplaceStateWithFinalRootTimerDerived/work",
+    "trace": [
+      {
+        "type": "stable",
+        "state": "/RedefineReplaceStateWithFinalRootTimerDerived/work"
+      }
+    ]
+  }
+}

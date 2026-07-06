@@ -1,0 +1,188 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "behavior_dispatch_to_preserves_application_source_target_metadata",
+  "description": "Behavior DispatchTo fills missing envelope Source and Target without overwriting application metadata keys named source or target.",
+  "features": [
+    "dispatch_to",
+    "event_ownership",
+    "runtime_context"
+  ],
+  "model": {
+    "name": "BehaviorDispatchToPreservesApplicationMetadataProducer",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "on": "go",
+            "target": "sent",
+            "effects": [
+              {
+                "behavior": "dispatch_peer"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "sent"
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "BehaviorDispatchToPreservesApplicationMetadataPeer",
+      "initial": "idle",
+      "states": [
+        {
+          "name": "idle",
+          "transitions": [
+            {
+              "on": "audit",
+              "guard": {
+                "behavior": "envelope_and_metadata_ok"
+              },
+              "target": "done",
+              "effects": [
+                {
+                  "behavior": "effect_done"
+                }
+              ]
+            },
+            {
+              "on": "audit",
+              "target": "bad",
+              "effects": [
+                {
+                  "behavior": "effect_bad"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "done"
+        },
+        {
+          "name": "bad"
+        }
+      ]
+    }
+  ],
+  "instances": [
+    {
+      "id": "producer"
+    },
+    {
+      "id": "peer",
+      "model": "BehaviorDispatchToPreservesApplicationMetadataPeer"
+    }
+  ],
+  "behaviors": {
+    "dispatch_peer": [
+      {
+        "op": "dispatch",
+        "target": "peer",
+        "event": {
+          "name": "audit",
+          "metadata": {
+            "source": "metadata-source",
+            "target": "metadata-target"
+          }
+        }
+      },
+      {
+        "op": "trace",
+        "value": "effect:dispatch-peer"
+      }
+    ],
+    "envelope_and_metadata_ok": [
+      {
+        "op": "trace",
+        "value": "guard:envelope-and-metadata"
+      },
+      {
+        "op": "event_metadata_equals",
+        "name": "source",
+        "value": "producer"
+      },
+      {
+        "op": "event_metadata_equals",
+        "name": "target",
+        "value": "peer"
+      },
+      {
+        "op": "event_application_metadata_equals",
+        "name": "source",
+        "value": "metadata-source"
+      },
+      {
+        "op": "event_application_metadata_equals",
+        "name": "target",
+        "value": "metadata-target"
+      }
+    ],
+    "effect_done": [
+      {
+        "op": "trace",
+        "value": "effect:done"
+      }
+    ],
+    "effect_bad": [
+      {
+        "op": "trace",
+        "value": "effect:bad"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start",
+      "instance": "producer"
+    },
+    {
+      "op": "start",
+      "instance": "peer"
+    },
+    {
+      "op": "dispatch_to",
+      "target": "producer",
+      "event": "go"
+    }
+  ],
+  "expect": {
+    "states": {
+      "producer": "/BehaviorDispatchToPreservesApplicationMetadataProducer/sent",
+      "peer": "/BehaviorDispatchToPreservesApplicationMetadataPeer/done"
+    },
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "go",
+        "target": "producer"
+      },
+      {
+        "type": "dispatch",
+        "event": "audit",
+        "target": "peer"
+      },
+      {
+        "type": "trace",
+        "value": "guard:envelope-and-metadata"
+      },
+      {
+        "type": "trace",
+        "value": "effect:done"
+      },
+      {
+        "type": "trace",
+        "value": "effect:dispatch-peer"
+      },
+      {
+        "type": "stable",
+        "state": "producer"
+      }
+    ]
+  }
+}

@@ -99,9 +99,24 @@
     "model": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["name", "states"],
+      "required": ["name"],
+      "allOf": [
+        {
+          "if": {
+            "not": {
+              "required": ["redefines"]
+            }
+          },
+          "then": {
+            "required": ["states"]
+          }
+        }
+      ],
       "properties": {
         "name": {
+          "$ref": "#/$defs/name"
+        },
+        "redefines": {
           "$ref": "#/$defs/name"
         },
         "initial": {
@@ -496,6 +511,7 @@
             "event_name_equals",
             "event_data_equals",
             "event_data_get",
+            "event_application_metadata_equals",
             "event_metadata_set",
             "event_metadata_get",
             "event_metadata_equals",
@@ -514,6 +530,9 @@
           "type": "string"
         },
         "target": {
+          "type": "string"
+        },
+        "instance": {
           "type": "string"
         },
         "attribute": {

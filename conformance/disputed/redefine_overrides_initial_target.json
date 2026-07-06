@@ -1,0 +1,42 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "redefine_overrides_initial_target",
+  "description": "A derived model can replace the base model root initial target while replaying base states under the derived root.",
+  "features": [
+    "redefine",
+    "initial"
+  ],
+  "model": {
+    "name": "RedefineOverrideInitialDerived",
+    "redefines": "RedefineOverrideInitialBase",
+    "initial": "derived"
+  },
+  "models": [
+    {
+      "name": "RedefineOverrideInitialBase",
+      "initial": "base",
+      "states": [
+        {
+          "name": "base"
+        },
+        {
+          "name": "derived"
+        }
+      ]
+    }
+  ],
+  "script": [
+    {
+      "op": "start"
+    }
+  ],
+  "expect": {
+    "state": "/RedefineOverrideInitialDerived/derived",
+    "trace": [
+      {
+        "type": "stable",
+        "state": "/RedefineOverrideInitialDerived/derived"
+      }
+    ]
+  }
+}

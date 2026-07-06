@@ -1,0 +1,55 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "redefine_replaces_state_with_final_root_transition",
+  "description": "A derived model replacing an inherited state with a final state removes root-owned inherited transitions sourced from that state.",
+  "features": [
+    "redefine",
+    "final",
+    "source"
+  ],
+  "model": {
+    "name": "RedefineReplaceStateWithFinalRootTransitionDerived",
+    "redefines": "RedefineReplaceStateWithFinalRootTransitionBase",
+    "states": [
+      {
+        "name": "work",
+        "kind": "final"
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "RedefineReplaceStateWithFinalRootTransitionBase",
+      "initial": "work",
+      "states": [
+        {
+          "name": "work"
+        },
+        {
+          "name": "other"
+        }
+      ],
+      "transitions": [
+        {
+          "source": "work",
+          "on": "go",
+          "target": "other"
+        }
+      ]
+    }
+  ],
+  "script": [
+    {
+      "op": "start"
+    }
+  ],
+  "expect": {
+    "state": "/RedefineReplaceStateWithFinalRootTransitionDerived/work",
+    "trace": [
+      {
+        "type": "stable",
+        "state": "/RedefineReplaceStateWithFinalRootTransitionDerived/work"
+      }
+    ]
+  }
+}

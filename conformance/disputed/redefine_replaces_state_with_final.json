@@ -1,0 +1,53 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "redefine_replaces_state_with_final",
+  "description": "A derived model can replace an inherited ordinary state and its outgoing transition with a final state of the same name.",
+  "features": [
+    "redefine",
+    "final"
+  ],
+  "model": {
+    "name": "RedefineReplaceStateWithFinalDerived",
+    "redefines": "RedefineReplaceStateWithFinalBase",
+    "states": [
+      {
+        "name": "work",
+        "kind": "final"
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "RedefineReplaceStateWithFinalBase",
+      "initial": "work",
+      "states": [
+        {
+          "name": "work",
+          "transitions": [
+            {
+              "on": "go",
+              "target": "other"
+            }
+          ]
+        },
+        {
+          "name": "other"
+        }
+      ]
+    }
+  ],
+  "script": [
+    {
+      "op": "start"
+    }
+  ],
+  "expect": {
+    "state": "/RedefineReplaceStateWithFinalDerived/work",
+    "trace": [
+      {
+        "type": "stable",
+        "state": "/RedefineReplaceStateWithFinalDerived/work"
+      }
+    ]
+  }
+}

@@ -1,0 +1,78 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "redefine_replaces_state_with_generated_trigger",
+  "description": "A derived replacement state with its own generated trigger replaces inherited state timers in the effective IR timer index.",
+  "features": [
+    "redefine",
+    "timer",
+    "after"
+  ],
+  "model": {
+    "name": "RedefineReplaceStateWithGeneratedTriggerDerived",
+    "redefines": "RedefineReplaceStateWithGeneratedTriggerBase",
+    "states": [
+      {
+        "name": "work",
+        "transitions": [
+          {
+            "trigger": {
+              "kind": "after",
+              "duration_ms": 0
+            },
+            "target": "../replacement"
+          }
+        ]
+      },
+      {
+        "name": "replacement"
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "RedefineReplaceStateWithGeneratedTriggerBase",
+      "initial": "work",
+      "states": [
+        {
+          "name": "work",
+          "transitions": [
+            {
+              "trigger": {
+                "kind": "after",
+                "duration_ms": 0
+              },
+              "target": "../stale"
+            }
+          ]
+        },
+        {
+          "name": "stale"
+        }
+      ]
+    }
+  ],
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "tick",
+      "millis": 0
+    }
+  ],
+  "expect": {
+    "state": "/RedefineReplaceStateWithGeneratedTriggerDerived/replacement",
+    "trace": [
+      {
+        "type": "timer_scheduled"
+      },
+      {
+        "type": "timer_fired"
+      },
+      {
+        "type": "stable",
+        "state": "/RedefineReplaceStateWithGeneratedTriggerDerived/replacement"
+      }
+    ]
+  }
+}

@@ -1,7 +1,7 @@
 {
   "version": "hsm-conformance-v1",
   "name": "config_queue_len_error_event",
-  "description": "A custom queue Len failure is converted to a runtime ErrorEvent that bypasses the custom queue hook.",
+  "description": "A custom queue Len failure is reported in snapshot trace without mutating runtime state.",
   "features": ["queue", "snapshot", "error"],
   "model": {
     "name": "ConfigQueueLenErrorEvent",
@@ -73,7 +73,7 @@
     }
   ],
   "expect": {
-    "state": "/ConfigQueueLenErrorEvent/failed",
+    "state": "/ConfigQueueLenErrorEvent/done",
     "snapshots": {
       "last": {
         "id": "default",
@@ -124,15 +124,15 @@
       },
       {
         "type": "trace",
-        "value": "effect:error"
-      },
-      {
-        "type": "trace",
         "value": "queue:pop:go"
       },
       {
+        "type": "trace",
+        "value": "effect:go"
+      },
+      {
         "type": "stable",
-        "state": "/ConfigQueueLenErrorEvent/failed"
+        "state": "/ConfigQueueLenErrorEvent/done"
       }
     ]
   }

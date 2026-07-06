@@ -1,0 +1,167 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "behavior_dispatch_to_populates_missing_source",
+  "description": "A behavior DispatchTo event with no Source populates Source from the current machine ID for the recipient envelope.",
+  "features": [
+    "dispatch_to",
+    "event_ownership",
+    "runtime_context"
+  ],
+  "model": {
+    "name": "BehaviorDispatchToPopulatesMissingSourceProducer",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "on": "go",
+            "target": "sent",
+            "effects": [
+              {
+                "behavior": "dispatch_peer"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "sent"
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "BehaviorDispatchToPopulatesMissingSourcePeer",
+      "initial": "idle",
+      "states": [
+        {
+          "name": "idle",
+          "transitions": [
+            {
+              "on": "audit",
+              "guard": {
+                "behavior": "source_is_producer"
+              },
+              "target": "done",
+              "effects": [
+                {
+                  "behavior": "effect_done"
+                }
+              ]
+            },
+            {
+              "on": "audit",
+              "target": "bad",
+              "effects": [
+                {
+                  "behavior": "effect_bad"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "done"
+        },
+        {
+          "name": "bad"
+        }
+      ]
+    }
+  ],
+  "instances": [
+    {
+      "id": "producer"
+    },
+    {
+      "id": "peer",
+      "model": "BehaviorDispatchToPopulatesMissingSourcePeer"
+    }
+  ],
+  "behaviors": {
+    "dispatch_peer": [
+      {
+        "op": "dispatch",
+        "event": "audit",
+        "target": "peer"
+      },
+      {
+        "op": "trace",
+        "value": "effect:dispatch-peer"
+      }
+    ],
+    "source_is_producer": [
+      {
+        "op": "trace",
+        "value": "guard:source-producer"
+      },
+      {
+        "op": "event_metadata_equals",
+        "name": "source",
+        "value": "producer"
+      }
+    ],
+    "effect_done": [
+      {
+        "op": "trace",
+        "value": "effect:done"
+      }
+    ],
+    "effect_bad": [
+      {
+        "op": "trace",
+        "value": "effect:bad"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start",
+      "instance": "producer"
+    },
+    {
+      "op": "start",
+      "instance": "peer"
+    },
+    {
+      "op": "dispatch_to",
+      "target": "producer",
+      "event": "go"
+    }
+  ],
+  "expect": {
+    "states": {
+      "producer": "/BehaviorDispatchToPopulatesMissingSourceProducer/sent",
+      "peer": "/BehaviorDispatchToPopulatesMissingSourcePeer/done"
+    },
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "go",
+        "target": "producer"
+      },
+      {
+        "type": "dispatch",
+        "event": "audit",
+        "target": "peer"
+      },
+      {
+        "type": "trace",
+        "value": "guard:source-producer"
+      },
+      {
+        "type": "trace",
+        "value": "effect:done"
+      },
+      {
+        "type": "trace",
+        "value": "effect:dispatch-peer"
+      },
+      {
+        "type": "stable",
+        "state": "producer"
+      }
+    ]
+  }
+}

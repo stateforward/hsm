@@ -15,7 +15,7 @@ case JSON -> language runner -> native runtime -> actual trace == expected trace
 A conformance case has these top-level sections:
 
 - `model`: runtime-oriented HSM model IR.
-- `models`: optional additional state machine model IRs referenced by submachine states.
+- `models`: optional additional state machine model IRs referenced by submachine states or redefined models.
 - `behaviors`: portable behavior programs keyed by behavior ID.
 - `instances`: optional named runtime instances for group/broadcast cases.
 - `groups`: optional named groups of instances.
@@ -41,6 +41,7 @@ Names are slashless symbolic names. Paths in `initial`, `source`, and `target` a
 Supported model fields:
 
 - `name`: model name.
+- `redefines`: optional base model name. The runner builds the base model first, then replays it under `name` and appends this model's fields as additional partials.
 - `initial`: initial target path, or `{ "target": "...", "effects": [...] }` for compound initial effects.
 - `attributes`: optional map of attribute names to `{ "type": "...", "default": ... }`.
 - `operations`: optional map of operation names to behavior references.
@@ -97,6 +98,7 @@ The v1 IR can express every currently identified conformance area:
 | Shallow/deep history | state `kind: "shallow_history"` / `deep_history` |
 | Final states and completion | state `kind: "final"`, trigger `kind: "completion"`, expect `done` |
 | Submachines and connection points | top-level `models`, state `kind: "submachine"` with `machine`, model `entry_points` / `exit_points`, transition `entry_point`, trigger `kind: "exit_point"` |
+| Model redefinition | model `redefines` plus appended model fields, lowered to native `Redefine(base, name, partials...)` |
 | Deferral and replay | state `defer`, trace `defer` / `undefer`, expect `queue` |
 | Activities and cancellation | `activity`, trace `activity_start` / `activity_cancel` / `activity_done` |
 | `on_set`, `on_call`, `when` | trigger kinds plus script `set` / `call` |
@@ -141,11 +143,12 @@ The portable behavior vocabulary is intentionally imperative and small enough fo
 - `event_name_equals`: return whether the current event name equals `value`.
 - `event_data_equals`: return whether the current event data, or data at `path`, equals `value`.
 - `event_data_get`: return current event data, or data at `path`.
+- `event_application_metadata_equals`: return whether application metadata field `name` equals `value`, without reserved envelope-field remapping.
 - `event_metadata_set`: mutate current event metadata for event ownership tests; reserved event envelope fields remain immutable.
 - `event_metadata_get`: read current event metadata.
 - `event_metadata_equals`: return whether current event metadata field `name` equals `value`.
 - `raise`: raise/send an internal event if the runtime supports it.
-- `dispatch`: dispatch an event from inside behavior for queue/reentrancy tests.
+- `dispatch`: dispatch an event from inside behavior for queue/reentrancy tests; optional `target`, `group`, or `instance` selects DispatchTo, group dispatch, or direct instance dispatch.
 - `call`: invoke a named operation.
 - `snapshot`: append or return a normalized snapshot.
 - `sleep`: await logical or real milliseconds.
@@ -238,11 +241,14 @@ Cases can use behavior `trace` ops to make entry, exit, effect, guard, and activ
 - [behavior_dispatch_group_all_stopped_noop.json](cases/behavior_dispatch_group_all_stopped_noop.json): a behavior-originated dispatch to a group whose members are all stopped completes as a no-op and the sender transition continues.
 - [behavior_dispatch_group_mixed_started_stopped.json](cases/behavior_dispatch_group_mixed_started_stopped.json): a behavior-originated group dispatch delivers to started group members and ignores stopped members in the same group.
 - [behavior_dispatch_group_no_started_noop.json](cases/behavior_dispatch_group_no_started_noop.json): a behavior-originated dispatch to a group with no started members completes as a no-op and the sender transition continues.
+- [behavior_dispatch_instance_populates_envelope_preserves_metadata.json](cases/behavior_dispatch_instance_populates_envelope_preserves_metadata.json): behavior direct dispatch to an instance fills missing envelope Source and Target without overwriting application metadata keys named source or target.
 - [behavior_dispatch_to_after_restart_target_succeeds.json](cases/behavior_dispatch_to_after_restart_target_succeeds.json): a behavior-originated dispatch to a named target delivers after that target has been restarted.
 - [behavior_dispatch_to_after_stop_start_target_succeeds.json](cases/behavior_dispatch_to_after_stop_start_target_succeeds.json): a behavior-originated dispatch to a named target delivers after that target has been stopped and started again.
 - [behavior_dispatch_to_event_object_payload_identity_metadata.json](cases/behavior_dispatch_to_event_object_payload_identity_metadata.json): a behavior dispatch op targeting one instance preserves event-object payload, metadata, and reserved identity fields without replacing declared source or target with route metadata.
 - [behavior_dispatch_to_exact_instance.json](cases/behavior_dispatch_to_exact_instance.json): a behavior dispatch op can target one named instance without delivering to the current instance.
 - [behavior_dispatch_to_missing_target_noop.json](cases/behavior_dispatch_to_missing_target_noop.json): a behavior-originated dispatch to an unknown instance id is a no-op for existing instances after recording the targeted dispatch.
+- [behavior_dispatch_to_populates_missing_source.json](cases/behavior_dispatch_to_populates_missing_source.json): a behavior DispatchTo event with no Source populates Source from the current machine ID for the recipient envelope.
+- [behavior_dispatch_to_preserves_application_source_target_metadata.json](cases/behavior_dispatch_to_preserves_application_source_target_metadata.json): behavior DispatchTo fills missing envelope Source and Target without overwriting application metadata keys named source or target.
 - [behavior_dispatch_to_stopped_target_noop.json](cases/behavior_dispatch_to_stopped_target_noop.json): a behavior-originated dispatch to a stopped target is a no-op and does not interrupt the sender's transition.
 - [behavior_dispatch_unhandled_event_noop.json](cases/behavior_dispatch_unhandled_event_noop.json): a behavior-dispatched event with no selectable transition is processed as a no-op after the current transition completes.
 - [behavior_dispatch_unknown_group_error.json](cases/behavior_dispatch_unknown_group_error.json): a behavior-originated dispatch to an unknown group reports a normalized runtime error and stops the transition before target entry.
@@ -370,13 +376,12 @@ Cases can use behavior `trace` ops to make entry, exit, effect, guard, and activ
 - [config_queue_group_dispatch_all_stopped_noop_bypasses_queue_hooks.json](cases/config_queue_group_dispatch_all_stopped_noop_bypasses_queue_hooks.json): caller-originated group dispatch to all-stopped members completes as a no-op before invoking stopped members' configured queue hooks.
 - [config_queue_group_dispatch_mixed_started_stopped_filters_inactive_before_queue_hooks.json](cases/config_queue_group_dispatch_mixed_started_stopped_filters_inactive_before_queue_hooks.json): caller-originated group dispatch filters stopped members before queue hooks and enqueues regular events through active recipients' configured queues.
 - [config_queue_group_dispatch_uses_recipient_queues.json](cases/config_queue_group_dispatch_uses_recipient_queues.json): a caller-originated group dispatch enqueues each regular event through the recipient instances' configured queues.
-- [config_queue_len_error_event.json](cases/config_queue_len_error_event.json): a custom queue Len failure is converted to a runtime ErrorEvent that bypasses the custom queue hook.
 - [config_queue_len_snapshot.json](cases/config_queue_len_snapshot.json): a snapshot obtains queue_len from the instance config queue Len hook.
 - [config_queue_lifecycle_error_bypasses_queue_hook.json](cases/config_queue_lifecycle_error_bypasses_queue_hook.json): a lifecycle dispatch error on a stopped instance is raised before invoking that instance's configured queue hook.
 - [config_queue_on_call_event_fifo.json](cases/config_queue_on_call_event_fifo.json): a script operation call runs the operation body first, then routes the generated operation event through the configured FIFO queue before on_call transition selection.
 - [config_queue_per_instance_isolation.json](cases/config_queue_per_instance_isolation.json): custom queue hooks are instance-specific and do not affect other instances of sibling models.
 - [config_queue_pop_error_event.json](cases/config_queue_pop_error_event.json): a custom queue Pop failure is converted to a runtime ErrorEvent that bypasses the custom queue hook.
-- [config_queue_push_error_event.json](cases/config_queue_push_error_event.json): a custom queue Push failure rejects the dispatch completion and does not enqueue an ErrorEvent through the same failing queue hook.
+- [config_queue_push_error_event.json](cases/config_queue_push_error_event.json): a custom queue Push failure is converted to a runtime ErrorEvent that bypasses the custom queue hook.
 - [config_queue_raise_internal_event_fifo.json](cases/config_queue_raise_internal_event_fifo.json): a normal internal event produced by raise is routed through the configured regular-event FIFO queue.
 - [config_queue_submachine_child_event_uses_parent_queue.json](cases/config_queue_submachine_child_event_uses_parent_queue.json): a caller-dispatched event handled by an active child submachine enters through the parent instance's configured queue before child selection.
 - [config_queue_timer_event_fifo.json](cases/config_queue_timer_event_fifo.json): a timer-generated time event is routed through the configured regular-event FIFO queue.
@@ -1010,6 +1015,9 @@ Cases can use behavior `trace` ops to make entry, exit, effect, guard, and activ
 - [path_resolution_entry_point_target_forms.json](cases/path_resolution_entry_point_target_forms.json): submachine entry-point targets accept ./ relative and absolute internal path forms.
 - [path_resolution_initial_target_forms.json](cases/path_resolution_initial_target_forms.json): root and nested initial targets accept absolute and ./ relative path forms.
 - [queue_reentrancy.json](cases/queue_reentrancy.json): nested dispatch queue ordering.
+- [redefine_inherited_operation_call_replays_under_derived_root.json](cases/redefine_inherited_operation_call_replays_under_derived_root.json): a derived model inherits base operations and on_call transitions under the derived root when the base model is replayed.
+- [redefine_inherits_submachine_unhandled_exit_point.json](cases/redefine_inherits_submachine_unhandled_exit_point.json): a derived model inherits a base submachine exit point and its generated unhandled fallback under the derived root.
+- [redefine_replays_base_with_new_root.json](cases/redefine_replays_base_with_new_root.json): a derived model replays a base model under a new root, appends transitions, and leaves the base model unchanged.
 - [restart_lifecycle.json](cases/restart_lifecycle.json): start, stop, restart lifecycle ordering.
 - [return_attr_guard.json](cases/return_attr_guard.json): a guard can return a boolean attribute value directly with return_attr.
 - [return_attr_unknown_fallback.json](cases/return_attr_unknown_fallback.json): return_attr for an unknown attribute returns no truthy guard value and allows later transitions to match.
@@ -1121,6 +1129,7 @@ Cases can use behavior `trace` ops to make entry, exit, effect, guard, and activ
 - [source_qualified_entry_point_target_transition_guard_set_attr_generated_trigger_after_entry_point_target_resolution.json](cases/source_qualified_entry_point_target_transition_guard_set_attr_generated_trigger_after_entry_point_target_resolution.json): source-qualified attribute work generated from a parent transition guard targeting a submachine entry point replays only after the entry-point target reaches its nested leaf.
 - [source_qualified_every_at_generated_triggers.json](cases/source_qualified_every_at_generated_triggers.json): parent-owned source-qualified transitions can use every and at timer triggers while filtering by active child source.
 - [source_qualified_generated_triggers.json](cases/source_qualified_generated_triggers.json): parent-owned source-qualified transitions can use generated trigger kinds while matching only the active child source.
+- [source_qualified_handler_preempts_active_defer.json](cases/source_qualified_handler_preempts_active_defer.json): a source-qualified transition whose source is the active deferring state consumes the event instead of deferring it.
 - [source_qualified_overlap_order.json](cases/source_qualified_overlap_order.json): overlapping source-qualified transitions owned by the same parent prefer the most specific source path when more than one source matches the active leaf.
 - [source_qualified_parent_transition.json](cases/source_qualified_parent_transition.json): parent-owned transition with child source.
 - [source_qualified_relative_source_path.json](cases/source_qualified_relative_source_path.json): source-qualified transitions can use ./ relative source and target paths under their owner.
@@ -1584,6 +1593,20 @@ Cases can use behavior `trace` ops to make entry, exit, effect, guard, and activ
 - [when_same_value_noop.json](cases/when_same_value_noop.json): setting an attribute to its current value does not re-evaluate when transitions.
 - [when_transition_effect_error_preserves_set_attribute_and_source_state.json](cases/when_transition_effect_error_preserves_set_attribute_and_source_state.json): a script set commits the attribute before a true when transition effect errors, preserving the attribute and source state while preventing target entry.
 - [when_transition_guard_error_preserves_set_attribute_and_source_state.json](cases/when_transition_guard_error_preserves_set_attribute_and_source_state.json): a script set commits the attribute before a true when transition guard errors, preserving the attribute and source state while preventing fallback selection.
+
+## Disputed Cases
+
+Files under `conformance/disputed` are intentionally outside the canonical runner input. They capture useful questions that are not yet specified tightly enough in `dsl.md` to require every implementation to match.
+
+- `config_queue_len_error_event.json`: queue operation errors are specified to propagate as runtime error events when processing can continue, but `Len` can be called by snapshot-only observation where event processing has not started.
+- `redefine_overrides_initial_target.json`: `Redefine` replay and append semantics are specified, but overriding an inherited initial target by name is not.
+- `redefine_replaces_connection_points.json`: same-named entry/exit point replacement during redefinition is not specified.
+- `redefine_replaces_delayed_entry_point_transition.json`: replacement cleanup for inherited entry-point selector transitions is not specified.
+- `redefine_replaces_generated_trigger_transition.json`: replacement cleanup for inherited generated triggers is not specified.
+- `redefine_replaces_state_with_generated_trigger.json`: same-named state replacement and timer-index cleanup is not specified.
+- `redefine_replaces_state_with_final.json`: replacing an inherited state with a different state kind is not specified.
+- `redefine_replaces_state_with_final_root_timer.json`: root-owned inherited timer cleanup after same-named state replacement is not specified.
+- `redefine_replaces_state_with_final_root_transition.json`: root-owned inherited transition cleanup after same-named state replacement is not specified.
 
 ## Implementation Runners
 

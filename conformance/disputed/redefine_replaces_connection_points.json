@@ -1,0 +1,148 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "redefine_replaces_connection_points",
+  "description": "A derived child model can replace inherited entry and exit points without duplicate connection-point definitions.",
+  "features": [
+    "redefine",
+    "submachine",
+    "entry_point",
+    "exit_point"
+  ],
+  "model": {
+    "name": "RedefineReplaceConnectionParent",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "on": "start",
+            "target": "drive",
+            "entry_point": "hot"
+          }
+        ]
+      },
+      {
+        "name": "drive",
+        "kind": "submachine",
+        "machine": "RedefineReplaceConnectionDerived",
+        "transitions": [
+          {
+            "trigger": {
+              "kind": "exit_point",
+              "exit_point": "done"
+            },
+            "target": "complete"
+          }
+        ]
+      },
+      {
+        "name": "complete"
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "RedefineReplaceConnectionBase",
+      "initial": "cold",
+      "entry_points": [
+        {
+          "name": "hot",
+          "target": "cold"
+        }
+      ],
+      "exit_points": [
+        {
+          "name": "done",
+          "effects": [
+            {
+              "behavior": "exit_base"
+            }
+          ]
+        }
+      ],
+      "states": [
+        {
+          "name": "cold"
+        },
+        {
+          "name": "warm",
+          "transitions": [
+            {
+              "on": "finish",
+              "target": "done"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "RedefineReplaceConnectionDerived",
+      "redefines": "RedefineReplaceConnectionBase",
+      "entry_points": [
+        {
+          "name": "hot",
+          "target": "warm"
+        }
+      ],
+      "exit_points": [
+        {
+          "name": "done",
+          "effects": [
+            {
+              "behavior": "exit_derived"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "behaviors": {
+    "exit_base": [
+      {
+        "op": "trace",
+        "value": "exit:base"
+      }
+    ],
+    "exit_derived": [
+      {
+        "op": "trace",
+        "value": "exit:derived"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "finish"
+    }
+  ],
+  "expect": {
+    "state": "/RedefineReplaceConnectionParent/complete",
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "start"
+      },
+      {
+        "type": "dispatch",
+        "event": "finish"
+      },
+      {
+        "type": "trace",
+        "value": "exit:derived"
+      },
+      {
+        "type": "stable",
+        "state": "/RedefineReplaceConnectionParent/complete"
+      }
+    ]
+  }
+}

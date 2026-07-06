@@ -1,0 +1,75 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "redefine_replays_base_with_new_root",
+  "description": "A model IR can derive from an existing model, replay the base under a new root name, append transitions, and leave the base model unchanged.",
+  "features": ["redefine", "model_registry", "dispatch_to"],
+  "model": {
+    "name": "RedefineDerived",
+    "redefines": "RedefineBase",
+    "states": [
+      {
+        "name": "done"
+      }
+    ],
+    "transitions": [
+      {
+        "source": "idle",
+        "on": "finish",
+        "target": "done"
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "RedefineBase",
+      "initial": "idle",
+      "states": [
+        {
+          "name": "idle"
+        }
+      ]
+    }
+  ],
+  "instances": [
+    {
+      "id": "base",
+      "model": "RedefineBase"
+    },
+    {
+      "id": "derived",
+      "model": "RedefineDerived"
+    }
+  ],
+  "script": [
+    {
+      "op": "start",
+      "instance": "base"
+    },
+    {
+      "op": "start",
+      "instance": "derived"
+    },
+    {
+      "op": "dispatch_to",
+      "target": "derived",
+      "event": "finish"
+    }
+  ],
+  "expect": {
+    "states": {
+      "base": "/RedefineBase/idle",
+      "derived": "/RedefineDerived/done"
+    },
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "finish",
+        "target": "derived"
+      },
+      {
+        "type": "stable",
+        "state": "/RedefineDerived/done"
+      }
+    ]
+  }
+}

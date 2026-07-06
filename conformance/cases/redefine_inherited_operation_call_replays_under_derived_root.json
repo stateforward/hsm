@@ -1,0 +1,106 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "redefine_inherited_operation_call_replays_under_derived_root",
+  "description": "A derived model inherits base operations and on_call transitions under the derived root when the base model is replayed.",
+  "features": [
+    "redefine",
+    "operation",
+    "on_call"
+  ],
+  "model": {
+    "name": "RedefineInheritedOperationDerived",
+    "redefines": "RedefineInheritedOperationBase"
+  },
+  "models": [
+    {
+      "name": "RedefineInheritedOperationBase",
+      "initial": "idle",
+      "operations": {
+        "audit": {
+          "behavior": "operation_audit"
+        }
+      },
+      "states": [
+        {
+          "name": "idle",
+          "transitions": [
+            {
+              "trigger": {
+                "kind": "on_call",
+                "operation": "audit"
+              },
+              "target": "handled",
+              "effects": [
+                {
+                  "behavior": "effect_audit"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "handled",
+          "entry": [
+            {
+              "behavior": "entry_handled"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "behaviors": {
+    "operation_audit": [
+      {
+        "op": "trace",
+        "value": "operation:audit"
+      }
+    ],
+    "effect_audit": [
+      {
+        "op": "trace",
+        "value": "effect:audit"
+      }
+    ],
+    "entry_handled": [
+      {
+        "op": "trace",
+        "value": "entry:handled"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "call",
+      "operation": "audit"
+    }
+  ],
+  "expect": {
+    "state": "/RedefineInheritedOperationDerived/handled",
+    "trace": [
+      {
+        "type": "call",
+        "operation": "audit"
+      },
+      {
+        "type": "trace",
+        "value": "operation:audit"
+      },
+      {
+        "type": "trace",
+        "value": "effect:audit"
+      },
+      {
+        "type": "trace",
+        "value": "entry:handled"
+      },
+      {
+        "type": "stable",
+        "state": "/RedefineInheritedOperationDerived/handled"
+      }
+    ]
+  }
+}

@@ -1,0 +1,76 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "redefine_replaces_generated_trigger_transition",
+  "description": "A derived model replacing a base generated-trigger transition does not retain the base timer activity.",
+  "features": [
+    "redefine",
+    "timer",
+    "after"
+  ],
+  "model": {
+    "name": "RedefineReplaceGeneratedTriggerDerived",
+    "redefines": "RedefineReplaceGeneratedTriggerBase",
+    "transitions": [
+      {
+        "id": "timer",
+        "source": "idle",
+        "on": "go",
+        "target": "replacement"
+      }
+    ]
+  },
+  "models": [
+    {
+      "name": "RedefineReplaceGeneratedTriggerBase",
+      "initial": "idle",
+      "states": [
+        {
+          "name": "idle"
+        },
+        {
+          "name": "stale"
+        },
+        {
+          "name": "replacement"
+        }
+      ],
+      "transitions": [
+        {
+          "id": "timer",
+          "source": "idle",
+          "trigger": {
+            "kind": "after",
+            "duration_ms": 0
+          },
+          "target": "stale"
+        }
+      ]
+    }
+  ],
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "tick",
+      "millis": 0
+    },
+    {
+      "op": "dispatch",
+      "event": "go"
+    }
+  ],
+  "expect": {
+    "state": "/RedefineReplaceGeneratedTriggerDerived/replacement",
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "go"
+      },
+      {
+        "type": "stable",
+        "state": "/RedefineReplaceGeneratedTriggerDerived/replacement"
+      }
+    ]
+  }
+}

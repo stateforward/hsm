@@ -1,0 +1,78 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "redefine_inherits_submachine_unhandled_exit_point",
+  "description": "A derived model inherits a base submachine exit point and its generated unhandled fallback under the derived root.",
+  "features": [
+    "redefine",
+    "submachine",
+    "exit_point",
+    "error"
+  ],
+  "model": {
+    "name": "RedefineInheritedUnhandledExitDerived",
+    "redefines": "RedefineInheritedUnhandledExitBase"
+  },
+  "models": [
+    {
+      "name": "RedefineInheritedUnhandledExitBase",
+      "initial": "drive",
+      "states": [
+        {
+          "name": "drive",
+          "kind": "submachine",
+          "machine": "RedefineUnhandledExitChild"
+        }
+      ]
+    },
+    {
+      "name": "RedefineUnhandledExitChild",
+      "initial": "active",
+      "exit_points": [
+        {
+          "name": "done"
+        }
+      ],
+      "states": [
+        {
+          "name": "active",
+          "transitions": [
+            {
+              "on": "finish",
+              "target": "done"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "finish"
+    }
+  ],
+  "expect": {
+    "state": "/RedefineInheritedUnhandledExitDerived/drive/active",
+    "error": {
+      "code": "unhandled_exit_point",
+      "message_contains": "done"
+    },
+    "trace": [
+      {
+        "type": "dispatch",
+        "event": "finish"
+      },
+      {
+        "type": "error",
+        "code": "unhandled_exit_point"
+      },
+      {
+        "type": "stable",
+        "state": "/RedefineInheritedUnhandledExitDerived/drive/active"
+      }
+    ]
+  }
+}

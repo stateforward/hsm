@@ -34,3 +34,6 @@
 [submodule "hsm.ex"]
 	path = hsm.ex
 	url = git@github.com:stateforward/hsm.ex.git
+[submodule "hsm.star"]
+	path = hsm.star
+	url = git@github.com:stateforward/hsm.star.git

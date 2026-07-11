@@ -17,6 +17,7 @@ Every implementation shares the same compile-time DSL, the same semantics, and t
 | JavaScript | [hsm.js](hsm.js/) | Active |
 | Python | [hsm.py](hsm.py/) | Active |
 | Rust | [hsm.rs](hsm.rs/) | Active |
+| Starlark | [hsm.star](hsm.star/) | Initial |
 | TypeScript | [hsm.ts](hsm.ts/) | Active |
 | Zig | [hsm.zig](hsm.zig/) | Active |
 
@@ -93,6 +94,7 @@ hsm/
 ├── hsm.js/          # JavaScript implementation
 ├── hsm.py/          # Python implementation
 ├── hsm.rs/          # Rust implementation
+├── hsm.star/        # Starlark model DSL
 ├── hsmc/            # Go-based cross-language HSM compiler
 ├── hsm.ts/          # TypeScript implementation
 └── hsm.zig/         # Zig implementation

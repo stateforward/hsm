@@ -19,12 +19,12 @@
   "behaviors": {"effect_timeout": [{"op": "trace", "value": "effect:timeout"}]},
   "script": [{"op": "start"}, {"op": "stop"}, {"op": "tick", "millis": 200}],
   "expect": {
-    "state": "/TimerAtStopCancel",
+    "state": "",
     "trace": [
       {"type": "timer_scheduled"},
       {"type": "stop"},
       {"type": "timer_cancelled"},
-      {"type": "stable", "state": "/TimerAtStopCancel"}
+      {"type": "stable", "state": ""}
     ]
   }
 }

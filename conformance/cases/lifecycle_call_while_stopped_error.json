@@ -38,7 +38,7 @@
     }
   ],
   "expect": {
-    "state": "/LifecycleCallWhileStoppedError",
+    "state": "",
     "error": {
       "code": "lifecycle_error",
       "message_contains": "started"
@@ -54,7 +54,7 @@
       },
       {
         "type": "stable",
-        "state": "/LifecycleCallWhileStoppedError"
+        "state": ""
       }
     ]
   }

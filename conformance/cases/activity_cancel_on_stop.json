@@ -13,12 +13,12 @@
   },
   "script": [{"op": "start"}, {"op": "stop"}],
   "expect": {
-    "state": "/ActivityCancelOnStop",
+    "state": "",
     "trace": [
       {"type": "trace", "value": "activity:start"},
       {"type": "stop"},
       {"type": "activity_cancel", "behavior": "activity_running"},
-      {"type": "stable", "state": "/ActivityCancelOnStop"}
+      {"type": "stable", "state": ""}
     ]
   }
 }

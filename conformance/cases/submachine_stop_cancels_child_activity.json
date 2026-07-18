@@ -61,7 +61,7 @@
     }
   ],
   "expect": {
-    "state": "/SubmachineStopCancelsActivity",
+    "state": "",
     "trace": [
       {
         "type": "trace",
@@ -76,7 +76,7 @@
       },
       {
         "type": "stable",
-        "state": "/SubmachineStopCancelsActivity"
+        "state": ""
       }
     ]
   }

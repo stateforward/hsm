@@ -1,10 +1,10 @@
 {
   "version": "hsm-conformance-v1",
-  "name": "lifecycle_stop_twice_error",
-  "description": "Stopping an instance twice leaves it stopped.",
-  "features": ["lifecycle", "stop", "error"],
+  "name": "lifecycle_state_empty_after_stop",
+  "description": "A machine has no observable active state after it is stopped.",
+  "features": ["lifecycle", "stop"],
   "model": {
-    "name": "LifecycleStopTwiceError",
+    "name": "LifecycleStateEmptyAfterStop",
     "initial": "idle",
     "states": [
       {
@@ -18,14 +18,17 @@
     },
     {
       "op": "stop"
-    },
-    {
-      "op": "stop"
     }
   ],
   "expect": {
     "state": "",
     "trace": [
+      {
+        "type": "start"
+      },
+      {
+        "type": "stop"
+      },
       {
         "type": "stable",
         "state": ""

@@ -925,6 +925,7 @@ Cases can use behavior `trace` ops to make entry, exit, effect, guard, and activ
 - [lifecycle_snapshot_before_start_error.json](cases/lifecycle_snapshot_before_start_error.json): taking a snapshot before start produces a normalized lifecycle error.
 - [lifecycle_snapshot_while_stopped_error.json](cases/lifecycle_snapshot_while_stopped_error.json): taking a snapshot after stop produces a normalized lifecycle error instead of reporting stale live state.
 - [lifecycle_start_twice_error.json](cases/lifecycle_start_twice_error.json): starting an already-started instance produces a normalized lifecycle error and leaves the active state unchanged.
+- [lifecycle_state_empty_after_stop.json](cases/lifecycle_state_empty_after_stop.json): a stopped machine exposes the empty string because it has no active state.
 - [lifecycle_stop_before_start_error.json](cases/lifecycle_stop_before_start_error.json): stopping an instance before it has been started is a no-op.
 - [lifecycle_stop_twice_error.json](cases/lifecycle_stop_twice_error.json): stopping an instance twice leaves it stopped.
 - [local_transition_effect_set_attr_from_event_data_generated_trigger_after_reentry.json](cases/local_transition_effect_set_attr_from_event_data_generated_trigger_after_reentry.json): attribute work generated from a local transition effect replays according to the transition kind lifecycle.

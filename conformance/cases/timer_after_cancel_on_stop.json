@@ -55,7 +55,7 @@
     }
   ],
   "expect": {
-    "state": "/TimerAfterStopCancel",
+    "state": "",
     "trace": [
       {
         "type": "timer_scheduled"
@@ -68,7 +68,7 @@
       },
       {
         "type": "stable",
-        "state": "/TimerAfterStopCancel"
+        "state": ""
       }
     ]
   }

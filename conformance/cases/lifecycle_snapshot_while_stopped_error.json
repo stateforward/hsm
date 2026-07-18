@@ -24,7 +24,7 @@
     }
   ],
   "expect": {
-    "state": "/LifecycleSnapshotWhileStoppedError",
+    "state": "",
     "error": {
       "code": "lifecycle_error",
       "message_contains": "started"
@@ -36,7 +36,7 @@
       },
       {
         "type": "stable",
-        "state": "/LifecycleSnapshotWhileStoppedError"
+        "state": ""
       }
     ]
   }

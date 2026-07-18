@@ -885,7 +885,7 @@ Binds a state machine model to a runtime instance without starting it.
 **Returns:** the supplied instance.
 
 **Description:**
-Creates the runtime machine associated with the instance. The instance remains stopped until `hsm.Start(...)` is called.
+Creates the runtime machine associated with the instance. The instance remains stopped until `hsm.Start(...)` is called, and its observable state is the empty string (`""`).
 
 ### `hsm.Start(ctx, instance, data)`
 
@@ -909,7 +909,7 @@ Stops a running instance or group.
 **Returns:** no-value completion handle.
 
 **Description:**
-Stop exits the active state configuration, cancels active activities, clears runtime-owned deferred and completion work for the stopped machine, and leaves the machine in the stopped root state. Stopping a group stops each member.
+Stop exits the active state configuration, cancels active activities, clears runtime-owned deferred and completion work for the stopped machine, and leaves the machine with no active state. The runtime state accessor returns the empty string (`""`) after stop. Stopping a group stops each member.
 
 ### `hsm.Restart(instance_or_group, data, ctx)`
 

@@ -65,7 +65,7 @@
   "expect": {
     "states": {
       "producer": "/ConfigQueueBehaviorDispatchToInactiveTargetBypassesQueueHookProducer/sent",
-      "stopped": "/ConfigQueueBehaviorDispatchToInactiveTargetBypassesQueueHookWorker",
+      "stopped": "",
       "never": ""
     },
     "trace": [

@@ -43,7 +43,7 @@
     "states": {
       "worker_a": "/ConfigQueueDispatchAllMixedStartedStoppedFiltersInactiveBeforeQueueHooks/done",
       "worker_b": "/ConfigQueueDispatchAllMixedStartedStoppedFiltersInactiveBeforeQueueHooks/done",
-      "stopped": "/ConfigQueueDispatchAllMixedStartedStoppedFiltersInactiveBeforeQueueHooks"
+      "stopped": ""
     },
     "trace": [
       {"type": "dispatch", "event": "audit", "target": "all"},

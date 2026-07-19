@@ -110,6 +110,7 @@ The v1 IR can express every currently identified conformance area:
 | Groups/broadcast | top-level `instances`, `groups`, script `dispatch_all`, `dispatch_to`, `group_dispatch` |
 | Error handling | expect `error`, trace `error` |
 | Validation/invalid model cases | `mode: "validation"`, expect `validation` |
+| Invalid lifecycle operations | expect `error.code: "runtime_error"`; lifecycle remains a feature, not an error category |
 | Async behavior ordering | behavior ops `sleep` and `yield`, activity trace |
 | Queue ordering/reentrancy | behavior op `dispatch`, trace/expect `queue` |
 | Restart/stop/lifecycle edge cases | script ops `start`, `stop`, `restart`, trace lifecycle events |

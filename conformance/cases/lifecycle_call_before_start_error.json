@@ -34,7 +34,7 @@
   "expect": {
     "state": "",
     "error": {
-      "code": "lifecycle_error",
+      "code": "runtime_error",
       "message_contains": "started"
     },
     "trace": [
@@ -44,7 +44,7 @@
       },
       {
         "type": "error",
-        "code": "lifecycle_error"
+        "code": "runtime_error"
       },
       {
         "type": "stable",

@@ -63,7 +63,7 @@
   "expect": {
     "states": {
       "started": "/DispatchAllMixedStartedStopped/done",
-      "stopped": "/DispatchAllMixedStartedStopped"
+      "stopped": ""
     },
     "trace": [
       {

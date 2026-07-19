@@ -62,7 +62,7 @@
   ],
   "expect": {
     "states": {
-      "stopped": "/DispatchToNoStartedTargetsNoop",
+      "stopped": "",
       "never": ""
     },
     "trace": [

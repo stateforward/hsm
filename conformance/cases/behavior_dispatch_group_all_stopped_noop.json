@@ -110,8 +110,8 @@
   "expect": {
     "states": {
       "producer": "/BehaviorDispatchGroupAllStoppedNoop/done",
-      "one": "/BehaviorDispatchGroupAllStoppedNoop",
-      "two": "/BehaviorDispatchGroupAllStoppedNoop"
+      "one": "",
+      "two": ""
     },
     "trace": [
       {

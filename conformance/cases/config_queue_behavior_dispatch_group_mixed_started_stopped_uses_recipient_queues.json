@@ -89,7 +89,7 @@
       "producer": "/ConfigQueueBehaviorDispatchGroupMixedProducer/sent",
       "worker_a": "/ConfigQueueBehaviorDispatchGroupMixedWorker/done",
       "worker_b": "/ConfigQueueBehaviorDispatchGroupMixedWorker/done",
-      "stopped": "/ConfigQueueBehaviorDispatchGroupMixedWorker"
+      "stopped": ""
     },
     "trace": [
       {"type": "dispatch", "event": "go", "target": "producer"},

@@ -61,7 +61,7 @@
   "expect": {
     "states": {
       "producer": "/BehaviorDispatchToStoppedTargetProducer/sent",
-      "stopped": "/BehaviorDispatchToStoppedTargetWorker"
+      "stopped": ""
     },
     "trace": [
       {"type": "dispatch", "event": "go", "target": "producer"},

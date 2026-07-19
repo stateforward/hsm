@@ -71,7 +71,7 @@
   ],
   "expect": {
     "states": {
-      "stopped": "/TimerCancelOnStopPreservesSiblingTimer",
+      "stopped": "",
       "sibling": "/TimerCancelOnStopPreservesSiblingTimer/timeout"
     },
     "trace": [
@@ -96,7 +96,7 @@
       },
       {
         "type": "stable",
-        "state": "/TimerCancelOnStopPreservesSiblingTimer"
+        "state": ""
       }
     ]
   }

@@ -98,7 +98,7 @@
     "states": {
       "reset": "/GroupDispatchAfterRestartPreservesMembership/done",
       "sibling": "/GroupDispatchAfterRestartPreservesMembership/done",
-      "stopped": "/GroupDispatchAfterRestartPreservesMembership"
+      "stopped": ""
     },
     "trace": [
       {

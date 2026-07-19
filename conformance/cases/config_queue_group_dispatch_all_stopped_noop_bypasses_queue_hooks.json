@@ -65,8 +65,8 @@
   ],
   "expect": {
     "states": {
-      "stopped_a": "/ConfigQueueGroupDispatchAllStoppedNoopBypassesQueueHooks",
-      "stopped_b": "/ConfigQueueGroupDispatchAllStoppedNoopBypassesQueueHooks"
+      "stopped_a": "",
+      "stopped_b": ""
     },
     "trace": [
       {

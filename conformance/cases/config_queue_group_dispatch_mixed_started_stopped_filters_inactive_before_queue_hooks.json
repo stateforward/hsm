@@ -46,7 +46,7 @@
     "states": {
       "worker_a": "/ConfigQueueGroupDispatchMixedStartedStoppedFiltersInactiveBeforeQueueHooks/done",
       "worker_b": "/ConfigQueueGroupDispatchMixedStartedStoppedFiltersInactiveBeforeQueueHooks/done",
-      "stopped": "/ConfigQueueGroupDispatchMixedStartedStoppedFiltersInactiveBeforeQueueHooks"
+      "stopped": ""
     },
     "trace": [
       {"type": "dispatch", "event": "audit", "target": "workers"},

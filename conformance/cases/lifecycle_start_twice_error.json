@@ -23,13 +23,13 @@
   "expect": {
     "state": "/LifecycleStartTwiceError/idle",
     "error": {
-      "code": "lifecycle_error",
+      "code": "runtime_error",
       "message_contains": "already"
     },
     "trace": [
       {
         "type": "error",
-        "code": "lifecycle_error"
+        "code": "runtime_error"
       },
       {
         "type": "stable",

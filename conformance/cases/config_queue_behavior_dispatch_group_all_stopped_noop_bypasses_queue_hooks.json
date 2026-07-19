@@ -117,8 +117,8 @@
   "expect": {
     "states": {
       "producer": "/ConfigQueueBehaviorDispatchGroupAllStoppedNoopBypassesQueueHooks/done",
-      "stopped_a": "/ConfigQueueBehaviorDispatchGroupAllStoppedNoopBypassesQueueHooks",
-      "stopped_b": "/ConfigQueueBehaviorDispatchGroupAllStoppedNoopBypassesQueueHooks"
+      "stopped_a": "",
+      "stopped_b": ""
     },
     "trace": [
       {

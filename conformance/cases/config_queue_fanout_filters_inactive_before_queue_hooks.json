@@ -80,7 +80,7 @@
   "expect": {
     "states": {
       "started": "/ConfigQueueFanoutFiltersInactiveBeforeQueueHooks/done",
-      "stopped": "/ConfigQueueFanoutFiltersInactiveBeforeQueueHooks",
+      "stopped": "",
       "never": ""
     },
     "trace": [

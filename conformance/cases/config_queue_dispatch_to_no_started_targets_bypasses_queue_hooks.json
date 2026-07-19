@@ -36,7 +36,7 @@
   ],
   "expect": {
     "states": {
-      "stopped": "/ConfigQueueDispatchToNoStartedTargetsBypassesQueueHooks",
+      "stopped": "",
       "never": ""
     },
     "trace": [

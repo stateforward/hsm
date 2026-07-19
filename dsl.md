@@ -872,6 +872,12 @@ Checks if a kind matches or inherits from one or more base kinds.
 
 ## Runtime Lifecycle
 
+### Error Taxonomy
+
+Model definition, redefinition, validation, and finalization failures are validation errors. Invoking lifecycle APIs in a machine state where they cannot run produces runtime errors. User behavior exceptions retain their native error identity.
+
+The conformance IR reports invalid lifecycle operations with code `runtime_error`; `lifecycle` remains a feature classification, not a separate error category. Other operational failures retain their more specific codes, including `attribute_error`, `operation_error`, `timer_error`, and `unhandled_exit_point`.
+
 ### `hsm.New(instance, model, config)`
 
 Binds a state machine model to a runtime instance without starting it.

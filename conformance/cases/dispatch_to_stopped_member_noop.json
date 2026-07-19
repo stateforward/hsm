@@ -67,7 +67,7 @@
   "expect": {
     "states": {
       "started": "/DispatchToStoppedMemberNoop/done",
-      "stopped": "/DispatchToStoppedMemberNoop"
+      "stopped": ""
     },
     "trace": [
       {

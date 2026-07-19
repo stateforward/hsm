@@ -38,8 +38,8 @@
   ],
   "expect": {
     "states": {
-      "stopped_a": "/ConfigQueueDispatchAllAllStoppedNoopBypassesQueueHooks",
-      "stopped_b": "/ConfigQueueDispatchAllAllStoppedNoopBypassesQueueHooks"
+      "stopped_a": "",
+      "stopped_b": ""
     },
     "trace": [
       {"type": "dispatch", "event": "audit", "target": "all"},

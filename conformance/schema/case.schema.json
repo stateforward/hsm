@@ -595,7 +595,6 @@
         "op": {
           "enum": [
             "start",
-            "context",
             "stop",
             "restart",
             "dispatch",
@@ -615,12 +614,6 @@
         },
         "id": {
           "$ref": "#/$defs/nonEmptyString"
-        },
-        "path": {
-          "$ref": "#/$defs/nonEmptyString"
-        },
-        "values": {
-          "type": "object"
         },
         "group": {
           "$ref": "#/$defs/nonEmptyString"
@@ -694,25 +687,6 @@
                 "$ref": "#/$defs/groupSnapshotExpectation"
               }
             ]
-          }
-        },
-        "context": {
-          "type": "object",
-          "additionalProperties": false,
-          "required": ["view", "paths", "values"],
-          "properties": {
-            "view": {
-              "$ref": "#/$defs/nonEmptyString"
-            },
-            "paths": {
-              "type": "array",
-              "items": {
-                "$ref": "#/$defs/nonEmptyString"
-              }
-            },
-            "values": {
-              "type": "object"
-            }
           }
         },
         "queue": {

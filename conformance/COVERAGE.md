@@ -111,6 +111,7 @@ These files live under `conformance/disputed` and are intentionally outside the 
 
 | Behavior op/context surface | Representative cases |
 | --- | --- |
+| Flattened path-value context and nested Subcontext views | `runtime_subcontext_flattened_lookup.json` |
 | Missing/falsy event/attribute read fallback | `event_data_get_missing_path_fallback.json`, `event_data_get_falsy_fallback.json`, `event_data_equals_missing_path_fallback.json`, `event_metadata_get_missing_fallback.json`, `event_metadata_get_falsy_fallback.json`, `event_metadata_equals_missing_fallback.json`, `return_attr_unknown_fallback.json`, `return_equals_unknown_attribute_fallback.json` |
 | Structured event-data, metadata, and attribute equality | `event_data_equals_structured_payload_guard.json`, `event_metadata_equals_structured_guard.json`, `return_equals_structured_attribute_guard.json`, `attribute_string_object_array_snapshot.json` |
 | `raise` from transition, entry, exit, guard, initial, activity | `behavior_raise_internal_event_order.json`, `config_queue_raise_internal_event_fifo.json`, `behavior_raise_from_entry.json`, `behavior_raise_from_exit.json`, `behavior_raise_from_guard.json`, `behavior_raise_from_initial_effect.json`, `behavior_raise_from_activity.json` |

@@ -915,7 +915,7 @@ Stops a running instance or group.
 **Returns:** no-value completion handle.
 
 **Description:**
-Stop exits the active state configuration, cancels active activities, clears runtime-owned deferred and completion work for the stopped machine, and leaves the machine with no active state. The runtime state accessor returns the empty string (`""`) after stop. Stopping a group stops each member.
+Stop exits the active state configuration, cancels active activities, clears runtime-owned deferred and completion work for the stopped machine, and leaves the machine with no active state. The runtime state accessor returns the empty string (`""`) after stop. Stopping a group stops each member. Stop also removes the machine's entry from the shared `Keys.Instances` registry of the context tree it was started in, so the registry holds only started machines. The registry mapping itself and the entries of other machines persist.
 
 ### `hsm.Restart(instance_or_group, data, ctx)`
 
@@ -1013,9 +1013,11 @@ Implementations should expose canonical context keys and lookup helpers:
 * `hsm.Keys.Owner` identifies the previous enclosing state machine or group when a machine extends an existing machine context.
 * `hsm.Keys.Instances` identifies the shared started-machine registry for a runtime context tree.
 * `hsm.FromContext(ctx)` returns the current state machine or group and whether one was present.
-* `hsm.InstancesFromContext(ctx)` returns the started machines visible through `ctx` and whether a registry was present.
+* `hsm.InstancesFromContext(ctx)` returns the started machines visible through `ctx` and whether a registry was present. When a registry is present, the returned mapping is the live shared registry: it is the same object the runtime reads and writes, its entries may be held by weak reference, and mutating the returned mapping mutates the shared registry.
 
-Machine start extends the supplied context with `Keys.HSM`, `Keys.Owner`, and the shared `Keys.Instances` registry. Behavior callbacks receive an extended context whose current `Keys.HSM` is the executing machine. Cross-machine dispatch uses this context to populate missing per-recipient event envelope fields: `Source` from the current machine ID and `Target` from the recipient machine ID. Explicit caller-provided `Source` or `Target` metadata remains payload metadata and must not be overwritten.
+Machine start extends the supplied context with `Keys.HSM`, `Keys.Owner`, and the shared `Keys.Instances` registry. Machine stop removes that machine's entry from the shared registry; the registry itself persists for the lifetime of the context tree. Behavior callbacks receive an extended context whose current `Keys.HSM` is the executing machine. Cross-machine dispatch uses this context to populate missing per-recipient event envelope fields: `Source` from the current machine ID and `Target` from the recipient machine ID. Explicit caller-provided `Source` or `Target` metadata remains payload metadata and must not be overwritten.
+
+Contexts may also expose a flattened path-value store. `WithPathValue(path, value)` adds a canonical path entry while ordinary `WithValue` semantics remain unchanged. `Subcontext(path)` is a lightweight view of a scope that stores only an array of that scope's direct child paths; it does not include the scope itself or deeper descendants. Nested views select a child scope and recompute its direct-child array, without retaining separate values or instances. `Subcontext.Value(path)` resolves absolute paths directly and relative paths from the view scope, then performs an O(1)-average lookup in the flattened store. Enumerating direct children is O(n) over the flattened store. Missing paths use the implementation's normal absent-value behavior.
 
 ### `hsm.DispatchAll(ctx, event)`
 

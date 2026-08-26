@@ -107,6 +107,7 @@ The v1 IR can express every currently identified conformance area:
 | Event ownership semantics | event object metadata, behavior ops `event_metadata_set` / `event_metadata_get` |
 | Operation references | model `operations`, script/behavior op `call`, trigger `on_call` |
 | Snapshots | script op `snapshot`, behavior op `snapshot`, expect `snapshots` |
+| Flattened context paths | script op `context` with `path`/`values`, expect `context` with direct-child `paths` |
 | Groups/broadcast | top-level `instances`, `groups`, script `dispatch_all`, `dispatch_to`, `group_dispatch` |
 | Error handling | expect `error`, trace `error` |
 | Validation/invalid model cases | `mode: "validation"`, expect `validation` |

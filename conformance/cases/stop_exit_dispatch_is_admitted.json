@@ -1,0 +1,80 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "stop_exit_dispatch_is_admitted",
+  "description": "A dispatch from an exit behavior during stop is admitted to the instance queue while the machine is tearing down.",
+  "features": ["queue", "lifecycle", "stop", "exit"],
+  "model": {
+    "name": "StopExitDispatchAdmission",
+    "initial": "active",
+    "states": [
+      {
+        "name": "active",
+        "exit": [
+          {
+            "behavior": "dispatch_cleanup"
+          }
+        ],
+        "transitions": [
+          {
+            "on": "cleanup",
+            "target": "done"
+          }
+        ]
+      },
+      {
+        "name": "done"
+      }
+    ]
+  },
+  "instances": [
+    {
+      "id": "default",
+      "config": {
+        "queue": "push_error"
+      }
+    }
+  ],
+  "behaviors": {
+    "dispatch_cleanup": [
+      {
+        "op": "dispatch",
+        "event": "cleanup"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "stop"
+    }
+  ],
+  "expect": {
+    "state": "",
+    "error": {
+      "code": "runtime_error"
+    },
+    "trace": [
+      {
+        "type": "stop"
+      },
+      {
+        "type": "dispatch",
+        "event": "cleanup"
+      },
+      {
+        "type": "trace",
+        "value": "queue:push-error:cleanup"
+      },
+      {
+        "type": "error",
+        "code": "runtime_error"
+      },
+      {
+        "type": "stable",
+        "state": ""
+      }
+    ]
+  }
+}

@@ -81,6 +81,8 @@ Event references can be plain event names or event objects with `name`, `data`, 
 
 `dispatch_to` script steps may use `instance` / `target` for one recipient or `targets` for an ordered list of recipient ids. Missing recipient ids are part of the conformance surface when a case declares that expectation.
 
+A script `expect` step may include `queued` after a dispatch operation. `queued: true` means at least one addressed runtime accepted the event into its queue; `queued: false` means the dispatch was a normal no-op with no accepted recipient. This reports admission only, not whether a transition handled the event. The dispatch completion remains the run-to-completion waitable.
+
 Runners may skip cases whose `features` require runtime facilities they have not implemented yet, but they must fail clearly rather than silently changing semantics.
 
 ## Feature Coverage
@@ -450,6 +452,7 @@ Cases can use behavior `trace` ops to make entry, exit, effect, guard, and activ
 - [dispatch_to_populates_missing_target.json](cases/dispatch_to_populates_missing_target.json): dispatch_to populates a missing event target envelope field with the selected recipient runtime ID.
 - [dispatch_to_routes_by_argument_not_event_target_field.json](cases/dispatch_to_routes_by_argument_not_event_target_field.json): dispatch_to delivery is controlled by the script target argument, not by the event object's declared target field.
 - [dispatch_to_stopped_member_noop.json](cases/dispatch_to_stopped_member_noop.json): dispatch_to ignores a stopped target while still delivering to started targets in the same target list.
+- [dispatch_queued_result.json](cases/dispatch_queued_result.json): dispatch completions report admission for a started recipient and a no-op broadcast with no started recipients.
 - [dispatch_unhandled_event_noop.json](cases/dispatch_unhandled_event_noop.json): dispatching an unhandled event to a started instance completes normally and leaves the active state unchanged.
 - [effect_set_attr_generated_trigger_after_compound_target_resolution.json](cases/effect_set_attr_generated_trigger_after_compound_target_resolution.json): attribute generated work from a transition effect targeting a compound state is replayed only after the compound target reaches its nested leaf.
 - [entry_point_effect_dispatch_after_composite_target_resolution.json](cases/entry_point_effect_dispatch_after_composite_target_resolution.json): a dispatch from a submachine entry-point effect targeting a composite state is replayed only after the composite target reaches its nested leaf.

@@ -1,0 +1,78 @@
+{
+  "version": "hsm-conformance-v1",
+  "name": "dispatch_queued_result",
+  "description": "Dispatch completion exposes whether an event was accepted by at least one recipient queue, including an all-stopped no-op.",
+  "features": ["broadcast", "dispatch_result", "lifecycle", "stop"],
+  "model": {
+    "name": "DispatchQueuedResult",
+    "initial": "idle",
+    "states": [
+      {
+        "name": "idle",
+        "transitions": [
+          {
+            "on": "go",
+            "target": "done"
+          }
+        ]
+      },
+      {
+        "name": "done"
+      }
+    ]
+  },
+  "script": [
+    {
+      "op": "start"
+    },
+    {
+      "op": "dispatch",
+      "event": "go"
+    },
+    {
+      "op": "expect",
+      "expect": {
+        "state": "/DispatchQueuedResult/done",
+        "queued": true
+      }
+    },
+    {
+      "op": "stop"
+    },
+    {
+      "op": "dispatch_all",
+      "event": "go"
+    },
+    {
+      "op": "expect",
+      "expect": {
+        "state": "",
+        "queued": false
+      }
+    }
+  ],
+  "expect": {
+    "state": "",
+    "trace": [
+      {
+        "type": "start"
+      },
+      {
+        "type": "dispatch",
+        "event": "go"
+      },
+      {
+        "type": "stop"
+      },
+      {
+        "type": "dispatch",
+        "event": "go",
+        "target": "all"
+      },
+      {
+        "type": "stable",
+        "state": "all"
+      }
+    ]
+  }
+}

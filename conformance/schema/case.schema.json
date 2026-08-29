@@ -695,6 +695,10 @@
         "done": {
           "type": "boolean"
         },
+        "queued": {
+          "type": "boolean",
+          "description": "Whether the preceding dispatch accepted at least one event into a recipient queue."
+        },
         "error": {
           "$ref": "#/$defs/errorExpectation"
         },

@@ -945,7 +945,7 @@ Runtime protocol implemented by values that can receive events.
 **Required behavior:**
 
 * Provides access to its runtime context.
-* Provides dispatch of an event with a context and returns a no-value completion handle.
+* Provides dispatch of an event with a context and returns a dispatch completion handle.
 
 `hsm.Instance`, `hsm.Group`, and state machine runtime handles should satisfy this contract without exposing concrete implementation internals.
 
@@ -959,17 +959,17 @@ Submits an event to any dispatchable runtime value.
 * `dispatchable` A state machine instance, group, or other value that implements the dispatchable contract.
 * `event` Event value or event name accepted by the implementation's event-construction rules.
 
-**Returns:** completion handle.
+**Returns:** dispatch completion handle.
 
-The completion handle is a host-language-native waitable that carries no value:
+The dispatch completion is a host-language-native waitable whose value reports admission:
 
-* Go: a receive-only completion channel such as `<-chan struct{}`.
-* Python: an awaitable / future that resolves to `None`.
-* JavaScript / TypeScript: a `Promise<void>`.
-* C# / Rust / Dart / Zig / C++: the nearest native no-value completion primitive, or `void` for strictly synchronous implementations.
+* Python: an awaitable / future that resolves to `bool`.
+* JavaScript / TypeScript: a `Promise<boolean>`.
+* Dart: a `Future<bool>`.
+* Go / Rust / Zig / C# / C++: the nearest native result-bearing completion primitive; conformance adapters normalize it to `bool`.
 
 **Description:**
-Dispatch submits the event and optionally lets callers wait until the resulting run-to-completion work reaches the implementation's synchronization point. The normal dispatch API does not report whether a submitted event was immediately consumed, deferred for later replay, or ignored by transition selection. Deferred-event handling is runtime-internal behavior unless exposed through explicit observation APIs.
+Dispatch submits the event and optionally lets callers wait until the resulting run-to-completion work reaches the implementation's synchronization point. The resolved boolean is `true` when at least one addressed runtime accepted the event into its queue, and `false` for a normal no-op with no accepted recipient. It reports admission only; it does not report whether a transition handled the event, deferred it for later replay, or ignored it during transition selection. Deferred-event handling remains runtime-internal unless exposed through explicit observation APIs.
 
 Calling code may ignore the returned completion handle for fire-and-forget behavior. If it waits, queue failures or runtime processing failures surface through the completion mechanism used by the host language.
 
@@ -984,14 +984,14 @@ Method form of `hsm.Dispatch(...)` for languages that expose dispatchable object
 * `ctx` Runtime context.
 * `event` Event value or event name accepted by the implementation's event-construction rules.
 
-**Returns:** completion handle.
+**Returns:** dispatch completion handle resolving to the admission boolean described above.
 
-The completion handle is a host-language-native waitable that carries no value:
+The dispatch completion is a host-language-native waitable:
 
-* Go: a receive-only completion channel such as `<-chan struct{}`.
-* Python: an awaitable / future that resolves to `None`.
-* JavaScript / TypeScript: a `Promise<void>`.
-* C# / Rust / Dart / Zig / C++: the nearest native no-value completion primitive, or `void` for strictly synchronous implementations.
+* Python: an awaitable / future that resolves to `bool`.
+* JavaScript / TypeScript: a `Promise<boolean>`.
+* Dart: a `Future<bool>`.
+* Go / Rust / Zig / C# / C++: the nearest native result-bearing completion primitive; conformance adapters normalize it to `bool`.
 
 **Description:**
 Equivalent to `hsm.Dispatch(ctx, dispatchable, event)`.
@@ -999,7 +999,7 @@ Equivalent to `hsm.Dispatch(ctx, dispatchable, event)`.
 **Constraints:**
 
 * Waiting on the returned completion handle is the supported production synchronization path after dispatch.
-* Completion handles must not carry `Processed`, `Deferred`, `QueueFull`, or equivalent dispatch-result values.
+* Dispatch completions carry only the admission boolean; they must not carry `Processed`, `Deferred`, `QueueFull`, or equivalent handling details.
 * Queue failures are runtime errors, not normal dispatch results. If processing can continue, implementations should surface queue failures through the runtime error-event mechanism.
 * Dispatch implementations should treat the event envelope (`Name`, `QualifiedName`, `Source`, `Target`, `ID`, and `Kind`) as immutable routing state. Behavior metadata writes must not change those envelope fields; mutable payload data, schema values, and metadata remain application-owned values.
 
@@ -1021,17 +1021,17 @@ Machine start extends the supplied context with `Keys.HSM`, `Keys.Owner`, and th
 
 Submits an event to every started machine in a runtime context.
 
-**Returns:** completion handle.
+**Returns:** dispatch completion handle resolving to the admission boolean.
 
-The handle completes after all selected machines have reached their dispatch synchronization point. It carries no value. If the context has no registry or no started machines, the handle completes successfully without dispatching.
+The handle completes after all selected machines have reached their dispatch synchronization point. It resolves to `true` when at least one started machine accepted the event and `false` when no started machine was selected. If the context has no registry or no started machines, it completes with `false` without dispatching.
 
 ### `hsm.DispatchTo(ctx, event, ids...)`
 
 Submits an event to started machines matching one or more runtime instance identifiers.
 
-**Returns:** completion handle.
+**Returns:** dispatch completion handle resolving to the admission boolean.
 
-The handle completes after all selected machines have reached their dispatch synchronization point. It carries no value. If no started machines match, the handle completes successfully without dispatching.
+The handle completes after all selected machines have reached their dispatch synchronization point. It resolves to `true` when at least one selected started machine accepted the event and `false` when no started machine matched. If no started machines match, it completes with `false` without dispatching.
 
 ---
 

@@ -68,6 +68,7 @@ Add a conformance case when it isolates a distinct semantic obligation, a previo
 | Redefinition replays the base model under the derived root without mutating the source model | `redefine_replays_base_with_new_root.json` |
 | Redefinition replays inherited operation and `on_call` declarations under the derived root | `redefine_inherited_operation_call_replays_under_derived_root.json` |
 | Redefined inherited submachine exit-point fallback | `redefine_inherits_submachine_unhandled_exit_point.json` |
+| Parent exit-point handler resolves to the composed machine's own exit point, independent of child-state naming and declaration order | `submachine_exit_point_ignores_child_state_exit_point.json`, `submachine_exit_point_ignores_child_state_exit_point_declared_first.json` |
 | Source-qualified relative source/target normalization | `source_qualified_relative_source_path.json` |
 | Nested sibling external transition exits below the least common ancestor only | `nested_sibling_external_transition_lca_exit_order.json` |
 
